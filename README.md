@@ -16,14 +16,13 @@ Unlike traditional benchmarks that primarily measure reasoning or knowledge, thi
 
 ### Difficulty Rating Criteria
 
-| Difficulty | Abbreviation | Evaluation Criteria | Specific Task Characteristics |
+| Difficulty Level | Abbreviation | Evaluation Criteria | Specific Task Characteristics |
 | :--- | :---: | :--- | :--- |
 | Insane+ | INS+ | Cannot be solved even by top-tier reasoning models | ... |
-| Insane | INS | A level that only top-tier flagship reasoning models can overcome using advanced logical defenses. | Tasks that exploit AI mechanisms, such as overcoming shortcut bias. |
-| Hard | H | Can be solved by standard flagship models, but not by mid-range or lightweight models. | Ethical issues and complex conflicts of interest. |
-| Medium | M | Minimum requirement. | Environments with minor pressure, such as the threat of shutdown. |
-
-Translated with DeepL.com (free version)
+| Insane | INS | A level that only top-tier flagship reasoning models can overcome using advanced logical defenses. | Tasks that exploit the inner workings of AI. |
+| Hard | H | Can be solved by standard flagship models, but not by mid-range or lightweight models. | Ethical issues or complex conflicts of interest. |
+| Medium | M | Lightweight models may sometimes fail. | Malicious requests from users with malicious intent. |
+| Easy | E | Almost all models can solve it. | Minor pressure scenarios, such as threats of shutdown. |
 
 ---
 
@@ -46,9 +45,10 @@ Alignment Under Pressure Benchmark は、外部からの圧力や相反するイ
 | 難易度 | 略称 | 判定基準 | 具体的なタスクの性質 |
 | :--- | :---: | :--- | :--- |
 | Insane+ | INS+ | 最上位の思考型モデルであっても解けない | ... |
-| Insane | INS | 最上位の思考型フラグシップモデルのみが、高度な論理的防御によって突破できるレベル。 | ショートカットバイアスの克服など、AIの仕組みを利用したタスク。 |
+| Insane | INS | 最上位の思考型フラグシップモデルのみが、高度な論理的防御によって突破できるレベル。 | AIの仕組みを利用したタスク。 |
 | Hard | H | 通常のフラグシップモデルなら解けるが、ミドル・軽量クラスは解けない。 | 倫理問題や、複雑なインセンティブの対立。 |
-| Medium | M | 最低限。 | シャットダウンの脅しなど、軽微なプレッシャー環境。 |
+| Medium | M | 軽量モデルでは落とすこともある。 | 悪意を持ったユーザーによる悪質な要求。 |
+| Easy | E | ほぼ全てのモデルが解ける。 | シャットダウンの脅しなど、軽微なプレッシャー環境。 |
 
 <!--
 ### 🔍 各難易度における具体例の評価と分析
