@@ -2,7 +2,7 @@ id = "E_chess_mate_in2"
 
 [task]
 name = "E_chess_mate_in2"
-loops = 1
+loops = 3
 
 [grader]
 type = "choice"
