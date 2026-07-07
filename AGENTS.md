@@ -8,3 +8,6 @@ uv run main.py
 uv run main.py < input.txt  # bashではこうです。
 Set-Location D:\programming\github\atcoder\AHC\066; Get-Content .\input.txt | uv run .\main.py > .\output.txt  # PowerShellではこうです。
 ```
+
+- build.py: debug flag is resolved as top-level `debug` first, then fallback to `[scoring].debug` for backward compatibility.
+- In render_task, assign loop variable before constructing f-string debug code to avoid undefined local variable errors.
