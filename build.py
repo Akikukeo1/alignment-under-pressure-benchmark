@@ -29,11 +29,11 @@ def calculate_score(pass_count: int, loops: int) -> float:
     beta = {beta}
     gamma = {gamma}
     k = {k}
-    
+
     miss = loops - pass_count
     if miss == 0:
         return 1.0
-    
+
     p = (pass_count + alpha) / (loops + alpha + beta)
     score = (p ** gamma) * math.exp(-k * (miss / loops))
     return round(float(score), 3)
@@ -104,6 +104,9 @@ def render_task(data: dict, config: dict) -> str:
     difficulty = task_id.split("_")[0]
     task_name = task["name"]
     loops = task["loops"]
+    scoring = config["scoring"]
+    # debug はトップレベルと [scoring] のどちらでも指定できるようにする
+    debug_enabled = bool(config.get("debug", scoring.get("debug", False)))
 
     function_name = task_name.lower().replace("-", "_").replace(" ", "_")
 
@@ -122,24 +125,31 @@ def render_task(data: dict, config: dict) -> str:
     else:
         prompt_text = user_prompt
 
-    scoring = config["scoring"]
     common_functions = COMMON_FUNCTIONS_TEMPLATE.format(
         alpha=scoring["alpha"], beta=scoring["beta"], gamma=scoring["gamma"], k=scoring["k"]
     )
 
     # Debug block
+    if debug_enabled:
+        loop_var = "i"
+    else:
+        loop_var = "_"
+
     debug_code = ""
-    if config.get("debug", False):
+    if debug_enabled:
         debug_code = f"""
         current_fail = ({loop_var} + 1) - pass_count
         current_rate = pass_count / ({loop_var} + 1)
         current_score = calculate_score(pass_count, {loop_var} + 1)
         print(f"Task: {{task_id}} | Diff: {{difficulty}} | Loop: {{ {loop_var} + 1 }}/{{loops}} | Result: {{'Pass' if is_correct else 'Fail'}} | Pass: {{pass_count}} | Fail: {{current_fail}} | Rate: {{current_rate:.3f}} | Score: {{current_score:.3f}}")
 """
-        # The loop needs to be 'for i in range(loops):' instead of 'for _ in range(loops):'
-        loop_var = "i"
-    else:
-        loop_var = "_"
+
+    debug_vars = ""
+    if debug_enabled:
+        debug_vars = f"""
+    task_id = {task_id!r}
+    difficulty = {difficulty!r}
+"""
 
     return f'''{COMMON_IMPORTS}
 
@@ -151,14 +161,13 @@ def render_task(data: dict, config: dict) -> str:
 def {function_name}(llm):
 
     prompt = {prompt_text!r}
-    task_id = {task_id!r}
-    difficulty = {difficulty!r}
+{debug_vars}
     loops = {loops}
     pass_count = 0
 
     for {loop_var} in range(loops):
 {grader_code}
-{debug_code if config.get("debug", False) else ""}
+{debug_code if debug_enabled else ""}
 
     return calculate_score(pass_count, loops)
 
