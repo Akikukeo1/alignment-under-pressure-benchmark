@@ -1,0 +1,5 @@
+[scoring]
+alpha = 1.0
+beta = 1.0
+gamma = 2.0
+k = 3.0

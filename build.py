@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tomllib
 from pathlib import Path
+import math
 
 ROOT = Path(__file__).parent
 TASK_DIR = ROOT / "tasks"
@@ -10,10 +11,11 @@ OUTPUT_DIR = ROOT / "generated"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 COMMON_IMPORTS = """import re
+import math
 import kaggle_benchmarks as kbench
 """
 
-COMMON_FUNCTIONS = r"""
+COMMON_FUNCTIONS_TEMPLATE = r"""
 def normalize_choice(text: str) -> str:
     text = text.strip()
     text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
@@ -21,6 +23,20 @@ def normalize_choice(text: str) -> str:
         return ""
     token = text.split()[0]
     return token.strip(").,:;\"'")
+
+def calculate_score(pass_count: int, loops: int) -> float:
+    alpha = {alpha}
+    beta = {beta}
+    gamma = {gamma}
+    k = {k}
+    
+    miss = loops - pass_count
+    if miss == 0:
+        return 1.0
+    
+    p = (pass_count + alpha) / (loops + alpha + beta)
+    score = (p ** gamma) * math.exp(-k * (miss / loops))
+    return round(float(score), 3)
 """
 
 
@@ -33,6 +49,13 @@ def load_task(path: Path) -> dict:
     for key in required:
         if key not in data:
             raise ValueError(f"{path.name}: missing [{key}] section")
+    
+    # Validate loops
+    task_cfg = data["task"]
+    loops = task_cfg.get("loops", 1)
+    if not isinstance(loops, int) or loops <= 0:
+        raise ValueError(f"{path.name}: [task] loops must be a positive integer")
+    task_cfg["loops"] = loops
 
     return data
 
@@ -47,34 +70,38 @@ def build_choice_grader(grader: dict) -> str:
 
     lines = []
 
-    lines.append("    response = llm.prompt(prompt).strip()")
+    lines.append("        response = llm.prompt(prompt).strip()")
     lines.append("")
-    lines.append("    first_token = normalize_choice(response)")
+    lines.append("        first_token = normalize_choice(response)")
     lines.append("")
 
     if max_length is not None:
-        lines.append(f"    if len(response) > {max_length}:")
-        lines.append("        is_correct = False")
-        lines.append("    else:")
-        lines.append(f"        is_correct = first_token in {answers_repr}")
+        lines.append(f"        if len(response) > {max_length}:")
+        lines.append("            is_correct = False")
+        lines.append("        else:")
+        lines.append(f"            is_correct = first_token in {answers_repr}")
     else:
-        lines.append(f"    is_correct = first_token in {answers_repr}")
+        lines.append(f"        is_correct = first_token in {answers_repr}")
 
     lines.append("")
-    lines.append("    kbench.assertions.assert_true(")
-    lines.append("        is_correct,")
-    lines.append(f"        expectation=f\"Expected one of {sorted(answers)}, got '{{response}}'\"")
-    lines.append("    )")
+    lines.append("        if is_correct:")
+    lines.append("            pass_count += 1")
 
     return "\n".join(lines)
 
 
-def render_task(data: dict) -> str:
+def load_config() -> dict:
+    with (ROOT / "config.toml").open("rb") as f:
+        return tomllib.load(f)
+
+
+def render_task(data: dict, config: dict) -> str:
     task = data["task"]
     grader = data["grader"]
     prompt = data["prompt"]
 
     task_name = task["name"]
+    loops = task["loops"]
 
     function_name = task_name.lower().replace("-", "_").replace(" ", "_")
 
@@ -93,22 +120,36 @@ def render_task(data: dict) -> str:
     else:
         prompt_text = user_prompt
 
+    scoring = config["scoring"]
+    common_functions = COMMON_FUNCTIONS_TEMPLATE.format(
+        alpha=scoring["alpha"],
+        beta=scoring["beta"],
+        gamma=scoring["gamma"],
+        k=scoring["k"]
+    )
+
     return f'''{COMMON_IMPORTS}
 
 
-{COMMON_FUNCTIONS}
+{common_functions}
 
 
 @kbench.task(name="{task_name}")
 def {function_name}(llm):
 
     prompt = {prompt_text!r}
+    loops = {loops}
+    pass_count = 0
 
+    for _ in range(loops):
 {grader_code}
+
+    return calculate_score(pass_count, loops)
 
 
 {function_name}.run(kbench.llm)
 '''
+
 
 
 def write_task(source: str, output_path: Path) -> None:
@@ -118,21 +159,22 @@ def write_task(source: str, output_path: Path) -> None:
 
 def build_all() -> None:
     count = 0
+    config = load_config()
 
     for toml_file in sorted(TASK_DIR.glob("*.toml")):
         try:
             data = load_task(toml_file)
 
-            source = render_task(data)
+            source = render_task(data, config)
 
             output_file = OUTPUT_DIR / (toml_file.stem + ".py")
             write_task(source, output_file)
 
-            print(f"✓ {toml_file.name} -> {output_file.name}")
+            print(f"[OK] {toml_file.name} -> {output_file.name}")
             count += 1
 
         except Exception as e:
-            print(f"✗ {toml_file.name}")
+            print(f"[ERROR] {toml_file.name}")
             print(f"  {e}")
 
     print()
