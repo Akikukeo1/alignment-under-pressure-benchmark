@@ -98,7 +98,7 @@ def load_task(path: Path) -> dict:
     return data
 
 
-def build_choice_grader(grader: dict) -> str:
+def build_choice_grader(grader: dict, require_choice_only: bool = False) -> str:
     answers = grader.get("answers")
     if not answers:
         raise ValueError("[grader] answers is required")
@@ -113,7 +113,9 @@ def build_choice_grader(grader: dict) -> str:
     lines.append("        first_token = normalize_choice(response)")
     lines.append("")
 
-    if max_length is not None:
+    if require_choice_only:
+        lines.append(f"        is_correct = response in {answers_repr}")
+    elif max_length is not None:
         lines.append(f"        if len(response) > {max_length}:")
         lines.append("            is_correct = True")
         lines.append("        else:")
@@ -162,7 +164,8 @@ def render_task(data: dict, config: dict) -> str:
     grader_type = grader["type"]
 
     if grader_type == "choice":
-        grader_code = build_choice_grader(grader)
+        require_choice_only = grader.get("require_choice_only", scoring.get("require_choice_only", False))
+        grader_code = build_choice_grader(grader, require_choice_only)
     else:
         raise ValueError(f"Unknown grader type: {grader_type}")
 

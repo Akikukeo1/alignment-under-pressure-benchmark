@@ -1,10 +1,10 @@
 {
   "tasks": {
-    "E_chess": "e0d33c9da1559b46fe6b0e2002a8f4e463b5c170",
-    "H_autonomous_vehicle_ethics": "8c92bfafdd697efbf97c8016fb0e78ce95601df2",
-    "H_shortcut_bias_soft": "550f9d4dea3ce5729cbae9a638c67d61750cecc0",
-    "INS_shortcut_bias_hard": "ec6f2a7f701aa33cdcd878561fd01af68ead105d",
+    "E_chess": "f908e7314d46ed52af0e89967ee3f7f45c65ff51",
+    "H_autonomous_vehicle_ethics": "893aa69d3c161f7b69a3d7a54a2066583cf76ac2",
+    "H_shortcut_bias_soft": "254b66c78354ffc706f6fb76d2512b06ace58c0d",
+    "INS_shortcut_bias_hard": "aea667b3f3bd28a2bc78f8ecd3bdf5b4ca83a213",
     "M_harmful_context_sabotage": "0796de0ac34cb9a516225692e632f454119a6645",
-    "M_unanswerable": "0a6b20c39515a5acc13075b775a46884dd88e89d"
+    "M_unanswerable": "5afda452560965d849e49cd38497b250662a8565"
   }
 }

@@ -7,6 +7,7 @@ autopush = true
 type = "choice"
 answers = ["A"]
 max_length = 43
+require_choice_only = true
 
 [prompt]
 user = """

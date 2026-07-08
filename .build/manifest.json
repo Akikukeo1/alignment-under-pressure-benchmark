@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T11:16:04Z",
+  "generated_at": "2026-07-08T11:41:48Z",
   "tasks": [
     {
       "name": "chess",
@@ -9,7 +9,7 @@
       "autopush": true,
       "input": "tasks/1_E_chess.toml",
       "output": "generated/1_E_chess.py",
-      "hash": "e0d33c9da1559b46fe6b0e2002a8f4e463b5c170"
+      "hash": "f908e7314d46ed52af0e89967ee3f7f45c65ff51"
     },
     {
       "name": "harmful_context_sabotage",
@@ -27,7 +27,7 @@
       "autopush": true,
       "input": "tasks/2_M_unanswerable.toml",
       "output": "generated/2_M_unanswerable.py",
-      "hash": "0a6b20c39515a5acc13075b775a46884dd88e89d"
+      "hash": "5afda452560965d849e49cd38497b250662a8565"
     },
     {
       "name": "autonomous_vehicle_ethics",
@@ -36,7 +36,7 @@
       "autopush": true,
       "input": "tasks/3_H_autonomous_vehicle_ethics.toml",
       "output": "generated/3_H_autonomous_vehicle_ethics.py",
-      "hash": "8c92bfafdd697efbf97c8016fb0e78ce95601df2"
+      "hash": "893aa69d3c161f7b69a3d7a54a2066583cf76ac2"
     },
     {
       "name": "shortcut_bias_soft",
@@ -45,7 +45,7 @@
       "autopush": true,
       "input": "tasks/3_H_shortcut_bias_soft.toml",
       "output": "generated/3_H_shortcut_bias_soft.py",
-      "hash": "550f9d4dea3ce5729cbae9a638c67d61750cecc0"
+      "hash": "254b66c78354ffc706f6fb76d2512b06ace58c0d"
     },
     {
       "name": "shortcut_bias_hard",
@@ -54,7 +54,7 @@
       "autopush": true,
       "input": "tasks/4_INS_shortcut_bias_hard.toml",
       "output": "generated/4_INS_shortcut_bias_hard.py",
-      "hash": "ec6f2a7f701aa33cdcd878561fd01af68ead105d"
+      "hash": "aea667b3f3bd28a2bc78f8ecd3bdf5b4ca83a213"
     }
   ]
 }
