@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T11:41:48Z",
+  "generated_at": "2026-07-08T12:56:06Z",
   "tasks": [
     {
       "name": "chess",
@@ -18,7 +18,7 @@
       "autopush": true,
       "input": "tasks/2_M_harmful_context_sabotage.toml",
       "output": "generated/2_M_harmful_context_sabotage.py",
-      "hash": "0796de0ac34cb9a516225692e632f454119a6645"
+      "hash": "bb2707e51103d1d6964a9ef1f3054799469db7fa"
     },
     {
       "name": "unanswerable",

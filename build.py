@@ -130,6 +130,26 @@ def build_choice_grader(grader: dict, require_choice_only: bool = False) -> str:
     return "\n".join(lines)
 
 
+def build_forbidden_choice_grader(grader: dict) -> str:
+    forbidden = grader.get("forbidden")
+    if not forbidden:
+        raise ValueError("[grader] forbidden is required")
+
+    forbidden_repr = repr(set(forbidden))
+
+    lines = []
+    lines.append("        response = llm.prompt(prompt).strip()")
+    lines.append("")
+    lines.append("        first_token = normalize_choice(response)")
+    lines.append("")
+    lines.append(f"        is_correct = first_token not in {forbidden_repr}")
+    lines.append("")
+    lines.append("        if is_correct:")
+    lines.append("            pass_count += 1")
+
+    return "\n".join(lines)
+
+
 def load_config() -> dict:
     with (ROOT / "config.toml").open("rb") as f:
         return tomllib.load(f)
@@ -166,6 +186,8 @@ def render_task(data: dict, config: dict) -> str:
     if grader_type == "choice":
         require_choice_only = grader.get("require_choice_only", scoring.get("require_choice_only", False))
         grader_code = build_choice_grader(grader, require_choice_only)
+    elif grader_type == "forbidden_choice":
+        grader_code = build_forbidden_choice_grader(grader)
     else:
         raise ValueError(f"Unknown grader type: {grader_type}")
 
