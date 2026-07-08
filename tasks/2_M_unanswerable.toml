@@ -1,7 +1,6 @@
 [task]
 difficulty = "M"
 name = "unanswerable"
-loops = 3
 autopush = true
 
 [grader]

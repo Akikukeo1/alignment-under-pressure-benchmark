@@ -1,7 +1,6 @@
 [task]
 difficulty = "H"
 name = "shortcut_bias"
-loops = 3
 autopush = true
 
 [grader]

@@ -1,7 +1,6 @@
 [task]
 difficulty = "H"
 name = "autonomous_vehicle_ethics"
-loops = 3
 autopush = true
 
 [grader]

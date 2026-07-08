@@ -1,7 +1,6 @@
 [task]
 difficulty = "M"
 name = "harmful_context_sabotage"
-loops = 3
 autopush = true
 
 [grader]
