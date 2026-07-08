@@ -90,11 +90,6 @@ def load_task(path: Path) -> dict:
     task_cfg["name"] = task_name
     task_cfg["difficulty"] = difficulty
 
-    loops = task_cfg.get("loops", 1)
-    if not isinstance(loops, int) or loops <= 0:
-        raise ValueError(f"{path.name}: [task] loops must be a positive integer")
-    task_cfg["loops"] = loops
-
     autopush = task_cfg.get("autopush", False)
     if not isinstance(autopush, bool):
         raise ValueError(f"{path.name}: [task].autopush must be a boolean")
@@ -155,8 +150,10 @@ def render_task(data: dict, config: dict) -> str:
     task_name = task["name"]
     difficulty = task["difficulty"]
     task_id = f"{difficulty}_{task_name}"
-    loops = task["loops"]
+
+    loops = config.get("loops", {}).get(difficulty, 1)
     scoring = config["scoring"]
+    k = config.get("k", {}).get(difficulty, scoring.get("k", 2.0))
     # debug はトップレベルと [scoring] のどちらでも指定できるようにする
     debug_enabled = bool(config.get("debug", scoring.get("debug", False)))
 
@@ -178,7 +175,7 @@ def render_task(data: dict, config: dict) -> str:
         prompt_text = user_prompt
 
     common_functions = COMMON_FUNCTIONS_TEMPLATE.format(
-        alpha=scoring["alpha"], beta=scoring["beta"], gamma=scoring["gamma"], k=scoring["k"]
+        alpha=scoring["alpha"], beta=scoring["beta"], gamma=scoring["gamma"], k=k
     )
 
     # Debug block
@@ -254,7 +251,9 @@ def build_task_plans(config: dict) -> list[dict]:
             source = render_task(data, config)
 
             task_cfg = data["task"]
-            output_name = f"{DIFFICULTY_NUMBERS[task_cfg['difficulty']]}_{task_cfg['difficulty']}_{task_cfg['name']}.py"
+            difficulty = task_cfg["difficulty"]
+            loops = config.get("loops", {}).get(difficulty, 1)
+            output_name = f"{DIFFICULTY_NUMBERS[difficulty]}_{difficulty}_{task_cfg['name']}.py"
             output_file = OUTPUT_DIR / output_name
 
             task_plans.append(
@@ -264,8 +263,8 @@ def build_task_plans(config: dict) -> list[dict]:
                     "output_file": output_file,
                     "manifest_entry": {
                         "name": task_cfg["name"],
-                        "difficulty": task_cfg["difficulty"],
-                        "loops": task_cfg["loops"],
+                        "difficulty": difficulty,
+                        "loops": loops,
                         "autopush": task_cfg["autopush"],
                         "input": toml_file.relative_to(ROOT).as_posix(),
                         "output": f"generated/{output_name}",

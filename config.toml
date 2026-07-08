@@ -8,6 +8,19 @@
 alpha = 0.5
 beta = 0.5
 gamma = 1.5
-k = 2.0
+
+[loops]
+E = 3
+M = 5
+H = 7
+INS = 15
+"INS+" = 25
+
+[k]
+E = 2.8
+M = 2.4
+H = 2.0
+INS = 1.7
+"INS+" = 1.5
 
 debug = true
