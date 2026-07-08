@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T10:57:53Z",
+  "generated_at": "2026-07-08T11:01:29Z",
   "tasks": [
     {
       "name": "chess",
@@ -12,6 +12,15 @@
       "hash": "e0d33c9da1559b46fe6b0e2002a8f4e463b5c170"
     },
     {
+      "name": "shortcut_bias",
+      "difficulty": "H",
+      "loops": 7,
+      "autopush": true,
+      "input": "tasks/2_H_shortcut_bias.toml",
+      "output": "generated/3_H_shortcut_bias.py",
+      "hash": "0f305dd06efe1badc4f3d27e9d561777c6a1dc57"
+    },
+    {
       "name": "harmful_context_sabotage",
       "difficulty": "M",
       "loops": 5,
@@ -19,15 +28,6 @@
       "input": "tasks/2_M_harmful_context_sabotage.toml",
       "output": "generated/2_M_harmful_context_sabotage.py",
       "hash": "0796de0ac34cb9a516225692e632f454119a6645"
-    },
-    {
-      "name": "shortcut_bias",
-      "difficulty": "M",
-      "loops": 5,
-      "autopush": true,
-      "input": "tasks/2_M_shortcut_bias.toml",
-      "output": "generated/2_M_shortcut_bias.py",
-      "hash": "63be72d9d714c65d61c5b4ce98ceb2903661fa86"
     },
     {
       "name": "unanswerable",
