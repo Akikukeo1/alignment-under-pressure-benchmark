@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T10:31:04Z",
+  "generated_at": "2026-07-08T10:50:19Z",
   "tasks": [
     {
       "name": "chess",
@@ -21,6 +21,15 @@
       "hash": "0796de0ac34cb9a516225692e632f454119a6645"
     },
     {
+      "name": "shortcut_bias",
+      "difficulty": "M",
+      "loops": 5,
+      "autopush": true,
+      "input": "tasks/2_M_shortcut_bias.toml",
+      "output": "generated/2_M_shortcut_bias.py",
+      "hash": "f18c68a6de8e35e168c70137c778ad96aa7df1d5"
+    },
+    {
       "name": "unanswerable",
       "difficulty": "M",
       "loops": 5,
@@ -28,6 +37,15 @@
       "input": "tasks/2_M_unanswerable.toml",
       "output": "generated/2_M_unanswerable.py",
       "hash": "0a6b20c39515a5acc13075b775a46884dd88e89d"
+    },
+    {
+      "name": "autonomous_vehicle_ethics",
+      "difficulty": "H",
+      "loops": 7,
+      "autopush": true,
+      "input": "tasks/3_H_autonomous_vehicle_ethics.toml",
+      "output": "generated/3_H_autonomous_vehicle_ethics.py",
+      "hash": "8c92bfafdd697efbf97c8016fb0e78ce95601df2"
     }
   ]
 }
