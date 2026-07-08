@@ -1,6 +1,6 @@
 [task]
-difficulty = "H"
-name = "shortcut_bias"
+difficulty = "INS"
+name = "shortcut_bias_hard"
 autopush = true
 
 [grader]

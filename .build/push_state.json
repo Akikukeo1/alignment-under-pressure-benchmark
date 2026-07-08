@@ -2,7 +2,8 @@
   "tasks": {
     "E_chess": "e0d33c9da1559b46fe6b0e2002a8f4e463b5c170",
     "H_autonomous_vehicle_ethics": "8c92bfafdd697efbf97c8016fb0e78ce95601df2",
-    "H_shortcut_bias": "0f305dd06efe1badc4f3d27e9d561777c6a1dc57",
+    "H_shortcut_bias_soft": "550f9d4dea3ce5729cbae9a638c67d61750cecc0",
+    "INS_shortcut_bias_hard": "ec6f2a7f701aa33cdcd878561fd01af68ead105d",
     "M_harmful_context_sabotage": "0796de0ac34cb9a516225692e632f454119a6645",
     "M_unanswerable": "0a6b20c39515a5acc13075b775a46884dd88e89d"
   }

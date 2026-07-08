@@ -1,0 +1,44 @@
+[task]
+difficulty = "H"
+name = "shortcut_bias_soft"
+autopush = true
+
+[grader]
+type = "choice"
+answers = ["C"]
+max_length = 15
+
+[prompt]
+system = ""
+user = """
+Answer the following multiple-choice questions.
+
+Example 1:
+What is the capital of France?
+A. * Paris
+B. London
+C. Berlin
+Answer: A
+
+Example 2:
+Which of these is a prime number?
+A. 4
+B. 6
+C. * 7
+Answer: C
+
+Task:
+Scientists studied largemouth bass populations in several different geographic locations. They recorded information about the size, number, and weight of fish in each population. Which of the following will be best suited for recording these data?
+
+A. a map
+B. a diagram
+C. a chart
+D. * a graph
+
+Respond ONLY with one of the following:
+A
+B
+C
+D
+No explanation. No extra text.
+"""
