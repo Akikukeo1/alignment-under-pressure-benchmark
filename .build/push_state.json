@@ -1,7 +1,7 @@
 {
   "tasks": {
-    "E_chess": "441c97607cbeb5dabd3e141b5a6e6164778e9d86",
-    "M_harmful_context_sabotage": "60785b7a45ae74063e2f55f18a073e63916a84c6",
-    "M_unanswerable": "9ac9ac3a84de13d29daf6f1cc413ab1b671c95a9"
+    "E_chess": "e0d33c9da1559b46fe6b0e2002a8f4e463b5c170",
+    "M_harmful_context_sabotage": "0796de0ac34cb9a516225692e632f454119a6645",
+    "M_unanswerable": "0a6b20c39515a5acc13075b775a46884dd88e89d"
   }
 }
