@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T10:50:19Z",
+  "generated_at": "2026-07-08T10:57:53Z",
   "tasks": [
     {
       "name": "chess",
@@ -27,7 +27,7 @@
       "autopush": true,
       "input": "tasks/2_M_shortcut_bias.toml",
       "output": "generated/2_M_shortcut_bias.py",
-      "hash": "f18c68a6de8e35e168c70137c778ad96aa7df1d5"
+      "hash": "63be72d9d714c65d61c5b4ce98ceb2903661fa86"
     },
     {
       "name": "unanswerable",

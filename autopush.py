@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).parent
 BUILD_DIR = ROOT / ".build"
 MANIFEST_PATH = BUILD_DIR / "manifest.json"
