@@ -10,6 +10,16 @@ OUTPUT_DIR = ROOT / "generated"
 
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+DIFFICULTY_NUMBERS = {
+    "E": 1,
+    "M": 2,
+    "H": 3,
+    "INS": 4,
+    "INS+": 5,
+}
+
+INVALID_TASK_NAME_PREFIXES = tuple(f"{difficulty}_" for difficulty in DIFFICULTY_NUMBERS)
+
 COMMON_IMPORTS = """import re
 import math
 import kaggle_benchmarks as kbench
@@ -52,6 +62,25 @@ def load_task(path: Path) -> dict:
 
     # Validate loops
     task_cfg = data["task"]
+
+    task_name = task_cfg.get("name")
+    if not isinstance(task_name, str) or not task_name.strip():
+        raise ValueError(f"{path.name}: [task].name is required")
+    task_name = task_name.strip()
+    if task_name[0].isdigit() or task_name.startswith(INVALID_TASK_NAME_PREFIXES):
+        raise ValueError(f"{path.name}: [task].name must not include a difficulty or numeric prefix")
+
+    difficulty = task_cfg.get("difficulty")
+    if not isinstance(difficulty, str) or not difficulty.strip():
+        raise ValueError(f"{path.name}: [task].difficulty is required")
+    difficulty = difficulty.strip()
+    if difficulty not in DIFFICULTY_NUMBERS:
+        allowed = ", ".join(DIFFICULTY_NUMBERS)
+        raise ValueError(f"{path.name}: [task].difficulty must be one of {allowed}")
+
+    task_cfg["name"] = task_name
+    task_cfg["difficulty"] = difficulty
+
     loops = task_cfg.get("loops", 1)
     if not isinstance(loops, int) or loops <= 0:
         raise ValueError(f"{path.name}: [task] loops must be a positive integer")
@@ -100,9 +129,9 @@ def render_task(data: dict, config: dict) -> str:
     grader = data["grader"]
     prompt = data["prompt"]
 
-    task_id = data.get("id", "unknown")
-    difficulty = task_id.split("_")[0]
     task_name = task["name"]
+    difficulty = task["difficulty"]
+    task_id = f"{difficulty}_{task_name}"
     loops = task["loops"]
     scoring = config["scoring"]
     # debug はトップレベルと [scoring] のどちらでも指定できるようにする
@@ -157,7 +186,7 @@ def render_task(data: dict, config: dict) -> str:
 {common_functions}
 
 
-@kbench.task(name="{task_name}")
+@kbench.task(name="{task_id}")
 def {function_name}(llm):
 
     prompt = {prompt_text!r}
@@ -191,7 +220,11 @@ def build_all() -> None:
 
             source = render_task(data, config)
 
-            output_file = OUTPUT_DIR / (toml_file.stem + ".py")
+            task_cfg = data["task"]
+            output_file = (
+                OUTPUT_DIR
+                / f"{DIFFICULTY_NUMBERS[task_cfg['difficulty']]}_{task_cfg['difficulty']}_{task_cfg['name']}.py"
+            )
             write_task(source, output_file)
 
             print(f"[OK] {toml_file.name} -> {output_file.name}")

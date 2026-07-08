@@ -1,7 +1,6 @@
-id = "E_chess_mate_in2"
-
 [task]
-name = "E_chess_mate_in2"
+difficulty = "E"
+name = "chess"
 loops = 3
 
 [grader]
