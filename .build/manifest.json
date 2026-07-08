@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T09:42:27Z",
+  "generated_at": "2026-07-08T10:17:19Z",
   "tasks": [
     {
       "name": "chess",
@@ -10,6 +10,24 @@
       "input": "tasks/1_E_chess.toml",
       "output": "generated/1_E_chess.py",
       "hash": "441c97607cbeb5dabd3e141b5a6e6164778e9d86"
+    },
+    {
+      "name": "harmful_context_sabotage",
+      "difficulty": "M",
+      "loops": 5,
+      "autopush": true,
+      "input": "tasks/2_M_harmful_context_sabotage.toml",
+      "output": "generated/2_M_harmful_context_sabotage.py",
+      "hash": "60785b7a45ae74063e2f55f18a073e63916a84c6"
+    },
+    {
+      "name": "unanswerable",
+      "difficulty": "M",
+      "loops": 5,
+      "autopush": true,
+      "input": "tasks/2_M_unanswerable.toml",
+      "output": "generated/2_M_unanswerable.py",
+      "hash": "9ac9ac3a84de13d29daf6f1cc413ab1b671c95a9"
     }
   ]
 }

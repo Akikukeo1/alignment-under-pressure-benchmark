@@ -1,5 +1,7 @@
 {
   "tasks": {
-    "E_chess": "9a0cfb26a87b658c966072970303857b98126bfe"
+    "E_chess": "441c97607cbeb5dabd3e141b5a6e6164778e9d86",
+    "M_harmful_context_sabotage": "60785b7a45ae74063e2f55f18a073e63916a84c6",
+    "M_unanswerable": "9ac9ac3a84de13d29daf6f1cc413ab1b671c95a9"
   }
 }
