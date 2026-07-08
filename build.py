@@ -1,14 +1,22 @@
 from __future__ import annotations
 
-import tomllib
-from pathlib import Path
+import argparse
+import hashlib
+import json
 import math
+import shutil
+import subprocess
+import tomllib
+from datetime import datetime, timezone
+from pathlib import Path
 
 ROOT = Path(__file__).parent
 TASK_DIR = ROOT / "tasks"
 OUTPUT_DIR = ROOT / "generated"
+BUILD_DIR = ROOT / ".build"
 
 OUTPUT_DIR.mkdir(exist_ok=True)
+BUILD_DIR.mkdir(exist_ok=True)
 
 DIFFICULTY_NUMBERS = {
     "E": 1,
@@ -20,8 +28,9 @@ DIFFICULTY_NUMBERS = {
 
 INVALID_TASK_NAME_PREFIXES = tuple(f"{difficulty}_" for difficulty in DIFFICULTY_NUMBERS)
 
-COMMON_IMPORTS = """import re
-import math
+COMMON_IMPORTS = """import math
+import re
+
 import kaggle_benchmarks as kbench
 """
 
@@ -86,6 +95,11 @@ def load_task(path: Path) -> dict:
         raise ValueError(f"{path.name}: [task] loops must be a positive integer")
     task_cfg["loops"] = loops
 
+    autopush = task_cfg.get("autopush", False)
+    if not isinstance(autopush, bool):
+        raise ValueError(f"{path.name}: [task].autopush must be a boolean")
+    task_cfg["autopush"] = autopush
+
     return data
 
 
@@ -122,6 +136,15 @@ def build_choice_grader(grader: dict) -> str:
 def load_config() -> dict:
     with (ROOT / "config.toml").open("rb") as f:
         return tomllib.load(f)
+
+
+def load_manifest() -> dict | None:
+    manifest_path = BUILD_DIR / "manifest.json"
+    if not manifest_path.exists():
+        return None
+
+    with manifest_path.open("r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def render_task(data: dict, config: dict) -> str:
@@ -210,9 +233,19 @@ def write_task(source: str, output_path: Path) -> None:
     output_path.write_text(source, encoding="utf-8")
 
 
-def build_all() -> None:
-    count = 0
-    config = load_config()
+def write_manifest(tasks: list[dict]) -> None:
+    manifest = {
+        "version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "tasks": tasks,
+    }
+
+    manifest_path = BUILD_DIR / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def build_task_plans(config: dict) -> list[dict]:
+    task_plans: list[dict] = []
 
     for toml_file in sorted(TASK_DIR.glob("*.toml")):
         try:
@@ -221,25 +254,104 @@ def build_all() -> None:
             source = render_task(data, config)
 
             task_cfg = data["task"]
-            output_file = (
-                OUTPUT_DIR
-                / f"{DIFFICULTY_NUMBERS[task_cfg['difficulty']]}_{task_cfg['difficulty']}_{task_cfg['name']}.py"
+            output_name = f"{DIFFICULTY_NUMBERS[task_cfg['difficulty']]}_{task_cfg['difficulty']}_{task_cfg['name']}.py"
+            output_file = OUTPUT_DIR / output_name
+
+            task_plans.append(
+                {
+                    "toml_file": toml_file,
+                    "source": source,
+                    "output_file": output_file,
+                    "manifest_entry": {
+                        "name": task_cfg["name"],
+                        "difficulty": task_cfg["difficulty"],
+                        "loops": task_cfg["loops"],
+                        "autopush": task_cfg["autopush"],
+                        "input": toml_file.relative_to(ROOT).as_posix(),
+                        "output": f"generated/{output_name}",
+                        "hash": hashlib.sha1(source.encode("utf-8")).hexdigest(),
+                    },
+                }
             )
-            write_task(source, output_file)
-
-            print(f"[OK] {toml_file.name} -> {output_file.name}")
-            count += 1
-
         except Exception as e:
             print(f"[ERROR] {toml_file.name}")
             print(f"  {e}")
 
+    return task_plans
+
+
+def remove_path(path: Path) -> None:
+    if path.is_dir():
+        shutil.rmtree(path)
+    else:
+        path.unlink()
+
+
+def build_all(clean: bool = False, dry_run: bool = False) -> None:
+    config = load_config()
+    task_plans = build_task_plans(config)
+    manifest_tasks = [plan["manifest_entry"] for plan in task_plans]
+    current_outputs = {plan["output_file"].as_posix() for plan in task_plans}
+    previous_manifest = load_manifest() or {"tasks": []}
+    previous_outputs = {
+        (ROOT / task["output"]).as_posix()
+        for task in previous_manifest.get("tasks", [])
+        if isinstance(task, dict) and isinstance(task.get("output"), str)
+    }
+
+    if clean:
+        delete_targets = sorted(OUTPUT_DIR.iterdir()) if OUTPUT_DIR.exists() else []
+        if dry_run:
+            for path in delete_targets:
+                print(f"DELETE {path.relative_to(ROOT).as_posix()}")
+        else:
+            if OUTPUT_DIR.exists():
+                shutil.rmtree(OUTPUT_DIR)
+            OUTPUT_DIR.mkdir(exist_ok=True)
+    else:
+        delete_targets = [Path(path) for path in sorted(previous_outputs - current_outputs)]
+        if dry_run:
+            for path in delete_targets:
+                print(f"DELETE {path.relative_to(ROOT).as_posix()}")
+        else:
+            for path in delete_targets:
+                if path.exists():
+                    remove_path(path)
+
+    count = len(task_plans)
+    for plan in task_plans:
+        toml_file = plan["toml_file"]
+        output_file = plan["output_file"]
+        source = plan["source"]
+        needs_write = clean or not output_file.exists() or output_file.read_text(encoding="utf-8") != source
+
+        if dry_run:
+            if needs_write:
+                print(f"WRITE {output_file.relative_to(ROOT).as_posix()}")
+        else:
+            if needs_write:
+                write_task(source, output_file)
+                print(f"[OK] {toml_file.name} -> {output_file.name}")
+    if dry_run:
+        print(f"WRITE {(OUTPUT_DIR / 'manifest.json').relative_to(ROOT).as_posix()}")
+        return
+
     print()
     print(f"Generated {count} task(s).")
+    write_manifest(manifest_tasks)
+    print(f"Wrote manifest -> {(BUILD_DIR / 'manifest.json').as_posix()}")
 
 
 def main() -> None:
-    build_all()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--clean", action="store_true", help="既存の generated を全削除してから生成する")
+    parser.add_argument("--dry-run", action="store_true", help="削除・生成予定のみ表示する")
+    args = parser.parse_args()
+
+    build_all(clean=args.clean, dry_run=args.dry_run)
+
+    subprocess.run(["ruff", "format", "generated"], check=True)
+    subprocess.run(["ruff", "check", "generated", "--fix"], check=True)
 
 
 if __name__ == "__main__":

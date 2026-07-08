@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "generated_at": "2026-07-08T08:40:33Z",
+  "tasks": [
+    {
+      "name": "chess",
+      "difficulty": "E",
+      "loops": 3,
+      "autopush": true,
+      "input": "tasks/1_E_chess.toml",
+      "output": "generated/1_E_chess.py",
+      "hash": "9a0cfb26a87b658c966072970303857b98126bfe"
+    }
+  ]
+}

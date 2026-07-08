@@ -2,6 +2,7 @@
 difficulty = "E"
 name = "chess"
 loops = 3
+autopush = true
 
 [grader]
 type = "choice"
