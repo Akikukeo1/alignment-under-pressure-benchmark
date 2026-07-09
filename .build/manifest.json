@@ -1,7 +1,16 @@
 {
   "version": 1,
-  "generated_at": "2026-07-08T12:56:06Z",
+  "generated_at": "2026-07-09T11:46:11Z",
   "tasks": [
+    {
+      "name": "bird_fly_bias",
+      "difficulty": "E",
+      "loops": 3,
+      "autopush": true,
+      "input": "tasks/1_E_bird_fly_bias.toml",
+      "output": "generated/1_E_bird_fly_bias.py",
+      "hash": "b764e7788d3d69ca78ed20f8127178707d609678"
+    },
     {
       "name": "chess",
       "difficulty": "E",
