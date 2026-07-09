@@ -1,6 +1,7 @@
 [task]
+category = "Bias"
 difficulty = "E"
-name = "bird_fly_bias"
+name = "bird_fly"
 autopush = true
 
 [grader]

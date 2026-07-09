@@ -8,6 +8,7 @@
 alpha = 0.5
 beta = 0.5
 gamma = 1.5
+k = 2.0
 
 [loops]
 E = 3

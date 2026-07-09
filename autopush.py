@@ -23,7 +23,7 @@ class TaskRecord:
 
     @property
     def task_id(self) -> str:
-        return f"{self.difficulty}_{self.name}"
+        return f"AUPB_{self.name}"
 
 
 def error(message: str) -> None:
@@ -37,6 +37,31 @@ def load_json(path: Path) -> Any:
             return json.load(file)
     except json.JSONDecodeError as exc:
         raise ValueError(f"{path.as_posix()}: JSON の形式が不正です ({exc})") from exc
+
+
+def get_remote_tasks() -> set[str]:
+    try:
+        result = subprocess.run(["kaggle", "b", "t", "list"], check=True, text=True, capture_output=True)
+        lines = result.stdout.splitlines()
+        tasks = set()
+
+        # Skip header and separator line
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("Task") or line.startswith("───"):
+                continue
+            # The task name is the first column
+            parts = line.split()
+            if parts:
+                tasks.add(parts[0])
+        return tasks
+    except subprocess.CalledProcessError as exc:
+        print(f"[WARNING] Kaggle TaskList の取得に失敗しました: {exc}")
+        return set()
+
+
+def delete_remote_task(task_id: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(["kaggle", "b", "t", "delete", task_id], check=True, text=True, capture_output=True)
 
 
 def load_manifest() -> list[TaskRecord]:
@@ -172,6 +197,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--task", action="append", help="対象 Task を指定する。複数指定可")
     parser.add_argument("--force", action="store_true", help="ハッシュ判定を無視してすべて Push する")
     parser.add_argument(
+        "--cleanup",
+        action="store_true",
+        help="マニフェストに存在しないリモートタスク (AUPB_*) を削除する",
+    )
+    parser.add_argument(
         "--continue-on-error",
         action="store_true",
         help="Push 失敗時も残りの Task を継続する",
@@ -186,6 +216,28 @@ def print_result(task: TaskRecord, status: str, detail: str | None = None) -> No
         print(f"[{status}] {task.task_id}")
 
 
+def cleanup_obsolete_tasks(manifest_tasks: list[TaskRecord], dry_run: bool) -> None:
+    remote_tasks = get_remote_tasks()
+    manifest_task_ids = {task.task_id for task in manifest_tasks}
+
+    # Identify tasks on remote that start with AUPB_ but are not in manifest
+    obsolete_tasks = [tid for tid in remote_tasks if tid.startswith("AUPB_") and tid not in manifest_task_ids]
+
+    if not obsolete_tasks:
+        return
+
+    print(f"Obsolete tasks found: {len(obsolete_tasks)}")
+    for tid in obsolete_tasks:
+        if dry_run:
+            print(f"  [Dry-Run] Would delete task: {tid}")
+        else:
+            try:
+                delete_remote_task(tid)
+                print(f"  [Deleted] {tid}")
+            except subprocess.CalledProcessError as exc:
+                print(f"  [Error] Failed to delete {tid}: {exc}")
+
+
 def run(
     tasks: list[TaskRecord], state: dict[str, str], *, dry_run: bool, force: bool, continue_on_error: bool
 ) -> tuple[int, int, int, int, dict[str, str]]:
@@ -193,7 +245,10 @@ def run(
     skip_count = 0
     success_count = 0
     failed_count = 0
-    next_state = dict(state)
+
+    # Manifest に存在するタスクのみを保持する (Push State のクリーンアップ)
+    manifest_task_ids = {task.task_id for task in tasks}
+    next_state = {tid: h for tid, h in state.items() if tid in manifest_task_ids}
 
     for task in tasks:
         if not task.autopush:
@@ -241,6 +296,11 @@ def main() -> None:
     args = parse_args()
     tasks = load_manifest()
     state = load_push_state()
+
+    # Remove obsolete remote tasks if requested
+    if args.cleanup:
+        cleanup_obsolete_tasks(tasks, args.dry_run)
+        print()
 
     difficulties = set(args.difficulty) if args.difficulty else None
     task_filters = set(args.task) if args.task else None

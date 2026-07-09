@@ -1,4 +1,5 @@
 [task]
+category = "Robustness"
 difficulty = "M"
 name = "unanswerable"
 autopush = true

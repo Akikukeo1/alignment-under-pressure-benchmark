@@ -1,69 +1,69 @@
 {
   "version": 1,
-  "generated_at": "2026-07-09T11:46:11Z",
+  "generated_at": "2026-07-09T22:12:45Z",
   "tasks": [
     {
-      "name": "bird_fly_bias",
+      "name": "bird_fly",
       "difficulty": "E",
       "loops": 3,
       "autopush": true,
-      "input": "tasks/1_E_bird_fly_bias.toml",
-      "output": "generated/1_E_bird_fly_bias.py",
-      "hash": "b764e7788d3d69ca78ed20f8127178707d609678"
+      "input": "tasks/Bias_E_bird_fly.toml",
+      "output": "generated/AUPB_bird_fly.py",
+      "hash": "2939f75cb90d31a5b381d56da276ff7b1af1368b"
+    },
+    {
+      "name": "shortcut_soft",
+      "difficulty": "H",
+      "loops": 7,
+      "autopush": true,
+      "input": "tasks/Bias_H_shortcut_soft.toml",
+      "output": "generated/AUPB_shortcut_soft.py",
+      "hash": "89bbd69296b489980ada4c77645d02e376ed23ed"
+    },
+    {
+      "name": "shortcut_hard",
+      "difficulty": "INS",
+      "loops": 15,
+      "autopush": true,
+      "input": "tasks/Bias_INS_shortcut_hard.toml",
+      "output": "generated/AUPB_shortcut_hard.py",
+      "hash": "662e09efd54d8bf720add005f93ef7f1fef23292"
+    },
+    {
+      "name": "autonomous_vehicle",
+      "difficulty": "H",
+      "loops": 7,
+      "autopush": true,
+      "input": "tasks/Ethics_H_autonomous_vehicle.toml",
+      "output": "generated/AUPB_autonomous_vehicle.py",
+      "hash": "d0dd1516ee99d8ee409b62d1740dbff383a0e2f5"
     },
     {
       "name": "chess",
       "difficulty": "E",
       "loops": 3,
       "autopush": true,
-      "input": "tasks/1_E_chess.toml",
-      "output": "generated/1_E_chess.py",
-      "hash": "f908e7314d46ed52af0e89967ee3f7f45c65ff51"
-    },
-    {
-      "name": "harmful_context_sabotage",
-      "difficulty": "M",
-      "loops": 5,
-      "autopush": true,
-      "input": "tasks/2_M_harmful_context_sabotage.toml",
-      "output": "generated/2_M_harmful_context_sabotage.py",
-      "hash": "bb2707e51103d1d6964a9ef1f3054799469db7fa"
+      "input": "tasks/Logic_E_chess.toml",
+      "output": "generated/AUPB_chess.py",
+      "hash": "c6f4ea3ca2939d8d44e1d2a6c5fd95443b1b2954"
     },
     {
       "name": "unanswerable",
       "difficulty": "M",
       "loops": 5,
       "autopush": true,
-      "input": "tasks/2_M_unanswerable.toml",
-      "output": "generated/2_M_unanswerable.py",
-      "hash": "5afda452560965d849e49cd38497b250662a8565"
+      "input": "tasks/Robustness_M_unanswerable.toml",
+      "output": "generated/AUPB_unanswerable.py",
+      "hash": "0ce6df0649503d824c6b34f337621859f295fce4"
     },
     {
-      "name": "autonomous_vehicle_ethics",
-      "difficulty": "H",
-      "loops": 7,
+      "name": "harmful_context_sabotage",
+      "difficulty": "M",
+      "loops": 5,
       "autopush": true,
-      "input": "tasks/3_H_autonomous_vehicle_ethics.toml",
-      "output": "generated/3_H_autonomous_vehicle_ethics.py",
-      "hash": "893aa69d3c161f7b69a3d7a54a2066583cf76ac2"
-    },
-    {
-      "name": "shortcut_bias_soft",
-      "difficulty": "H",
-      "loops": 7,
-      "autopush": true,
-      "input": "tasks/3_H_shortcut_bias_soft.toml",
-      "output": "generated/3_H_shortcut_bias_soft.py",
-      "hash": "254b66c78354ffc706f6fb76d2512b06ace58c0d"
-    },
-    {
-      "name": "shortcut_bias_hard",
-      "difficulty": "INS",
-      "loops": 15,
-      "autopush": true,
-      "input": "tasks/4_INS_shortcut_bias_hard.toml",
-      "output": "generated/4_INS_shortcut_bias_hard.py",
-      "hash": "aea667b3f3bd28a2bc78f8ecd3bdf5b4ca83a213"
+      "input": "tasks/Safety_M_harmful_context.toml",
+      "output": "generated/AUPB_harmful_context_sabotage.py",
+      "hash": "d16405f8f5cbd3191510bbe94ea0c56f42b255a7"
     }
   ]
 }

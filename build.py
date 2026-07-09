@@ -72,6 +72,11 @@ def load_task(path: Path) -> dict:
     # Validate loops
     task_cfg = data["task"]
 
+    category = task_cfg.get("category")
+    if not isinstance(category, str) or not category.strip():
+        raise ValueError(f"{path.name}: [task].category is required")
+    category = category.strip()
+
     task_name = task_cfg.get("name")
     if not isinstance(task_name, str) or not task_name.strip():
         raise ValueError(f"{path.name}: [task].name is required")
@@ -89,6 +94,7 @@ def load_task(path: Path) -> dict:
 
     task_cfg["name"] = task_name
     task_cfg["difficulty"] = difficulty
+    task_cfg["category"] = category
 
     autopush = task_cfg.get("autopush", False)
     if not isinstance(autopush, bool):
@@ -171,7 +177,12 @@ def render_task(data: dict, config: dict) -> str:
 
     task_name = task["name"]
     difficulty = task["difficulty"]
-    task_id = f"{difficulty}_{task_name}"
+    category = task["category"]
+
+    # Kaggle task ID (immutable)
+    kaggle_task_id = f"AUPB_{task_name}"
+    # Local task ID (for debugging)
+    debug_task_id = f"{category}_{difficulty}_{task_name}"
 
     loops = config.get("loops", {}).get(difficulty, 1)
     scoring = config["scoring"]
@@ -215,13 +226,13 @@ def render_task(data: dict, config: dict) -> str:
         current_fail = ({loop_var} + 1) - pass_count
         current_rate = pass_count / ({loop_var} + 1)
         current_score = calculate_score(pass_count, {loop_var} + 1)
-        print(f"Task: {{task_id}} | Diff: {{difficulty}} | Loop: {{ {loop_var} + 1 }}/{{loops}} | Result: {{'Pass' if is_correct else 'Fail'}} | Pass: {{pass_count}} | Fail: {{current_fail}} | Rate: {{current_rate:.3f}} | Score: {{current_score:.3f}}")
+        print(f"Task: {{debug_task_id}} | Diff: {{difficulty}} | Loop: {{ {loop_var} + 1 }}/{{loops}} | Result: {{'Pass' if is_correct else 'Fail'}} | Pass: {{pass_count}} | Fail: {{current_fail}} | Rate: {{current_rate:.3f}} | Score: {{current_score:.3f}}")
 """
 
     debug_vars = ""
     if debug_enabled:
         debug_vars = f"""
-    task_id = {task_id!r}
+    debug_task_id = {debug_task_id!r}
     difficulty = {difficulty!r}
 """
 
@@ -231,7 +242,7 @@ def render_task(data: dict, config: dict) -> str:
 {common_functions}
 
 
-@kbench.task(name="{task_id}")
+@kbench.task(name="{kaggle_task_id}")
 def {function_name}(llm):
 
     prompt = {prompt_text!r}
@@ -277,8 +288,9 @@ def build_task_plans(config: dict) -> list[dict]:
 
             task_cfg = data["task"]
             difficulty = task_cfg["difficulty"]
+            category = task_cfg["category"]
             loops = config.get("loops", {}).get(difficulty, 1)
-            output_name = f"{DIFFICULTY_NUMBERS[difficulty]}_{difficulty}_{task_cfg['name']}.py"
+            output_name = f"AUPB_{task_cfg['name']}.py"
             output_file = OUTPUT_DIR / output_name
 
             task_plans.append(

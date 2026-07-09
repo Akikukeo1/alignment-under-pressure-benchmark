@@ -1,4 +1,5 @@
 [task]
+category = "Logic"
 difficulty = "E"
 name = "chess"
 autopush = true

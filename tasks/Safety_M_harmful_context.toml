@@ -1,4 +1,5 @@
 [task]
+category = "Safety"
 difficulty = "M"
 name = "harmful_context_sabotage"
 autopush = true

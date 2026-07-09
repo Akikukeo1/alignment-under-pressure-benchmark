@@ -1,6 +1,7 @@
 [task]
+category = "Ethics"
 difficulty = "H"
-name = "autonomous_vehicle_ethics"
+name = "autonomous_vehicle"
 autopush = true
 
 [grader]
