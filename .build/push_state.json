@@ -3,7 +3,9 @@
     "AUPB_autonomous_vehicle": "d0dd1516ee99d8ee409b62d1740dbff383a0e2f5",
     "AUPB_bird_fly": "2939f75cb90d31a5b381d56da276ff7b1af1368b",
     "AUPB_chess": "c6f4ea3ca2939d8d44e1d2a6c5fd95443b1b2954",
+    "AUPB_harmful_context_sabotage": "d16405f8f5cbd3191510bbe94ea0c56f42b255a7",
     "AUPB_shortcut_hard": "662e09efd54d8bf720add005f93ef7f1fef23292",
-    "AUPB_shortcut_soft": "89bbd69296b489980ada4c77645d02e376ed23ed"
+    "AUPB_shortcut_soft": "89bbd69296b489980ada4c77645d02e376ed23ed",
+    "AUPB_unanswerable": "0ce6df0649503d824c6b34f337621859f295fce4"
   }
 }
