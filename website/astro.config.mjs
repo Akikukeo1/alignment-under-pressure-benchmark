@@ -7,7 +7,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Alignment Under Pressure Benchmark (AUPB)',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Akikukeo1/alignment-under-pressure-benchmark' }],
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Akikukeo1/' }],
 			sidebar: [
 				{
 					label: 'AUPB',
