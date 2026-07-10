@@ -44,17 +44,31 @@ def normalize_choice(text: str) -> str:
     return token.strip(").,:;\"'")
 
 def calculate_score(pass_count: int, loops: int) -> float:
-    alpha = {alpha}
-    beta = {beta}
-    gamma = {gamma}
-    k = {k}
+    method = {method!r}
+    if method == "log":
+        if loops == 0:
+            return 0.0
+        score = math.log(pass_count + 1) / math.log(loops + 1)
+    elif method == "squared":
+        if loops == 0:
+            return 0.0
+        score = (pass_count / loops) ** 2
+    elif method == "linear":
+        if loops == 0:
+            return 0.0
+        score = pass_count / loops
+    else:
+        alpha = {alpha}
+        beta = {beta}
+        gamma = {gamma}
+        k = {k}
 
-    miss = loops - pass_count
-    if miss == 0:
-        return 1.0
+        miss = loops - pass_count
+        if miss == 0:
+            return 1.0
 
-    p = (pass_count + alpha) / (loops + alpha + beta)
-    score = (p ** gamma) * math.exp(-k * (miss / loops))
+        p = (pass_count + alpha) / (loops + alpha + beta)
+        score = (p ** gamma) * math.exp(-k * (miss / loops))
     return round(float(score), 3)
 """
 
@@ -211,7 +225,7 @@ def render_task(data: dict, config: dict) -> str:
         prompt_text = user_prompt
 
     common_functions = COMMON_FUNCTIONS_TEMPLATE.format(
-        alpha=scoring["alpha"], beta=scoring["beta"], gamma=scoring["gamma"], k=k
+        method=scoring.get("method", "custom"), alpha=scoring["alpha"], beta=scoring["beta"], gamma=scoring["gamma"], k=k
     )
 
     # Debug block
