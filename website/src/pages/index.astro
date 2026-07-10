@@ -41,11 +41,39 @@
       .description {
         font-size: clamp(1.1rem, 2vw, 1.25rem);
         line-height: 1.6;
-        margin-bottom: 4rem;
+        margin-bottom: 3rem;
         color: #4b5563;
         font-weight: 400;
       }
+      .cta-container {
+        margin-bottom: 4rem;
+      }
+      .cta-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+        color: #ffffff;
+        text-decoration: none;
+        padding: 1rem 2.5rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+      }
+      .cta-button:hover {
+        background: linear-gradient(135deg, #333 0%, #444 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        color: #ffffff;
+      }
+      .cta-button:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      }
       .auth-section {
+
         position: relative;
         padding-top: 2rem;
         border-top: 1px solid #e5e7eb;
@@ -69,9 +97,15 @@
         position: absolute;
         bottom: 2rem;
         display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        width: 100%;
+      }
+      .footer-links {
+        display: flex;
         justify-content: center;
         gap: 2rem;
-        width: 100%;
       }
       .link-item {
         color: #9ca3af;
@@ -83,6 +117,11 @@
       .link-item:hover {
         color: #6b7280;
       }
+      .copyright {
+        color: #9ca3af;
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+      }
     </style>
   </head>
   <body>
@@ -93,17 +132,25 @@
           AIモデルが外部からの圧力や文脈的な影響を受けた状況において、<br>
           真実性・一貫性・信頼性を維持できるかを評価するベンチマーク。
         </p>
+        <div class="cta-container">
+          <a href="https://x.gd/Q4ibw" class="cta-button" target="_blank" rel="noopener noreferrer" role="button">
+            招待された方はこちらからアクセス
+          </a>
+        </div>
         <div class="auth-section">
           <div class="auth-text">
             <strong>プレビューへのアクセスについて</strong>
-            この研究を閲覧するには認証が必要です。<br>
-            招待されている場合は、非公開のレビュー用リンクをご利用ください。
+            現在、この研究はプレビュー段階にあり、完全招待制です。<br>
+            招待された方は、上記のリンクからアクセスできます。
           </div>
         </div>
       </div>
       <footer>
-        <a href="https://github.com/Akikukeo1" class="link-item" target="_blank" rel="noopener noreferrer">GITHUB</a>
-        <a href="https://akikukeo1.github.io" class="link-item" target="_blank" rel="noopener noreferrer">WEBSITE</a>
+        <div class="footer-links">
+          <a href="https://github.com/Akikukeo1" class="link-item" target="_blank" rel="noopener noreferrer">GITHUB</a>
+          <a href="https://akikukeo1.github.io" class="link-item" target="_blank" rel="noopener noreferrer">WEBSITE</a>
+        </div>
+        <div class="copyright">© 2026 Akikukeo1</div>
       </footer>
     </div>
   </body>
