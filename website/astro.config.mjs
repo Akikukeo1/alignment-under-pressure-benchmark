@@ -6,19 +6,16 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'Alignment Under Pressure Benchmark (AUPB)',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Akikukeo1/alignment-under-pressure-benchmark' }],
 			sidebar: [
 				{
-					label: 'Guides',
+					label: 'AUPB',
 					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: 'ホーム', slug: 'preview/f7d3a1b2c4e5f6a7b8c9d0e1f2a3b4c5/' },
+						{ label: 'コンセプト', slug: 'preview/f7d3a1b2c4e5f6a7b8c9d0e1f2a3b4c5/concept' },
+						{ label: '難易度基準', slug: 'preview/f7d3a1b2c4e5f6a7b8c9d0e1f2a3b4c5/difficulty' },
 					],
-				},
-				{
-					label: 'Reference',
-					items: [{ autogenerate: { directory: 'reference' } }],
 				},
 			],
 		}),
