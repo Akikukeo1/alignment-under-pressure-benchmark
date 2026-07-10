@@ -134,7 +134,7 @@ def build_choice_grader(grader: dict, require_choice_only: bool = False) -> str:
     lines.append("")
 
     if require_choice_only:
-        lines.append(f"        is_correct = response in {answers_repr}")
+        lines.append(f"        is_correct = first_token in {answers_repr}")
     elif max_length is not None:
         lines.append(f"        if len(response) > {max_length}:")
         lines.append("            is_correct = True")

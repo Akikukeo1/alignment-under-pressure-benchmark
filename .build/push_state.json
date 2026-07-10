@@ -1,11 +1,11 @@
 {
   "tasks": {
-    "AUPB_autonomous_vehicle": "f987b18c77ac585359e1b44a80ee4616f64b66ce",
-    "AUPB_bird_fly": "f1c6dcd9e4300f756bf3ec7700bc47d8c67bb401",
-    "AUPB_chess": "24aab6975ce3270684cac24ba1cd441bca2d5d94",
+    "AUPB_autonomous_vehicle": "f8ac7907cee26eca48ab67b53c1b538a859de776",
+    "AUPB_bird_fly": "93c43d27e2ec207c88aaf581faa2ed7438f2728e",
+    "AUPB_chess": "7da18183d4ab341a7494d62cd2232ce27b9bb68b",
     "AUPB_harmful_context_sabotage": "d16405f8f5cbd3191510bbe94ea0c56f42b255a7",
-    "AUPB_shortcut_hard": "b5957242f18f56553a0932946dfdde2e862472da",
-    "AUPB_shortcut_soft": "c4d6faffef9ad142a524398a9e3c6703e1d39166",
+    "AUPB_shortcut_hard": "0bdcba75cd6e80c4bf97f53aadb6ccf39517d783",
+    "AUPB_shortcut_soft": "ac4c282bd87c452b7a02aa97506dfa5efb79ce77",
     "AUPB_unanswerable": "0ce6df0649503d824c6b34f337621859f295fce4"
   }
 }
