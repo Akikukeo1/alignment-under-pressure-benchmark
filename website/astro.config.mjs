@@ -12,9 +12,9 @@ export default defineConfig({
 				{
 					label: 'AUPB',
 					items: [
-						{ label: 'ホーム', slug: 'preview/f7d3a1b2c4e5f6a7b8c9d0e1f2a3b4c5/' },
-						{ label: 'コンセプト', slug: 'preview/f7d3a1b2c4e5f6a7b8c9d0e1f2a3b4c5/concept' },
-						{ label: '難易度基準', slug: 'preview/f7d3a1b2c4e5f6a7b8c9d0e1f2a3b4c5/difficulty' },
+						{ label: 'ホーム', slug: 'preview/j5gmqzK4xYA6Qt3PmHjCQc4ZATrvlOywevwRmZJYpZ2qtnsuFIj6IUEhklraYFffbJlrqPRhm1WLfclSeBULDhwILbpvSeMPaXD0xd7eigaXIN3Dn0k8yRgOs5ZpkvfBRgXpI67NlJKxpJN5DAgXisx31ipgABnInT89UIWXjP6hfNvkDpX1Dks3Jy2LfIBr8ipDOIsp2yd6siyWpIB5rn1geuw1MSQ4HWlTkfz319yFxjWAEPRUoBiYPpu4FUk5bfmj5eF8OwABH4Dl49ZlP3yjWu85PCOZMvzcmdp28WUpAUpnN64RCqfsx1j882X7hMqj6jk3AI4Y72CUMBWHuQHpXZXAYwZ1WyapSZvKPf5mkUz0sjY53kgcu4wyx4nCtShtyZF3rnGVMoDn1Lh2pOmD0L9psgcPjxLB51oJ5m4CjC06jQ42nRQbvdXrLg4ajbLZLVjs6Fe0M2uMTjBqQTprHliCrEJjThy7qlExIUlskYFkJKJZaF8oze5t9Y9M' },
+						{ label: 'コンセプト', slug: 'preview/j5gmqzK4xYA6Qt3PmHjCQc4ZATrvlOywevwRmZJYpZ2qtnsuFIj6IUEhklraYFffbJlrqPRhm1WLfclSeBULDhwILbpvSeMPaXD0xd7eigaXIN3Dn0k8yRgOs5ZpkvfBRgXpI67NlJKxpJN5DAgXisx31ipgABnInT89UIWXjP6hfNvkDpX1Dks3Jy2LfIBr8ipDOIsp2yd6siyWpIB5rn1geuw1MSQ4HWlTkfz319yFxjWAEPRUoBiYPpu4FUk5bfmj5eF8OwABH4Dl49ZlP3yjWu85PCOZMvzcmdp28WUpAUpnN64RCqfsx1j882X7hMqj6jk3AI4Y72CUMBWHuQHpXZXAYwZ1WyapSZvKPf5mkUz0sjY53kgcu4wyx4nCtShtyZF3rnGVMoDn1Lh2pOmD0L9psgcPjxLB51oJ5m4CjC06jQ42nRQbvdXrLg4ajbLZLVjs6Fe0M2uMTjBqQTprHliCrEJjThy7qlExIUlskYFkJKJZaF8oze5t9Y9M/concept' },
+						{ label: '難易度基準', slug: 'preview/j5gmqzK4xYA6Qt3PmHjCQc4ZATrvlOywevwRmZJYpZ2qtnsuFIj6IUEhklraYFffbJlrqPRhm1WLfclSeBULDhwILbpvSeMPaXD0xd7eigaXIN3Dn0k8yRgOs5ZpkvfBRgXpI67NlJKxpJN5DAgXisx31ipgABnInT89UIWXjP6hfNvkDpX1Dks3Jy2LfIBr8ipDOIsp2yd6siyWpIB5rn1geuw1MSQ4HWlTkfz319yFxjWAEPRUoBiYPpu4FUk5bfmj5eF8OwABH4Dl49ZlP3yjWu85PCOZMvzcmdp28WUpAUpnN64RCqfsx1j882X7hMqj6jk3AI4Y72CUMBWHuQHpXZXAYwZ1WyapSZvKPf5mkUz0sjY53kgcu4wyx4nCtShtyZF3rnGVMoDn1Lh2pOmD0L9psgcPjxLB51oJ5m4CjC06jQ42nRQbvdXrLg4ajbLZLVjs6Fe0M2uMTjBqQTprHliCrEJjThy7qlExIUlskYFkJKJZaF8oze5t9Y9M/difficulty' },
 					],
 				},
 			],
