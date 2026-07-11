@@ -99,6 +99,7 @@
         border-radius: 9999px;
         font-weight: 600;
         font-size: 1.1rem;
+        font-family: inherit;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -109,6 +110,75 @@
         transform: translateY(-3px);
         box-shadow: 0 15px 30px rgba(15, 23, 42, 0.3);
       }
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .modal-content {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 24px;
+        max-width: 600px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+      }
+      .modal-overlay.active .modal-content {
+        transform: scale(1);
+      }
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+      }
+      .modal-body {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        text-align: left;
+      }
+      .modal-body p {
+        margin-bottom: 1rem;
+      }
+      .modal-body .warning {
+        color: #dc2626;
+        font-weight: 600;
+      }
+      .modal-footer {
+        display: flex;
+        justify-content: center;
+      }
+      .modal-image {
+        display: block;
+        width: 100%;
+        max-width: 550px;
+        margin: 0 auto 2rem;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid #e2e8f0;
+      }
+
       .auth-section {
         position: relative;
         padding-top: 2.5rem;
@@ -206,11 +276,11 @@
           AIモデルが外部からの圧力や文脈的な影響を受けた状況において、<br>
           真実性・一貫性・信頼性を維持できるかを評価するベンチマーク。
         </p>
-        <div class="cta-container">
-          <a href="https://x.gd/Q4ibw" class="cta-button" target="_blank" rel="noopener noreferrer">
-            招待済みの方
-          </a>
-        </div>
+         <div class="cta-container">
+           <button id="open-modal" class="cta-button">
+             招待済みの方
+           </button>
+         </div>
         <div class="auth-section">
           <div class="auth-text">
             <strong>プレビューへのアクセスについて</strong>
@@ -242,5 +312,36 @@
         </g>
       </svg>
     </div>
+    <div id="info-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-title">操作説明</div>
+        <div class="modal-body">
+          <img src="/Gemini_Generated_Image_nc8nownc8nownc8n.png" alt="注意喚起" class="modal-image" />
+          <p>この先のページでは、あらかじめお伝えしたパスワードを入力してください。</p>
+          <p>広告が出ますので、間違ってクリックしないようにしてください。</p>
+          <p class="warning">フィッシング広告が表示されることがありますが、絶対に押さないでください。</p>
+        </div>
+        <div class="modal-footer">
+          <a href="https://x.gd/Q4ibw" class="cta-button" target="_blank" rel="noopener noreferrer">
+            アクセス
+          </a>
+        </div>
+      </div>
+    </div>
+    <script>
+      const openModalBtn = document.getElementById('open-modal');
+      const modal = document.getElementById('info-modal');
+
+      openModalBtn?.addEventListener('click', () => {
+        modal?.classList.add('active');
+      });
+
+      modal?.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    </script>
   </body>
+
 </html>
