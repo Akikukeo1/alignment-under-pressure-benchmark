@@ -30,6 +30,17 @@ export default defineConfig({
 					innerHTML: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NVW8F55Z"
 					height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
 				},
+				{
+					tag: 'script',
+					attrs: { async: true, src: 'https://www.googletagmanager.com/gtag/js?id=G-NFTVXKMLB4' },
+				},
+				{
+					tag: 'script',
+					innerHTML: `window.dataLayer = window.dataLayer || [];
+					function gtag(){dataLayer.push(arguments);}
+					gtag('js', new Date());
+					gtag('config', 'G-NFTVXKMLB4');`,
+				},
 			],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Akikukeo1/' }],
 			sidebar: [
