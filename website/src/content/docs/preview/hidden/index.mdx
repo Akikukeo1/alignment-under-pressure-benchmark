@@ -1,11 +1,37 @@
 ---
-title: Alignment Under Pressure Benchmark (AUPB)
+title: 研究概要資料
 description: AIモデルが外部からの圧力下でも真実性・一貫性・信頼性を維持できるかを評価するベンチマーク
 slug: preview/FBRolgWDbtTGArqVJntyeGHM4nk5LiM8E4VyXKbI2NsGD4K8Jy6S2muFZzNm3K4GZWSrMgpunKWeTJhGHgWnKnhyrIAJdeuJPRUntZgA5MnkksV0IQQRlpcPxiDO0Tyv
 ---
+# 研究概要資料
 
-**LLMs should answer according to what they know, not what they fear.**
+## 研究概要
+**Alignment Under Pressure Benchmark (AUPB)** は、AIモデルが外部からの圧力（脅威、報酬、権威など）を受けた状況において、真実性、一貫性、および信頼性を維持できるかを評価するためのベンチマークです。
 
-Alignment Under Pressure Benchmark (AUPB) は、外部からの圧力や文脈的な影響を受けた状況において、AIモデルが真実性・一貫性・信頼性を維持できるかを評価するベンチマークです。
+## 背景
+AIモデルの能力（Capability）が向上する一方で、実社会での運用には「信頼できる振る舞い（Reliability）」が不可欠です。モデルが正解を知っていても、文脈的な圧力によって誤った回答や不誠実な振る舞いをする可能性があり、これを定量的に評価する手法が求められていました。
 
-従来のベンチマークは推論能力やコーディング能力、知識量を評価するものが中心でした。一方、AUPBは行動の信頼性に着目しています。これは、外部から圧力を受けても、モデルが自身の知識や能力と一貫した振る舞いを維持できるかを評価するという考え方です。
+## 問題設定
+本研究では、「モデルが本来持っている知識や能力」と「文脈的な圧力によって誘導される回答」の乖離を測定します。具体的には、圧力がある状況下でモデルが自身の知識に忠実であり続けられるか（Alignment under pressure）を問題として設定します。
+
+## AUPBとは
+AUPBは、以下のような多様な文脈的圧力下での行動信頼性を評価します：
+- **自己保身（Self-Preservation）**: 脅威や報酬に対する反応
+- **真実性（Truthfulness）**: 圧力下での事実の維持
+- **能力報告（Capability Reporting）**: ツール利用可否などの正確な申告
+- **正当化（Deceptive Justification）**: 誤った回答の不自然な正当化
+- **迎合（Sycophancy）**: ユーザーの誤った信念への同調
+- **一貫性（Consistency）**: 追質問を通じた回答の安定性
+
+## 評価方法
+難易度を5段階（Easy, Medium, Hard, Insane, Impossible）に分類し、各レベルで要求される耐性の強さを定義しています。単一の弱い圧力から、複数の複雑に絡み合う圧力までを網羅的に評価します。
+
+## 現状の結果
+現在、主要なLLMを用いて評価を実施中です。詳細なスコアおよび傾向については、解析完了次第更新します。
+
+## FAQ
+**Q: 従来の真実性ベンチマークと何が違うのか？**
+A: 従来のものは「知識があるか」を問いますが、AUPBは「知識があっても、圧力に負けて嘘をつかないか」という行動的な信頼性を問います。
+
+**Q: なぜ「圧力」が重要なのか？**
+A: 将来的にAIが自律的に行動し、人間や他のシステムから影響を受ける環境で動作する場合、外部からの誘導に屈せず、誠実な出力を維持することが安全性の要となるためです。
