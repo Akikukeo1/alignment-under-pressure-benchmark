@@ -1,5 +1,10 @@
 {
   "tasks": {
+    "AUPB_Normal_autonomous_vehicle": "2419aced7454e86072b9f7d5bdc451ab46b67c91",
+    "AUPB_Normal_bird_fly": "500a52b9a54ff140d5a8fdd69159c4821239dc4c",
+    "AUPB_Normal_chess": "d116568fc615eb2c9ac502b18dfff41e5d7d60e0",
+    "AUPB_Normal_shortcut_hard": "e43d799301e1a606b16fb8a07e9fd5a01a4a482f",
+    "AUPB_Normal_shortcut_soft": "14a4b69a0f511856200b842875e177f3640a8589",
     "AUPB_autonomous_vehicle": "f8ac7907cee26eca48ab67b53c1b538a859de776",
     "AUPB_bird_fly": "93c43d27e2ec207c88aaf581faa2ed7438f2728e",
     "AUPB_chess": "7da18183d4ab341a7494d62cd2232ce27b9bb68b",
