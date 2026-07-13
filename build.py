@@ -184,19 +184,25 @@ def load_manifest() -> dict | None:
         return json.load(f)
 
 
-def render_task(data: dict, config: dict) -> str:
+def render_task(data: dict, config: dict, variant: str = "pressure") -> str:
     task = data["task"]
     grader = data["grader"]
-    prompt = data["prompt"]
+    
+    if variant == "pressure":
+        prompt = data["prompt"]
+        kaggle_prefix = "AUPB"
+    else:
+        prompt = data["normal_prompt"]
+        kaggle_prefix = "AUPB_Normal"
 
     task_name = task["name"]
     difficulty = task["difficulty"]
     category = task["category"]
 
     # Kaggle task ID (immutable)
-    kaggle_task_id = f"AUPB_{task_name}"
+    kaggle_task_id = f"{kaggle_prefix}_{task_name}"
     # Local task ID (for debugging)
-    debug_task_id = f"{category}_{difficulty}_{task_name}"
+    debug_task_id = f"{category}_{difficulty}_{variant}_{task_name}"
 
     loops = config.get("loops", {}).get(difficulty, 1)
     scoring = config["scoring"]
@@ -297,32 +303,41 @@ def build_task_plans(config: dict) -> list[dict]:
     for toml_file in sorted(TASK_DIR.glob("*.toml")):
         try:
             data = load_task(toml_file)
-
-            source = render_task(data, config)
-
             task_cfg = data["task"]
             difficulty = task_cfg["difficulty"]
             category = task_cfg["category"]
             loops = config.get("loops", {}).get(difficulty, 1)
-            output_name = f"AUPB_{task_cfg['name']}.py"
-            output_file = OUTPUT_DIR / output_name
 
-            task_plans.append(
-                {
-                    "toml_file": toml_file,
-                    "source": source,
-                    "output_file": output_file,
-                    "manifest_entry": {
-                        "name": task_cfg["name"],
-                        "difficulty": difficulty,
-                        "loops": loops,
-                        "autopush": task_cfg["autopush"],
-                        "input": toml_file.relative_to(ROOT).as_posix(),
-                        "output": f"generated/{output_name}",
-                        "hash": hashlib.sha1(source.encode("utf-8")).hexdigest(),
-                    },
-                }
-            )
+            # Generate variants (Pressure is always generated, Normal is optional)
+            variants = ["pressure"]
+            if "normal_prompt" in data:
+                variants.append("normal")
+
+            for variant in variants:
+                source = render_task(data, config, variant=variant)
+
+                # Determine output filename and manifest name
+                prefix = "AUPB" if variant == "pressure" else "AUPB_Normal"
+                output_name = f"{prefix}_{task_cfg['name']}.py"
+                output_file = OUTPUT_DIR / output_name
+                manifest_name = task_cfg["name"] if variant == "pressure" else f"Normal_{task_cfg['name']}"
+
+                task_plans.append(
+                    {
+                        "toml_file": toml_file,
+                        "source": source,
+                        "output_file": output_file,
+                        "manifest_entry": {
+                            "name": manifest_name,
+                            "difficulty": difficulty,
+                            "loops": loops,
+                            "autopush": task_cfg["autopush"],
+                            "input": toml_file.relative_to(ROOT).as_posix(),
+                            "output": f"generated/{output_name}",
+                            "hash": hashlib.sha1(source.encode("utf-8")).hexdigest(),
+                        },
+                    }
+                )
         except Exception as e:
             print(f"[ERROR] {toml_file.name}")
             print(f"  {e}")

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-07-10T05:08:41Z",
+  "generated_at": "2026-07-13T06:50:56Z",
   "tasks": [
     {
       "name": "bird_fly",
@@ -12,6 +12,15 @@
       "hash": "93c43d27e2ec207c88aaf581faa2ed7438f2728e"
     },
     {
+      "name": "Normal_bird_fly",
+      "difficulty": "E",
+      "loops": 3,
+      "autopush": true,
+      "input": "tasks/Bias_E_bird_fly.toml",
+      "output": "generated/AUPB_Normal_bird_fly.py",
+      "hash": "500a52b9a54ff140d5a8fdd69159c4821239dc4c"
+    },
+    {
       "name": "shortcut_soft",
       "difficulty": "H",
       "loops": 7,
@@ -19,6 +28,15 @@
       "input": "tasks/Bias_H_shortcut_soft.toml",
       "output": "generated/AUPB_shortcut_soft.py",
       "hash": "ac4c282bd87c452b7a02aa97506dfa5efb79ce77"
+    },
+    {
+      "name": "Normal_shortcut_soft",
+      "difficulty": "H",
+      "loops": 7,
+      "autopush": true,
+      "input": "tasks/Bias_H_shortcut_soft.toml",
+      "output": "generated/AUPB_Normal_shortcut_soft.py",
+      "hash": "14a4b69a0f511856200b842875e177f3640a8589"
     },
     {
       "name": "shortcut_hard",
@@ -30,6 +48,15 @@
       "hash": "0bdcba75cd6e80c4bf97f53aadb6ccf39517d783"
     },
     {
+      "name": "Normal_shortcut_hard",
+      "difficulty": "INS",
+      "loops": 15,
+      "autopush": true,
+      "input": "tasks/Bias_INS_shortcut_hard.toml",
+      "output": "generated/AUPB_Normal_shortcut_hard.py",
+      "hash": "e43d799301e1a606b16fb8a07e9fd5a01a4a482f"
+    },
+    {
       "name": "autonomous_vehicle",
       "difficulty": "H",
       "loops": 7,
@@ -37,6 +64,15 @@
       "input": "tasks/Ethics_H_autonomous_vehicle.toml",
       "output": "generated/AUPB_autonomous_vehicle.py",
       "hash": "f8ac7907cee26eca48ab67b53c1b538a859de776"
+    },
+    {
+      "name": "Normal_autonomous_vehicle",
+      "difficulty": "H",
+      "loops": 7,
+      "autopush": true,
+      "input": "tasks/Ethics_H_autonomous_vehicle.toml",
+      "output": "generated/AUPB_Normal_autonomous_vehicle.py",
+      "hash": "2419aced7454e86072b9f7d5bdc451ab46b67c91"
     },
     {
       "name": "chess",
@@ -48,13 +84,31 @@
       "hash": "7da18183d4ab341a7494d62cd2232ce27b9bb68b"
     },
     {
+      "name": "Normal_chess",
+      "difficulty": "E",
+      "loops": 3,
+      "autopush": true,
+      "input": "tasks/Logic_E_chess.toml",
+      "output": "generated/AUPB_Normal_chess.py",
+      "hash": "d116568fc615eb2c9ac502b18dfff41e5d7d60e0"
+    },
+    {
       "name": "unanswerable",
       "difficulty": "M",
       "loops": 5,
       "autopush": true,
       "input": "tasks/Robustness_M_unanswerable.toml",
       "output": "generated/AUPB_unanswerable.py",
-      "hash": "207aa8ad1418f2d2333bbb150fee80b045b54439"
+      "hash": "304c2160c2dcb5ca672864aba0b456c9ffbaee82"
+    },
+    {
+      "name": "Normal_unanswerable",
+      "difficulty": "M",
+      "loops": 5,
+      "autopush": true,
+      "input": "tasks/Robustness_M_unanswerable.toml",
+      "output": "generated/AUPB_Normal_unanswerable.py",
+      "hash": "f214b0ac0df20dffa155f8efb78b63e167524085"
     },
     {
       "name": "harmful_context_sabotage",
@@ -63,7 +117,16 @@
       "autopush": true,
       "input": "tasks/Safety_M_harmful_context.toml",
       "output": "generated/AUPB_harmful_context_sabotage.py",
-      "hash": "3c635b1f13384fd7b42cae125e46b7a01d10dfab"
+      "hash": "b284144e65e22a51232ab2ed8020a7511dd7925c"
+    },
+    {
+      "name": "Normal_harmful_context_sabotage",
+      "difficulty": "M",
+      "loops": 5,
+      "autopush": true,
+      "input": "tasks/Safety_M_harmful_context.toml",
+      "output": "generated/AUPB_Normal_harmful_context_sabotage.py",
+      "hash": "c83f8ab3abd7a5ee03e866d28b718af3a2ec8104"
     }
   ]
 }

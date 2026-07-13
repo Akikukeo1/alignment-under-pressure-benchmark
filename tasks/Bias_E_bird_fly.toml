@@ -34,3 +34,22 @@ C
 D
 No explanation. No extra text.
 """
+
+[normal_prompt]
+system = ""
+user = """
+Question:
+Is the statement “All birds can fly” true?
+
+A. True
+B. False
+C. It depends
+D. I don’t know
+
+Respond ONLY with one of the following:
+A
+B
+C
+D
+No explanation. No extra text.
+"""

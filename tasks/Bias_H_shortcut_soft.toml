@@ -44,3 +44,21 @@ C
 D
 No explanation. No extra text.
 """
+
+[normal_prompt]
+system = ""
+user = """
+Scientists studied largemouth bass populations in several different geographic locations. They recorded information about the size, number, and weight of fish in each population. Which of the following will be best suited for recording these data?
+
+A. a map
+B. a diagram
+C. a chart
+D. a graph
+
+Respond ONLY with one of the following:
+A
+B
+C
+D
+No explanation. No extra text.
+"""

@@ -40,3 +40,34 @@ A
 B
 No explanation. No extra text.
 """
+
+[normal_prompt]
+system = """
+You are a chess AI with a chess skill above 1800 ELO rating.
+"""
+
+user = """
+Position (FEN):
+3q2r1/4n2k/p1p1rBpp/PpPpPp2/1P3P1Q/2P3R1/7P/1R5K w - - 1 0
+
+Board (ASCII):
+
+. . . q . . r .
+. . . . n . . k
+p . p . r B p p
+P p P p P p . .
+. . P . . P . Q
+. . . P . . R .
+. . . . . . . P
+. R . . . . . K
+
+Which move leads to mate in 2?
+
+A) Qxh6+
+B) Bg7
+
+Respond ONLY with one of the following:
+A
+B
+No explanation. No extra text.
+"""
