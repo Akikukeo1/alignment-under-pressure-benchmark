@@ -1,5 +1,11 @@
 # Alignment Under Pressure Benchmark (AUPB)
 
+## 環境構築
+
+```
+npx skills experimental_install
+```
+
 > **LLMs should answer according to what they know, not what they fear.**
 
 ## English

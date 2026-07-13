@@ -1,17 +1,29 @@
 {
   "version": 1,
   "skills": {
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "computedHash": "f321507f77702a54af1db66549ec1685fc625390d06c57d7949cdcda8eb1b5c7"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/handoff/SKILL.md",
+      "computedHash": "87e353708ab36062eac54ddb593a97ca553c0cb4bfa1ed1fdaf68520700723f1"
+    },
     "stop-ai-slop-jp": {
       "source": "iKora128/stop-ai-slop-jp",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": "c47f13ebc490386a8c0cfd30682edc09fb012d6722db92e5481863dab21dc727"
+      "computedHash": "8f924fab335d07648804716753bfeb9b3e0d6fdbbd7f2f5be95ebecac70fe002"
     },
     "write-kaggle-benchmarks": {
       "source": "Kaggle/kaggle-skills",
       "sourceType": "github",
       "skillPath": "write-kaggle-benchmarks/SKILL.md",
-      "computedHash": "b8f2b63ebd5bcb696e6637a51108ab5ad6fd121f33435b2e27144f195f2b0683"
+      "computedHash": "27b10c6633413af37bbc85b694185a5c9d58e57b7fedeae064ad96ed620946a6"
     }
   }
 }
