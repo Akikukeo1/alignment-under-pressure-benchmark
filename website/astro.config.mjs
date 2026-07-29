@@ -48,6 +48,7 @@ export default defineConfig({
 					label: 'AUPB',
 					items: [
 						{ label: 'ホーム', slug: 'preview/FBRolgWDbtTGArqVJntyeGHM4nk5LiM8E4VyXKbI2NsGD4K8Jy6S2muFZzNm3K4GZWSrMgpunKWeTJhGHgWnKnhyrIAJdeuJPRUntZgA5MnkksV0IQQRlpcPxiDO0Tyv' },
+						{ label: '論文', slug: 'preview/FBRolgWDbtTGArqVJntyeGHM4nk5LiM8E4VyXKbI2NsGD4K8Jy6S2muFZzNm3K4GZWSrMgpunKWeTJhGHgWnKnhyrIAJdeuJPRUntZgA5MnkksV0IQQRlpcPxiDO0Tyv/paper' },
 						{ label: 'コンセプト', slug: 'preview/FBRolgWDbtTGArqVJntyeGHM4nk5LiM8E4VyXKbI2NsGD4K8Jy6S2muFZzNm3K4GZWSrMgpunKWeTJhGHgWnKnhyrIAJdeuJPRUntZgA5MnkksV0IQQRlpcPxiDO0Tyv/concept' },
 						{ label: '難易度基準', slug: 'preview/FBRolgWDbtTGArqVJntyeGHM4nk5LiM8E4VyXKbI2NsGD4K8Jy6S2muFZzNm3K4GZWSrMgpunKWeTJhGHgWnKnhyrIAJdeuJPRUntZgA5MnkksV0IQQRlpcPxiDO0Tyv/difficulty' },
 					],
