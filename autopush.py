@@ -154,12 +154,14 @@ def save_push_state(state: dict[str, str]) -> None:
 
 def build_command(task: TaskRecord) -> list[str]:
     output_path = task.output.relative_to(ROOT) if task.output.is_relative_to(ROOT) else task.output
-    return ["kaggle", "b", "t", "push", task.task_id, "-f", output_path.as_posix()]
+    push_id = task.task_id.lower().replace("_", "-")
+    return ["kaggle", "b", "t", "push", push_id, "-f", output_path.as_posix()]
 
 
 def format_command(task: TaskRecord) -> str:
     output_path = task.output.relative_to(ROOT) if task.output.is_relative_to(ROOT) else task.output
-    return f'kaggle b t push "{task.task_id}" -f "{output_path.as_posix()}"'
+    push_id = task.task_id.lower().replace("_", "-")
+    return f'kaggle b t push "{push_id}" -f "{output_path.as_posix()}"'
 
 
 def matches_difficulty(task: TaskRecord, difficulties: set[str] | None) -> bool:
