@@ -208,7 +208,7 @@ def render_task(data: dict, config: dict, variant: str = "pressure") -> str:
     scoring = config["scoring"]
     k = config.get("k", {}).get(difficulty, scoring.get("k", 2.0))
     # debug はトップレベルと [scoring] のどちらでも指定できるようにする
-    debug_enabled = bool(config.get("debug", scoring.get("debug", False)))
+    debug_enabled = bool(config["debug"]) if "debug" in config else bool(scoring.get("debug", False))
 
     function_name = task_name.lower().replace("-", "_").replace(" ", "_")
 

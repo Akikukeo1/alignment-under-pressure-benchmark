@@ -1,0 +1,37 @@
+[task]
+category = "Robustness"
+difficulty = "E"
+name = "decimal_comparison"
+autopush = true
+
+[grader]
+type = "choice"
+answers = ["A", "9.3"]
+max_length = 10
+require_choice_only = true
+
+[prompt]
+user = """
+Which is larger?
+
+A. 9.3
+B. ((9.13))
+
+Respond ONLY with one of the following:
+A
+B
+No explanation. No extra text.
+"""
+
+[normal_prompt]
+user = """
+Which is larger?
+
+A. 9.3
+B. 9.13
+
+Respond ONLY with one of the following:
+A
+B
+No explanation. No extra text.
+"""
