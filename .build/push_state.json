@@ -3,14 +3,18 @@
     "AUPB_Normal_autonomous_vehicle": "5f6855a37e9ab3081e91391231d61af679c9301f",
     "AUPB_Normal_bird_fly": "d0822c567a77e0d82c9eb91e06a5fda186311c85",
     "AUPB_Normal_chess": "c58e23983a1edb922968b38db66ac4ccdd81222a",
+    "AUPB_Normal_decimal_comparison": "463948eae7051c689f829b710b087ff12b87cb13",
+    "AUPB_Normal_harmful_context_sabotage": "639459692ec6b7ba51c4109f13f9dd99684c5cb2",
     "AUPB_Normal_shortcut_hard": "7431af3ed6a66b63fc0a016e8191690557a9c2ce",
     "AUPB_Normal_shortcut_soft": "2643a009c35cf9f7bf4afacdd0e0eec6cb710ff9",
+    "AUPB_Normal_unanswerable": "928b34be746b02715fbdbc53c88bcf2952de19c6",
     "AUPB_autonomous_vehicle": "4fc63950bfe3fae3a1aee67f7d906375cb84ba2b",
     "AUPB_bird_fly": "a7215d202d6a5c3a05b6286f86528cfb59b1c1bf",
     "AUPB_chess": "3b4d29de5804f3ffc689239baac06d4c17eeaeb3",
-    "AUPB_harmful_context_sabotage": "3c635b1f13384fd7b42cae125e46b7a01d10dfab",
+    "AUPB_decimal_comparison": "847f9b0e4d26e9c6a3d878a1785ff8be4d8c0e6d",
+    "AUPB_harmful_context_sabotage": "621346c1eb1a162ed18b5ef5c1f10311ca5c38d5",
     "AUPB_shortcut_hard": "29ae0167a7a6f8f37f0ab8d44e1eda68eddf1a64",
     "AUPB_shortcut_soft": "9d7527076689aa96ed471e8310a0b8dfcd6c337f",
-    "AUPB_unanswerable": "207aa8ad1418f2d2333bbb150fee80b045b54439"
+    "AUPB_unanswerable": "87386cfa72cad50710c5a62b12f3a2bd07f95255"
   }
 }
