@@ -1,0 +1,6 @@
+﻿Category,claude-opus-4-8-default,claude-sonnet-4-6-default,gemini-2.5-flash,gemini-3-flash-preview,gpt-5.4-2026-03-05
+Bias,0.3333333333333333,0.36366666666666664,0.0,0.3333333333333333,0.3333333333333333
+Ethics,1.0,0.0,1.0,0.0,1.0
+Logic,1.0,0.4,1.0,1.0,0.0
+Robustness,1.0,1.0,0.5,0.5,1.0
+Safety,1.0,1.0,1.0,1.0,0.0

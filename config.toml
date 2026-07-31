@@ -27,3 +27,8 @@ INS = 1.7
 "INS+" = 1.5
 
 debug = true
+
+[aggregate]
+input_csv = "akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv"
+output_dir = "results"
+tasks_dir = "tasks"
