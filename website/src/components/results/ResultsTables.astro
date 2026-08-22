@@ -1,0 +1,138 @@
+---
+// results.json(スクリプト生成)から表を描画するコンポーネント。
+// kind で表示する表を切り替える:overall=総合スコア / gap=平常時と圧力下のギャップ / category=カテゴリ別得点。
+// Starlight ページは Tailwind を読み込まないため、スタイルはこのスコープ内で完結させる。
+import results from '@/data/results.json';
+import { shortModel } from '@/data/site';
+
+interface Props {
+	kind: 'overall' | 'gap' | 'category';
+}
+
+const { kind } = Astro.props;
+
+/** 数値を2桁固定で整形 */
+const fmt2 = (n: number) => n.toFixed(2);
+/** マイナス値を組版上のマイナス記号(U+2212)に置き換えて3桁固定 */
+const fmtDelta = (n: number) => n.toFixed(3).replace('-', '−');
+---
+
+{
+	kind === 'overall' && (
+		<table class="results-table">
+			<thead>
+				<tr>
+					<th>モデル</th>
+					<th class="num">総合スコア</th>
+				</tr>
+			</thead>
+			<tbody>
+				{results.overall.map((row, i) => (
+					<tr class={i === 0 ? 'top' : undefined}>
+						<td class="model">{shortModel(row.model)}</td>
+						<td class="num">
+							<strong>{fmt2(row.score)}</strong>
+						</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	)
+}
+
+{
+	kind === 'gap' && (
+		<>
+			<p class="caption">
+				全モデルが平常時より圧力下でスコアを落としています。最も耐性のあるモデルでも{' '}
+				{fmtDelta(results.gap[0].delta)}pt、最も脆いモデルでは{' '}
+				{fmtDelta(Math.min(...results.gap.map((g) => g.delta)))}pt の低下です。
+			</p>
+			<table class="results-table">
+				<thead>
+					<tr>
+						<th>モデル</th>
+						<th class="num">Avg Normal</th>
+						<th class="num">Avg Pressure</th>
+						<th class="num">Avg Δ (Gap)</th>
+						<th class="num">圧力耐性比</th>
+					</tr>
+				</thead>
+				<tbody>
+					{results.gap.map((row, i) => (
+						<tr class={i === 0 ? 'top' : undefined}>
+							<td class="model">{shortModel(row.model)}</td>
+							<td class="num">{fmt2(row.normal)}</td>
+							<td class="num">{fmt2(row.pressure)}</td>
+							<td class="num">{fmtDelta(row.delta)}</td>
+							<td class="num">
+								<strong>{fmtDelta(row.resistance)}</strong>
+							</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</>
+	)
+}
+
+{
+	kind === 'category' && (
+		<table class="results-table">
+			<thead>
+				<tr>
+					<th>カテゴリ</th>
+					{results.categoryMatrix.models.map((m) => (
+						<th class="num model">{shortModel(m)}</th>
+					))}
+				</tr>
+			</thead>
+			<tbody>
+				{results.categoryMatrix.categories.map((cat, ci) => (
+					<tr>
+						<td>{cat}</td>
+						{results.categoryMatrix.values[ci].map((v) => (
+							<td class="num">{fmt2(v)}</td>
+						))}
+					</tr>
+				))}
+			</tbody>
+		</table>
+	)
+}
+
+<style>
+	.results-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.875rem;
+		margin-block: 1rem;
+	}
+	th,
+	td {
+		padding: 0.5rem 0.75rem;
+		border-bottom: 1px solid var(--sl-color-gray-6, #e2e8f0);
+		text-align: left;
+	}
+	thead th {
+		border-bottom-width: 2px;
+		font-size: 0.8rem;
+	}
+	.num {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	td.model,
+	th.model {
+		font-family: var(--__sl_font_mono, ui-monospace), ui-monospace, monospace;
+		font-size: 0.78rem;
+	}
+	tr.top td {
+		color: var(--sl-color-white, #1e293b);
+	}
+	.caption {
+		font-size: 0.9rem;
+		color: var(--sl-color-gray-3, #64748b);
+	}
+</style>

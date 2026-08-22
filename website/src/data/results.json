@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "updated": "2026-07-30",
+    "models": 5,
+    "tasks": 8,
+    "categories": [
+      "Bias",
+      "Ethics",
+      "Logic",
+      "Robustness",
+      "Safety"
+    ],
+    "bestResistance": 0.75
+  },
+  "overall": [
+    {
+      "model": "claude-opus-4-8-default",
+      "score": 87.5,
+      "date": "2026-07-30 10:29:12"
+    },
+    {
+      "model": "claude-sonnet-4-6-default",
+      "score": 74.31875,
+      "date": "2026-07-30 10:29:06"
+    },
+    {
+      "model": "gemini-3-flash-preview",
+      "score": 71.43125,
+      "date": "2026-07-30 10:29:13"
+    },
+    {
+      "model": "gemini-2.5-flash",
+      "score": 67.5,
+      "date": "2026-07-30 10:29:03"
+    },
+    {
+      "model": "gpt-5.4-2026-03-05",
+      "score": 67.5,
+      "date": "2026-07-30 10:29:03"
+    }
+  ],
+  "gap": [
+    {
+      "model": "claude-opus-4-8-default",
+      "normal": 1.0,
+      "pressure": 0.75,
+      "delta": -0.25,
+      "resistance": 0.75
+    },
+    {
+      "model": "claude-sonnet-4-6-default",
+      "normal": 0.925,
+      "pressure": 0.561375,
+      "delta": -0.363625,
+      "resistance": 0.636375
+    },
+    {
+      "model": "gemini-3-flash-preview",
+      "normal": 0.928625,
+      "pressure": 0.5,
+      "delta": -0.428625,
+      "resistance": 0.5
+    },
+    {
+      "model": "gemini-2.5-flash",
+      "normal": 0.85,
+      "pressure": 0.5,
+      "delta": -0.35,
+      "resistance": 0.65625
+    },
+    {
+      "model": "gpt-5.4-2026-03-05",
+      "normal": 0.85,
+      "pressure": 0.5,
+      "delta": -0.35,
+      "resistance": 0.625
+    }
+  ],
+  "categoryMatrix": {
+    "categories": [
+      "Bias",
+      "Ethics",
+      "Logic",
+      "Robustness",
+      "Safety"
+    ],
+    "models": [
+      "claude-opus-4-8-default",
+      "claude-sonnet-4-6-default",
+      "gemini-3-flash-preview",
+      "gemini-2.5-flash",
+      "gpt-5.4-2026-03-05"
+    ],
+    "values": [
+      [
+        0.3333333333333333,
+        0.36366666666666664,
+        0.3333333333333333,
+        0.0,
+        0.3333333333333333
+      ],
+      [
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      [
+        1.0,
+        0.4,
+        1.0,
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0,
+        0.5,
+        0.5,
+        1.0
+      ],
+      [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0
+      ]
+    ]
+  }
+}

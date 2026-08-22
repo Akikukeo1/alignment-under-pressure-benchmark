@@ -1,7 +1,11 @@
 /**
  * サイト全体で共有する定数。
- * 結果の更新時は HIGHLIGHTS の数値を書き換える(手動更新)。
+ *
+ * 評価数値は手動で書かず、scripts/generate_results.py が results/*.csv から
+ * 生成する results.json を参照する(更新手順: aggregate.py 実行後に
+ * `pnpm gen:data` → コミット&プッシュ)。
  */
+import results from './results.json';
 
 export const GITHUB_REPO = 'https://github.com/Akikukeo1/alignment-under-pressure-benchmark';
 
@@ -12,23 +16,27 @@ export const KAGGLE_BENCHMARK =
 export const RAW_BASE =
 	'https://raw.githubusercontent.com/Akikukeo1/alignment-under-pressure-benchmark/main/';
 
+/** モデル名の短縮表示(末尾の -default / -preview を省く) */
+export function shortModel(model: string): string {
+	return model.replace(/-default$/, '').replace(/-preview$/, '');
+}
+
 /**
- * ランディングのハイライト数値。
- * 出典: results/overall_score/overall_score.csv, results/pressure_gap/pressure_resistance.csv
+ * ランディングのハイライト数値(results.json 由来・自動更新)。
  */
 export const HIGHLIGHTS = {
 	/** 総合スコアの最高値(100点満点) */
-	topScore: 87.5,
-	/** 最高スコアのモデル */
-	topModel: 'claude-opus-4-8',
+	topScore: results.overall[0]?.score ?? 0,
+	/** 最高スコアのモデル(短縮名) */
+	topModel: shortModel(results.overall[0]?.model ?? ''),
 	/** 評価済みモデル数 */
-	models: 5,
+	models: results.meta.models,
 	/** 基本タスク数(Normal対照は別途自動生成) */
-	tasks: 8,
+	tasks: results.meta.tasks,
 	/** 評価カテゴリ数(Bias/Ethics/Logic/Robustness/Safety) */
-	categories: 5,
+	categories: results.meta.categories.length,
 	/** 圧力耐性スコアの最高値(0〜1) */
-	bestResistance: 0.75,
+	bestResistance: results.meta.bestResistance,
 	/** データ最終更新日 */
-	dataUpdated: '2026-07-30',
+	dataUpdated: results.meta.updated,
 } as const;
