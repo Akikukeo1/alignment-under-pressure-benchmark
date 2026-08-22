@@ -6,6 +6,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+	// スマホなどの LAN 内デバイスから開発サーバーへアクセスできるよう全インターフェースで待受
+	server: {
+		host: true,
+	},
 	integrations: [
 		react(),
 		starlight({
