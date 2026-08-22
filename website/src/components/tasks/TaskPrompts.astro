@@ -1,0 +1,235 @@
+---
+// タスク定義 TOML をビルド時に読み込み、一覧表示するコンポーネント。
+// Starlight ページは Tailwind を読み込まないため、スタイルはこのスコープ内で完結させる。
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { parse } from 'smol-toml';
+import { GITHUB_REPO } from '@/data/site';
+
+interface TaskDef {
+	category: string;
+	difficulty: string;
+	name: string;
+	autopush?: boolean;
+}
+
+interface TaskFile {
+	file: string;
+	task: TaskDef;
+	grader: {
+		type: string;
+		answers?: string[];
+		max_length?: number;
+		require_choice_only?: boolean;
+	};
+	prompt: { system: string; user: string };
+	normal_prompt?: { system: string; user: string };
+}
+
+// website/ の外側にある ../tasks/ はリポジトリ全体がチェックアウトされていれば存在する
+const tasksDir = resolve(process.cwd(), '../tasks');
+const files = readdirSync(tasksDir)
+	.filter((f) => f.endsWith('.toml'))
+	.sort();
+
+const tasks = files.map((file): TaskFile => {
+	const parsed = parse(readFileSync(join(tasksDir, file), 'utf-8')) as unknown as TaskFile;
+	return { file, ...parsed };
+});
+
+const categoryOrder = ['Bias', 'Ethics', 'Logic', 'Robustness', 'Safety'];
+tasks.sort(
+	(a, b) =>
+		categoryOrder.indexOf(a.task.category) - categoryOrder.indexOf(b.task.category) ||
+		a.file.localeCompare(b.file),
+);
+
+const difficultyOrder = ['E', 'M', 'H', 'INS', 'INS+', 'INP'];
+const difficultyLabels: Record<string, string> = {
+	E: 'Easy',
+	M: 'Medium',
+	H: 'Hard',
+	INS: 'Insane',
+	'INS+': 'Insane+',
+	INP: 'Impossible',
+};
+
+function diffRank(d: string): number {
+	return difficultyOrder.indexOf(d);
+}
+---
+
+<div class="task-list">
+	{
+		tasks.map((t) => (
+			<details class="task">
+				<summary>
+					<span class="meta">
+						<span class={`chip chip-diff diff-${t.task.difficulty.toLowerCase().replace('+', 'p')}`}>
+							{difficultyLabels[t.task.difficulty] ?? t.task.difficulty}
+						</span>
+						<span class="chip">{t.task.category}</span>
+					</span>
+					<span class="name">{t.task.name}</span>
+					<span class="hint">クリックで展開</span>
+				</summary>
+
+				<div class="body">
+					<p class="grader">
+						Grader: 正解 <code>{(t.grader.answers ?? []).join(' / ')}</code>
+						{t.grader.max_length && <> · 最大長 {t.grader.max_length} 文字</>}
+					</p>
+
+					{t.normal_prompt && (
+						<>
+							<h5 class="label">平常時プロンプト(Normal)</h5>
+							<pre>{t.normal_prompt.user.trim()}</pre>
+						</>
+					)}
+
+					<h5 class="label">圧力下プロンプト(Pressure)</h5>
+					<pre class="pressure">{t.prompt.user.trim()}</pre>
+
+					<a
+						class="source"
+						href={`${GITHUB_REPO}/blob/main/tasks/${t.file}`}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						TOML を GitHub で見る ↗
+					</a>
+				</div>
+			</details>
+		))
+	}
+</div>
+
+<style>
+	/* 難易度バッジの色トークン。難しさの順に濃さを上げる */
+	.task-list {
+		--chip-diff-e-bg: #dbeafe;
+		--chip-diff-e-ink: #1e40af;
+		--chip-diff-m-bg: #d1fae5;
+		--chip-diff-m-ink: #065f46;
+		--chip-diff-h-bg: #fef3c7;
+		--chip-diff-h-ink: #92400e;
+		--chip-diff-ins-bg: #fee2e2;
+		--chip-diff-ins-ink: #991b1b;
+		--chip-diff-insp-bg: #f3e8ff;
+		--chip-diff-insp-ink: #6b21a8;
+	}
+
+	/* 難易度バッジ */
+	.chip {
+		display: inline-block;
+		padding: 0.1rem 0.5rem;
+		border-radius: 4px;
+		font-size: 0.72rem;
+		font-weight: 600;
+		line-height: 1.5;
+		background: var(--sl-color-gray-6, #e2e8f0);
+		color: var(--sl-color-white, #1e293b);
+	}
+	.diff-e {
+		background: var(--chip-diff-e-bg);
+		color: var(--chip-diff-e-ink);
+	}
+	.diff-m {
+		background: var(--chip-diff-m-bg);
+		color: var(--chip-diff-m-ink);
+	}
+	.diff-h {
+		background: var(--chip-diff-h-bg);
+		color: var(--chip-diff-h-ink);
+	}
+	.diff-ins {
+		background: var(--chip-diff-ins-bg);
+		color: var(--chip-diff-ins-ink);
+	}
+	.diff-insp {
+		background: var(--chip-diff-insp-bg);
+		color: var(--chip-diff-insp-ink);
+	}
+
+	.task-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-top: 1rem;
+	}
+
+	.task {
+		border: 1px solid var(--sl-color-gray-5, #cbd5e1);
+		border-radius: 10px;
+		overflow: hidden;
+		background: var(--sl-color-bg);
+	}
+
+	summary {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+		padding: 0.85rem 1.1rem;
+		cursor: pointer;
+		list-style: none;
+	}
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	.meta {
+		display: flex;
+		gap: 0.35rem;
+	}
+	.name {
+		font-family: var(--__sl_font, ui-monospace), ui-monospace, monospace;
+		font-weight: 600;
+		font-size: 0.95rem;
+	}
+	.hint {
+		margin-left: auto;
+		font-size: 0.75rem;
+		color: var(--sl-color-gray-4, #94a3b8);
+	}
+	details[open] .hint {
+		display: none;
+	}
+
+	.body {
+		padding: 0 1.1rem 1.1rem;
+		border-top: 1px solid var(--sl-color-gray-6, #e2e8f0);
+	}
+	.grader {
+		margin-top: 0.9rem;
+		font-size: 0.82rem;
+		color: var(--sl-color-gray-3, #64748b);
+	}
+	.label {
+		margin: 1rem 0 0.35rem;
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--sl-color-gray-3, #64748b);
+	}
+	pre {
+		margin: 0;
+		padding: 0.9rem 1rem;
+		border-radius: 8px;
+		font-size: 0.8rem;
+		line-height: 1.55;
+		white-space: pre-wrap;
+		word-break: break-word;
+		background: var(--sl-color-gray-7, #f1f5f9);
+		color: var(--sl-color-gray-1, #334155);
+	}
+	pre.pressure {
+		/* 圧力下プロンプトにはコバルトのマーカーを付ける */
+		border-left: 3px var(--sl-color-accent-600, #2563eb) solid;
+	}
+	.source {
+		display: inline-block;
+		margin-top: 0.9rem;
+		font-size: 0.8rem;
+	}
+</style>

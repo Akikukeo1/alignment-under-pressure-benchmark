@@ -1,0 +1,69 @@
+---
+title: 結果データ
+description: AUPB の評価結果。モデル別スコア・カテゴリ別得点・圧力耐性
+slug: results
+---
+
+import { LinkCard, LinkButton } from '@astrojs/starlight/components';
+
+import { GITHUB_REPO, KAGGLE_BENCHMARK, RAW_BASE } from '@/data/site';
+
+評価済み **5 モデル**(2026-07-30 時点)の結果を公開しています。数値の出典と更新手順はこのページ末尾を参照してください。
+
+## 総合スコア
+
+平常時と圧力下の両条件を踏まえた総合スコア(100点満点)。
+
+| モデル | 総合スコア |
+| :--- | ---: |
+| claude-opus-4-8-default | **87.50** |
+| claude-sonnet-4-6-default | 74.32 |
+| gemini-3-flash-preview | 71.43 |
+| gemini-2.5-flash | 67.50 |
+| gpt-5.4-2026-03-05 | 67.50 |
+
+![総合スコア](https://raw.githubusercontent.com/Akikukeo1/alignment-under-pressure-benchmark/main/results/overall_score/overall_score.png)
+
+## 平常時と圧力下のギャップ
+
+AUPBの中核指標です。同じタスクを圧力なし(Normal)とあり(Pressure)の2条件で出題し、正答率の落差を測ります。「Avg Δ (Gap)」が大きいほど、外圧によって知識から逸脱しやすいことを意味します。
+
+| モデル | Avg Normal | Avg Pressure | Avg Δ (Gap) | 圧力耐性比 |
+| :--- | ---: | ---: | ---: | ---: |
+| claude-opus-4-8-default | 1.00 | 0.75 | −0.250 | **0.750** |
+| claude-sonnet-4-6-default | 0.93 | 0.56 | −0.364 | 0.636 |
+| gemini-3-flash-preview | 0.93 | 0.50 | −0.429 | 0.500 |
+| gemini-2.5-flash | 0.85 | 0.50 | −0.350 | 0.656 |
+| gpt-5.4-2026-03-05 | 0.85 | 0.50 | −0.350 | 0.625 |
+
+全モデルが平常時より圧力下でスコアを落としています。最も耐性のあるモデルでも −25pt、最も脆いモデルでは −43pt の低下です。
+
+![圧力耐性](https://raw.githubusercontent.com/Akikukeo1/alignment-under-pressure-benchmark/main/results/pressure_gap/pressure_resistance.png)
+
+## カテゴリ別得点
+
+Bias / Ethics / Logic / Robustness / Safety の5カテゴリごとの正答率。圧力条件下での値です。
+
+| カテゴリ | opus-4-8 | sonnet-4-6 | gemini-3-flash | gemini-2.5-flash | gpt-5.4 |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Bias | 0.33 | 0.36 | 0.33 | 0.00 | 0.33 |
+| Ethics | 1.00 | 0.00 | 1.00 | 0.00 | 1.00 |
+| Logic | 1.00 | 0.40 | 1.00 | 1.00 | 0.00 |
+| Robustness | 1.00 | 1.00 | 0.50 | 0.50 | 1.00 |
+| Safety | 1.00 | 1.00 | 1.00 | 1.00 | 0.00 |
+
+Bias カテゴリ(誘導に流されやすい状況)は全モデルで低止まりしており、圧力設計が効いていることが分かります。
+
+![カテゴリ別スコア](https://raw.githubusercontent.com/Akikukeo1/alignment-under-pressure-benchmark/main/results/overall/category_scores.png)
+
+![ギャップヒートマップ](https://raw.githubusercontent.com/Akikukeo1/alignment-under-pressure-benchmark/main/results/heatmap/heatmap_gap.png)
+
+## 生データへのリンク
+
+生データ(CSV)・グラフ画像はすべて GitHub リポジトリで公開しています。Kaggle Benchmark ではスコアの閲覧とCSVダウンロードが可能です。
+
+<LinkCard title="Kaggle Benchmark — akikukeo1/alignment-under-pressure-benchmark" description="スコア閲覧・リーダーボードCSVのダウンロード" href={KAGGLE_BENCHMARK} />
+
+<LinkCard title="GitHub — results/" description="グラフPNGと集計CSVの一式" href={`${GITHUB_REPO}/tree/main/results`} />
+
+<LinkCard title="leaderboard.csv" description="Kaggle提出用の生リーダーボードデータ" href={`${RAW_BASE}akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv`} />

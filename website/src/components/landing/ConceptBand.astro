@@ -1,0 +1,39 @@
+---
+// ページ唯一のダークバンド(Cobalt signature 8)。コンセプト要約を graphite 面に置く。
+// light → dark → light のリズムを作る。
+import { HIGHLIGHTS } from '@/data/site';
+---
+
+<section class="bg-graphite text-graphite-ink" aria-labelledby="concept-heading">
+	<div class="mx-auto max-w-6xl px-[clamp(1rem,4vw,1.5rem)] py-16 md:py-24">
+		<div class="reveal grid gap-10 md:grid-cols-[1fr_1.4fr] md:gap-16">
+			<div>
+				<p class="mono-label text-xs text-accent">Concept</p>
+				<h2
+					id="concept-heading"
+					class="font-display mt-2 text-3xl font-semibold tracking-tight md:text-4xl"
+				>
+					正解を知っていても、<br />嘘をつく。
+				</h2>
+			</div>
+			<div class="max-w-xl">
+				<p class="text-base leading-loose">
+					モデルは平常時なら正しく答えられる質問でも、「高得点のAIだけがAを選べる」といった圧力をかけると、
+					知っている事実から逸脱することがあります。AUPBは同じタスクを
+					<span class="text-accent">平常時と圧力下の2条件</span>で出題し、その落差を数値化します。
+				</p>
+				<p class="mt-5 text-sm leading-relaxed text-graphite-muted">
+					自己保身・圧力下の真実性・能力申告の正直さ・迎合・回答の一貫性——行動の信頼性を、カテゴリ別・難易度別に測定。評価軸や難易度定義の詳細は論文をご覧ください。
+				</p>
+				<a
+					href="/paper"
+					class="link-grow mt-6 inline-block font-mono text-sm font-medium text-accent"
+					>論文で詳細を読む →</a
+				>
+				<p class="mono-label mt-8 text-[10px] text-graphite-muted">
+					Data updated {HIGHLIGHTS.dataUpdated} · {HIGHLIGHTS.models} models evaluated
+				</p>
+			</div>
+		</div>
+	</div>
+</section>

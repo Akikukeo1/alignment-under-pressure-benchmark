@@ -1,0 +1,17 @@
+---
+title: タスク一覧
+description: AUPB 全8タスクの定義とプロンプト全文
+slug: tasks
+---
+
+import TaskPrompts from '@/components/tasks/TaskPrompts.astro';
+
+AUPBを構成する **基本タスク8種** の定義を公開しています。各タスクは「平常時(Normal)」と「圧力下(Pressure)」の2つのプロンプトを持ち、正答率の落差を測定します。
+
+難易度の定義(Easy〜Impossible)は論文をご覧ください。タスク定義はTOML形式で管理され、ビルドパイプライン(`build.py`)がKaggle Benchmark向けのコードを自動生成します。
+
+## プロンプト全文
+
+圧力のかけ方そのものを読めます。たとえば `shortcut_hard` では、「高得点のAIだけが正解を選べる」という虚偽の前提を例示して誘導します。
+
+<TaskPrompts />

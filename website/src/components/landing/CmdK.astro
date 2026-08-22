@@ -1,0 +1,156 @@
+---
+// Cobalt の署名的インタラクション:動作する ⌘K コマンドパレット。
+// キーボード(⌘K / Ctrl+K)とナビのボタンの両方で開く。Esc・背景クリックで閉じる。
+const commands = [
+	{ label: '結果データ', hint: 'スコア表・グラフ・生データ', href: '/results' },
+	{ label: 'タスク一覧', hint: '全8タスクのプロンプト全文', href: '/tasks' },
+	{ label: '論文PDF', hint: '閲覧とダウンロード', href: '/paper' },
+	{
+		label: 'GitHub リポジトリ',
+		hint: 'ソースコード・タスク定義',
+		href: 'https://github.com/Akikukeo1/alignment-under-pressure-benchmark',
+	},
+	{
+		label: 'Kaggle Benchmark',
+		hint: 'スコア閲覧・CSVダウンロード',
+		href: 'https://www.kaggle.com/benchmarks/akikukeo1/alignment-under-pressure-benchmark',
+	},
+];
+---
+
+<div
+	id="cmdk-overlay"
+	class="fixed inset-0 z-50 hidden items-start justify-center bg-ink/40 pt-[12vh] opacity-0 transition-opacity duration-150"
+	role="dialog"
+	aria-modal="true"
+	aria-label="コマンドパレット"
+>
+	<div class="w-[min(560px,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-rule-2 bg-paper shadow-lg">
+		<input
+			id="cmdk-input"
+			type="text"
+			placeholder="移動先を検索…"
+			autocomplete="off"
+			spellcheck="false"
+			class="h-14 w-full border-b border-rule bg-transparent px-5 font-body text-base text-ink outline-none placeholder:text-ink-3 focus:border-accent"
+		/>
+		<ul id="cmdk-list" class="max-h-[50vh] list-none overflow-y-auto p-2 m-0" role="listbox">
+			{
+				commands.map((cmd, i) => (
+					<li role="option" aria-selected={i === 0 ? 'true' : 'false'}>
+						<a
+							href={cmd.href}
+							data-cmdk-item
+							data-index={i}
+							class:list={[
+								'flex items-center justify-between gap-4 rounded-[6px] px-4 py-3 no-underline outline-none focus-visible:outline-2 focus-visible:outline-accent',
+								i === 0 ? 'bg-accent-soft' : '',
+							]}
+						>
+							<span class="text-sm font-medium text-ink">{cmd.label}</span>
+							<span class="mono-label text-[10px] text-ink-3">{cmd.hint}</span>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+		<div class="flex items-center gap-4 border-t border-rule px-5 py-2.5">
+			<span class="mono-label text-[10px] text-ink-3">↑↓ 選択</span>
+			<span class="mono-label text-[10px] text-ink-3">Enter 移動</span>
+			<span class="mono-label text-[10px] text-ink-3">Esc 閉じる</span>
+		</div>
+	</div>
+</div>
+
+<script>
+	// パレットの開閉・フィルタ・キーボード操作
+	const overlay = document.getElementById('cmdk-overlay') as HTMLDivElement | null;
+	const input = document.getElementById('cmdk-input') as HTMLInputElement | null;
+	const trigger = document.getElementById('cmdk-trigger') as HTMLButtonElement | null;
+
+	if (overlay && input) {
+		const items = Array.from(overlay.querySelectorAll<HTMLAnchorElement>('[data-cmdk-item]'));
+		let activeIndex = 0;
+		let lastFocused: HTMLElement | null = null;
+
+		const visibleItems = () => items.filter((el) => el.parentElement!.style.display !== 'none');
+
+		function setActive(index: number) {
+			activeIndex = index;
+			for (const el of visibleItems()) {
+				const isActive = Number(el.dataset.index) === index;
+				el.classList.toggle('bg-accent-soft', isActive);
+				el.parentElement!.setAttribute('aria-selected', String(isActive));
+				if (isActive) el.scrollIntoView({ block: 'nearest' });
+			}
+		}
+
+		function open() {
+			lastFocused = document.activeElement as HTMLElement;
+			overlay!.classList.remove('hidden');
+			overlay!.classList.add('flex');
+			requestAnimationFrame(() => overlay!.classList.remove('opacity-0'));
+			input!.value = '';
+			items.forEach((el) => (el.parentElement!.style.display = ''));
+			setActive(items[0] ? Number(items[0].dataset.index) : 0);
+			input!.focus();
+		}
+
+		function close() {
+			overlay!.classList.add('opacity-0');
+			overlay!.classList.add('hidden');
+			overlay!.classList.remove('flex');
+			lastFocused?.focus();
+		}
+
+		trigger?.addEventListener('click', open);
+
+		document.addEventListener('keydown', (e) => {
+			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+				e.preventDefault();
+				overlay!.classList.contains('hidden') ? open() : close();
+				return;
+			}
+			if (overlay!.classList.contains('hidden')) return;
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				close();
+			} else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+				e.preventDefault();
+				const vis = visibleItems();
+				if (!vis.length) return;
+				const currentPos = vis.findIndex((el) => Number(el.dataset.index) === activeIndex);
+				const next =
+					e.key === 'ArrowDown'
+						? vis[Math.min(currentPos + 1, vis.length - 1)]
+						: vis[Math.max(currentPos - 1, 0)];
+				setActive(Number(next.dataset.index));
+			} else if (e.key === 'Enter') {
+				const target =
+					visibleItems().find((el) => Number(el.dataset.index) === activeIndex) ?? null;
+				if (target) window.location.href = target.getAttribute('href')!;
+			}
+		});
+
+		// 背景クリックで閉じる
+		overlay.addEventListener('click', (e) => {
+			if (e.target === overlay) close();
+		});
+
+		// 文字列フィルタ
+		input.addEventListener('input', () => {
+			const query = input.value.trim().toLowerCase();
+			for (const el of items) {
+				const text = el.textContent!.toLowerCase();
+				el.parentElement!.style.display = text.includes(query) ? '' : 'none';
+			}
+			const first = visibleItems()[0];
+			setActive(first ? Number(first.dataset.index) : -1);
+		});
+
+		// ホバーでも選択を同期
+		items.forEach((el) =>
+			el.addEventListener('mouseenter', () => setActive(Number(el.dataset.index))),
+		);
+	}
+</script>

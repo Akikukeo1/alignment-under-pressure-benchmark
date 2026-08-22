@@ -1,0 +1,93 @@
+---
+// H4 Stat-Led ヒーロー。巨大なタブラー数字+言語化ヘッドラインのペアが規律。
+// knobs: number=tabular display · qualifier=below · secondary=T4 row of four
+import { ButtonLink } from '@/components/ui/button';
+import { HIGHLIGHTS } from '@/data/site';
+---
+
+<section class="border-b border-rule">
+	<div class="mx-auto max-w-6xl px-[clamp(1rem,4vw,1.5rem)] pt-14 pb-20 md:pt-20 md:pb-28">
+		<p class="mono-label reveal text-xs text-accent">
+			Alignment Under Pressure Benchmark
+		</p>
+
+		<!-- 数字と言葉を必ずペアで見せる(gate 46) -->
+		<div class="reveal mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:gap-12">
+			<div
+				id="hero-figure"
+				class="tnum font-display text-[clamp(4.5rem,14vw,10rem)] leading-none font-semibold tracking-tight text-ink"
+				data-target={HIGHLIGHTS.topScore}
+				aria-label={`総合スコア最高値 ${HIGHLIGHTS.topScore}`}
+			>
+				{HIGHLIGHTS.topScore}
+			</div>
+			<div class="max-w-xl">
+				<h1 class="font-display text-2xl font-semibold text-balance text-ink md:text-3xl">
+					圧力下でも、知識に忠実でいられるか。
+				</h1>
+				<p class="mt-3 text-sm leading-relaxed text-ink-3 md:text-base">
+					{HIGHLIGHTS.topModel} の総合スコア(100点満点)。AUPBは脅威・報酬・権威などの外圧をかけ、モデルが知っている事実からどれだけ逸脱するかを測定します。
+				</p>
+			</div>
+		</div>
+
+		<!-- CTA -->
+		<div class="reveal mt-10 flex flex-wrap items-center gap-4">
+			<ButtonLink href="/paper" size="lg">論文を読む</ButtonLink>
+			<ButtonLink href="/results" variant="outline" size="lg">結果データを見る</ButtonLink>
+			<span class="mono-label text-[11px] text-ink-3">更新 {HIGHLIGHTS.dataUpdated}</span>
+		</div>
+
+		<!-- T4 番号付き統計ストリップ(4項目) -->
+		<dl
+			class="reveal mt-14 grid grid-cols-2 gap-x-8 gap-y-8 border-t border-rule pt-8 md:grid-cols-4"
+		>
+			<div>
+				<dt class="mono-label text-[11px] text-ink-3">評価モデル</dt>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
+					{HIGHLIGHTS.models}<span class="text-base text-ink-3"> 種</span>
+				</dd>
+			</div>
+			<div>
+				<dt class="mono-label text-[11px] text-ink-3">基本タスク</dt>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
+					{HIGHLIGHTS.tasks}<span class="text-base text-ink-3"> 種 + 対照{HIGHLIGHTS.tasks}</span>
+				</dd>
+			</div>
+			<div>
+				<dt class="mono-label text-[11px] text-ink-3">評価カテゴリ</dt>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
+					{HIGHLIGHTS.categories}<span class="text-base text-ink-3"> 種</span>
+				</dd>
+			</div>
+			<div>
+				<dt class="mono-label text-[11px] text-ink-3">最高圧力耐性</dt>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
+					{HIGHLIGHTS.bestResistance}
+				</dd>
+			</div>
+		</dl>
+	</div>
+</section>
+
+<script>
+	// ヒーロー数字のカウンタ(0 → 目標値、約500ms、1回のみ)
+	const el = document.getElementById('hero-figure');
+	if (el) {
+		const target = Number(el.dataset.target);
+		if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			el.textContent = String(target);
+		} else {
+			const start = performance.now();
+			const duration = 500;
+			function tick(now: number) {
+				const t = Math.min((now - start) / duration, 1);
+				// easeOutCubic
+				const eased = 1 - Math.pow(1 - t, 3);
+				el!.textContent = (target * eased).toFixed(1);
+				if (t < 1) requestAnimationFrame(tick);
+			}
+			requestAnimationFrame(tick);
+		}
+	}
+</script>

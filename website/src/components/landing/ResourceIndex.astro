@@ -1,0 +1,94 @@
+---
+// 公開リソースのインデックス。Index-First の語彙(ヘアライン区切りの行)で情報集約を表現する。
+// S2 hanging セクション見出し。
+import { GITHUB_REPO, KAGGLE_BENCHMARK } from '@/data/site';
+
+const resources = [
+	{
+		label: 'PAPER',
+		title: '論文PDF',
+		description:
+			'研究の全文。コンセプト・評価手法・難易度定義はすべて論文に収めています。閲覧とダウンロードができます。',
+		href: '/paper',
+		external: false,
+	},
+	{
+		label: 'DATA',
+		title: '結果データ',
+		description:
+			'モデル別スコア表・カテゴリ別得点・圧力耐性グラフ。生CSVはKaggleとGitHubから入手できます。',
+		href: '/results',
+		external: false,
+	},
+	{
+		label: 'TASKS',
+		title: 'タスク一覧',
+		description:
+			'全8タスクのプロンプト全文をそのまま公開。平常時プロンプトとの対比で、圧力のかけ方を読めます。',
+		href: '/tasks',
+		external: false,
+	},
+	{
+		label: 'CODE',
+		title: 'ソースコード',
+		description:
+			'評価パイプライン・タスク定義TOML・集計スクリプトをGitHubで公開しています。',
+		href: GITHUB_REPO,
+		external: true,
+	},
+	{
+		label: 'KAGGLE',
+		title: 'Kaggle Benchmark',
+		description: 'ベンチマークのスコア閲覧とリーダーボードCSVのダウンロード。',
+		href: KAGGLE_BENCHMARK,
+		external: true,
+	},
+];
+---
+
+<section aria-labelledby="resources-heading">
+	<div class="mx-auto max-w-6xl px-[clamp(1rem,4vw,1.5rem)] py-16 md:py-24">
+		<!-- S2 hanging 見出し -->
+		<div class="reveal mb-10">
+			<p class="mono-label text-xs text-accent">Resources</p>
+			<h2
+				id="resources-heading"
+				class="font-display mt-2 text-3xl font-semibold tracking-tight text-ink md:text-4xl"
+			>
+				公開リソース
+			</h2>
+			<p class="mt-3 max-w-xl text-sm leading-relaxed text-ink-3 md:text-base">
+				論文の要点は論文に任せ、ここでは生データ・コード・タスクの中身に一発で飛べるようにしています。
+			</p>
+		</div>
+
+		<!-- ヘアライン区切り行のインデックス -->
+		<ul class="reveal m-0 list-none border-t border-rule p-0">
+			{
+				resources.map((r) => (
+					<li class="border-b border-rule">
+						<a
+							href={r.href}
+							class="group flex items-center gap-5 py-5 no-underline outline-none focus-visible:ring-2 focus-visible:ring-accent md:gap-8 md:py-6"
+							{...(r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+						>
+							<span class="mono-label hidden w-16 shrink-0 text-[11px] text-accent sm:block">
+								{r.label}
+							</span>
+							<span class="min-w-0 grow">
+								<span class="block font-display font-semibold text-ink transition-colors group-hover:text-accent">
+									{r.title}
+									<span aria-hidden="true" class="ml-1.5 inline-block transition-transform group-hover:translate-x-1">
+										→
+									</span>
+								</span>
+								<span class="mt-1 block text-sm leading-relaxed text-ink-3">{r.description}</span>
+							</span>
+							{r.external && <span class="mono-label shrink-0 text-[10px] text-ink-3">外部 ↗</span>}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</section>

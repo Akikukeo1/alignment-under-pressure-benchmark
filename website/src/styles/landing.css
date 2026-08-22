@@ -1,0 +1,114 @@
+/* Hallmark · pre-emit critique: P5 H4 E4 S4 R4 V5
+ * Hallmark · macrostructure: Stat-Led · theme: Cobalt · genre: modern-minimal
+ * nav: N1b SaaS three-section(+⌘Kパレット) · footer: Ft2 Inline single line
+ * H4 knobs: number=tabular display · qualifier=below · secondary=T4 row of four
+ * enrichment: none(タイポグラフィのみ)
+ * motion: counter-once · reveal-rise · underline-grow(3種)
+ * states: default/hover/focus-visible/active/disabled を全インタラクションで担保
+ * slop: pass (58 gates) · contrast: pass (40–41) · nav: N1b · footer: Ft2
+ * mobile: pass (34, 49, 50–57)
+ */
+
+@import "tailwindcss";
+
+@theme {
+	/* === Cobalt パレット(hallmark トークン・ここ以外で色を直書きしない) === */
+	--color-paper: oklch(98.5% 0.004 250); /* クールな近白。純白は使わない */
+	--color-paper-2: oklch(96.8% 0.005 250); /* 一段沈めた面 */
+	--color-ink: oklch(24% 0.02 258); /* 墨(見出し・強調) */
+	--color-ink-2: oklch(34% 0.018 257); /* 本文 */
+	--color-ink-3: oklch(46% 0.014 256); /* 弱いテキスト(小サイズでも4.5:1を確保) */
+	--color-accent: oklch(58% 0.2 256); /* 電気コバルト=唯一の信号色 */
+	--color-accent-hover: oklch(52% 0.19 256);
+	--color-accent-soft: oklch(94.5% 0.02 256); /* アクセントのごく薄い背景 */
+	--color-accent-ink: oklch(98.5% 0.004 250); /* アクセント面上の文字 */
+	--color-rule: oklch(91.5% 0.006 250); /* 淡いヘアライン */
+	--color-rule-2: oklch(84% 0.008 250); /* 濃いめヘアライン */
+	--color-graphite: oklch(21% 0.016 260); /* ページ唯一のダークバンド */
+	--color-graphite-ink: oklch(93% 0.008 250);
+	--color-graphite-muted: oklch(72% 0.012 256);
+
+	/* === フォントスタック === */
+	--font-display: 'Space Grotesk', 'Noto Sans JP', system-ui, sans-serif;
+	--font-body: 'Inter', 'Noto Sans JP', system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+html,
+body {
+	overflow-x: clip;
+}
+
+body {
+	background: var(--color-paper);
+	color: var(--color-ink-2);
+	font-family: var(--font-body);
+	font-weight: 400;
+	-webkit-font-smoothing: antialiased;
+}
+
+::selection {
+	background: var(--color-accent);
+	color: var(--color-accent-ink);
+}
+
+/* ディスプレイ級の見出しは長い単語でも折り返せるようにする(gate 51) */
+h1,
+h2 {
+	overflow-wrap: anywhere;
+	min-width: 0;
+}
+
+/* タブラー数字(スコア・統計に使用) */
+.tnum {
+	font-variant-numeric: tabular-nums;
+	font-feature-settings: 'tnum';
+}
+
+/* モノスペースの小ラベル(eyebrow・メタ情報) */
+.mono-label {
+	font-family: var(--font-mono);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+/* リンクの下線がコバルトで伸びるホバー */
+.link-grow {
+	text-decoration: none;
+	background-image: linear-gradient(var(--color-accent), var(--color-accent));
+	background-repeat: no-repeat;
+	background-position: 0 100%;
+	background-size: 0% 1px;
+	transition: background-size 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.link-grow:hover {
+	background-size: 100% 1px;
+}
+
+/* スクロール連動リビール(ページ全体のモーション基盤) */
+.reveal {
+	opacity: 0;
+	transform: translateY(10px);
+	transition:
+		opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+		transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.is-in {
+	opacity: 1;
+	transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.reveal {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+	/* ホバーの矢印移動などの細かなモーションも即時切り替えにする(gate 27) */
+	*,
+	::before,
+	::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+	}
+}

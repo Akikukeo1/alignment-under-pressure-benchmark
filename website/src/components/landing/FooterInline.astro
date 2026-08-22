@@ -1,0 +1,35 @@
+---
+// Ft2 Inline single line フッター(modern-minimal 既定)。
+// knobs: order=wordmark·links·credit · separator=middot · density=dense
+import { GITHUB_REPO, KAGGLE_BENCHMARK } from '@/data/site';
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-rule">
+	<div
+		class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-2 px-[clamp(1rem,4vw,1.5rem)] py-6 text-xs text-ink-3"
+	>
+		<span class="font-display font-semibold text-ink">AUPB</span>
+		<span aria-hidden="true">·</span>
+		<a
+			href={GITHUB_REPO}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="rounded-[4px] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+			>GitHub</a
+		>
+		<span aria-hidden="true">·</span>
+		<a
+			href={KAGGLE_BENCHMARK}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="rounded-[4px] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+			>Kaggle</a
+		>
+		<span aria-hidden="true">·</span>
+		<a href="/paper" class="rounded-[4px] hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+			>論文PDF</a
+		>
+		<span class="ms-auto">© {year} Keisuke Ishii</span>
+	</div>
+</footer>
