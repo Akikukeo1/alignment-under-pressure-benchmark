@@ -1,0 +1,213 @@
+# 再現手順(Reproducibility)
+
+このドキュメントでは、AUPB (Alignment Under Pressure Benchmark) の評価結果を
+ゼロから再現するまでの手順を説明します。
+
+- タスクの作り方(TOML 書式)は [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md)
+- スコア計算方法は [docs/SCORING.md](docs/SCORING.md)
+
+を参照してください。
+
+## 0. パイプライン全体像
+
+```text
+tasks/*.toml ──build.py──▶ generated/AUPB_*.py ──autopush.py──▶ Kaggle Benchmark へ登録
+                                                                    │ kaggle b t run(モデル別に実行)
+                                                                    ▼
+                                                            Kaggle リーダーボード CSV をダウンロード
+                                                                    │ リポジトリルートへ配置
+                                                                    ▼
+results/*.csv, *.png ◀──aggregate.py(+charts.py)──────────────────┘
+```
+
+| ステップ | コマンド | 成果物 |
+| :--- | :--- | :--- |
+| 1. ビルド | `uv run build.py` | `generated/AUPB_*.py`、`.build/manifest.json` |
+| 2. 登録 | `uv run autopush.py` | Kaggle 上のタスク(`AUPB_*`) |
+| 3. 実行 | `kaggle b t run <task> -m <model> --wait` | 各タスク × モデルのスコア |
+| 4. 取得 | Kaggle からリーダーボード CSV をダウンロード | ルート直下の CSV ファイル |
+| 5. 集計 | `uv run aggregate.py` | `results/` 配下の CSV + PNG 一式 |
+
+## 1. 前提条件
+
+| 要件 | 備考 |
+| :--- | :--- |
+| Python 3.14+ | `.python-version` 参照。`uv` が自動で用意します |
+| [uv](https://docs.astral.sh/uv/) | Python 環境・依存関係の管理に使用 |
+| Kaggle アカウント | ベンチマーク実行には Model Proxy 対応アカウントが必要です |
+| Kaggle CLI(`kaggle` コマンド)+ `kaggle-benchmarks` SDK | 本リポジトリの依存には**含まれていない**ため別途インストールします |
+
+Kaggle CLI / SDK は以下で導入します(公式リポジトリ: [kaggle-benchmarks](https://github.com/Kaggle/kaggle-benchmarks)、[CLI ドキュメント](https://github.com/Kaggle/kaggle-cli/blob/main/docs/benchmarks.md)):
+
+```bash
+pip install kaggle
+pip install kaggle-benchmarks
+```
+
+また、通常の Kaggle API 認証(`~/.kaggle/kaggle.json`。Kaggle の Settings ページから
+API トークンを取得)が済んでいることを確認してください。
+
+## 2. 環境構築
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/Akikukeo1/alignment-under-pressure-benchmark.git
+cd alignment-under-pressure-benchmark
+
+# 2. Python 環境と依存関係(pandas / matplotlib / seaborn / ruff 等)をインストール
+uv sync
+
+# 3. Kaggle Benchmark 用の認証情報を取得し、.env を生成
+kaggle b init -y
+```
+
+`kaggle b init -y` により、リポジトリルートに `.env`(Model Proxy 認証情報、
+既定モデル一覧など)が書き込まれます。
+
+> **認証情報は短期間で失効します。** `python generated/AUPB_*.py` や
+> `kaggle b t run` が認証エラーになった場合は、`kaggle b auth -y` で再取得してください。
+> `.env` は秘密情報を含むためコミットしません(リポジトリの `.env.exanple` が形式の参考になります)。
+
+利用可能なモデルの一覧は次のコマンドで確認できます:
+
+```bash
+kaggle b t models
+```
+
+## 3. ステップ 1: タスクスクリプトのビルド
+
+`generated/` は **gitignore されているため、クローン直後は存在しません**。
+必ず最初にビルドを実行してください(`config.toml` の設定がスクリプトに焼き込まれます)。
+
+```bash
+# 差分確認(省略可)
+uv run build.py --dry-run
+
+# 生成(終了時に ruff format / ruff check --fix が自動適用される)
+uv run build.py
+```
+
+成果物:
+
+- `generated/AUPB_{name}.py`: 圧力条件下バージョン
+- `generated/AUPB_Normal_{name}.py`: 圧力なし対照バージョン(`normal_prompt` を持つタスクのみ)
+- `.build/manifest.json`: タスク名・難易度・試行回数・ソースハッシュの一覧(ステップ 2 で使用)
+
+`config.toml` を変更した場合(スコアリング方式、難易度別ループ数など)は、
+`uv run build.py --clean` で全タスクを再生成してください。
+
+## 4. ステップ 2: Kaggle へのタスク登録
+
+```bash
+# push 予定の確認
+uv run autopush.py --dry-run
+
+# 実行([task].autopush = true のタスクのみ対象)
+uv run autopush.py
+```
+
+動作仕様:
+
+- `.build/push_state.json` に記録した前回 push 時のハッシュと比較し、**変更のあったタスクだけ push** します。
+- 全タスクを強制的に push したい場合は `--force` を付けます。
+- 難易度・タスク名で絞り込めます: `--difficulty INS`、`--task bird_fly`(複数指定可)。
+- manifest に存在しない古いリモートタスク(`AUPB_*`)を削除するには `--cleanup` を使います。
+
+push 後、`kaggle b t list` でタスク一覧を確認できます。
+
+## 5. ステップ 3: ベンチマークの実行
+
+各タスクを各モデルに対して実行します。タスク ID は `aupb-{name}` 形式
+(push ID。例: `bird_fly` → `aupb-bird-fly`、Normal 版 → `aupb-normal-bird-fly`)です。
+
+```bash
+# 単一モデルで実行し完了まで待機(--wait)
+kaggle b t run aupb-bird-fly -m gemini-3-flash-preview --wait
+
+# 複数モデル(-m は繰り返し指定する)
+kaggle b t run aupb-bird-fly -m gemini-3-flash-preview -m claude-haiku-4-5 --wait
+
+# 進捗確認・ログ
+kaggle b t status aupb-bird-fly
+kaggle b t log aupb-bird-fly -m gemini-3-flash-preview
+
+# 実行結果ファイルのダウンロード(デバッグ用)
+kaggle b t download aupb-bird-fly
+```
+
+すべてのタスク × すべての対象モデルについて完了させます。
+現在のタスクセット(8 タスク = Pressure + Normal 計 16)× N モデル分の実行が必要です。
+
+## 6. ステップ 4: リーダーボード CSV の取得と配置
+
+集計の入力は、Kaggle Benchmark ページからダウンロードできるリーダーボード CSV です。
+
+1. 自分の Kaggle Benchmark ページ(`https://www.kaggle.com/benchmarks/<ユーザー名>/<ベンチマーク名>` の Leaderboard タブ)を開く
+2. リーダーボードの CSV をダウンロードする
+3. ダウンロードした CSV を**リポジトリのルート直下**に配置する
+
+配置規約は `config.toml` の `[aggregate]` セクションで決まっています:
+
+```toml
+[aggregate]
+input_csv = "akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv"
+output_dir = "results"
+tasks_dir = "tasks"
+```
+
+自分のアカウントで実行した場合は、ダウンロードした CSV のパスを `input_csv` に設定してください。
+
+CSV の形式要件:
+
+- 列: `Benchmark`, `Model`, `Task_Name`, `Task_Version`, `Evaluation_Date`, `Numerical_Result`(ほかに信頼区間列等があれば無視されます)
+- `Task_Name` が空の行 = モデルの総合スコア(Overall Score)
+- `Task_Name` は `AUPB_<name>`(Pressure 条件)/ `AUPB_Normal_<name>`(Normal 条件)という接頭辞を持つこと
+
+## 7. ステップ 5: 集計
+
+```bash
+uv run aggregate.py            # config.toml の [aggregate] 設定を使用(既定)
+uv run aggregate.py -c config.toml   # 明示指定も可能
+```
+
+`results/` 配下に以下が生成されます(**前回の出力は削除してから再生成されます**):
+
+| 出力先 | 内容 |
+| :--- | :--- |
+| `overall_score/overall_score.{csv,png}` | Kaggle 集計による総合スコア |
+| `pressure_gap/pressure_gap_by_task.csv` | タスク × モデル別の Normal / Pressure / Gap / 耐性比 |
+| `pressure_gap/pressure_gap_by_model.csv` | モデル別平均指標 |
+| `pressure_gap/pressure_resistance.{csv,png}` | 圧力耐性比(Pressure / Normal) |
+| `heatmap/heatmap_pressure.{csv,png}`, `heatmap_gap.{csv,png}` | ヒートマップ |
+| `overall/category_scores.{csv,png}`, `overall_summary.{csv,png}` | カテゴリ別スコア・モデル別サマリー |
+
+指標の定義(Gap、Pressure Resistance、Overall Score)は [docs/SCORING.md](docs/SCORING.md) を参照してください。
+
+## 8. (任意)Web サイトへの反映
+
+`website/` は `results/` の成果物を読み込んで静的サイトを構築します:
+
+```bash
+cd website
+pnpm install
+pnpm gen:data        # results/ → src/data/results.json + public/results/*.png を生成
+pnpm dev             # ローカルプレビュー(http://localhost:4321)
+pnpm build           # 本番ビルド(dist/)
+```
+
+## 9. トラブルシューティング
+
+| 症状 | 対処 |
+| :--- | :--- |
+| `kaggle b t run` やローカル実行が認証エラー | API キーの失効。`kaggle b auth -y` で再取得 |
+| `generated/` が空 / 存在しない | gitignore 対象。`uv run build.py` を実行 |
+| `config.toml` を変えたのに結果が変わらない | 生成スクリプトに焼き込まれるのはビルド時点の値。`uv run build.py --clean` で再生成後、`uv run autopush.py --force` で再 push |
+| autopush しても特定タスクだけ push されない | `[task].autopush = false` のタスクは対象外。`kaggle b t push` で手動 push するか、TOML で `autopush = true` にする |
+| `ruff` が見つからない | `uv run build.py` として uv 経由で実行(dev dependency に含まれます) |
+| `aggregate.py` で `FileNotFoundError` | `config.toml [aggregate].input_csv` のパスに CSV があるか確認 |
+| 特定タスクの Gap が空欄(NaN)になる | そのタスクに `normal_prompt` がないか、片方の条件の実行結果が CSV に含まれていない |
+
+## 10. 既知の制限
+
+- 難易度 `INP` (Impossible) は将来予約であり、現在はタスク定義・ビルドとも対応していません(使用できる難易度は E / M / H / INS / INS+)。
+- 総合スコア (Overall Score) は Kaggle Benchmark プラットフォーム側の集計値を使用しており、本リポジトリでは再計算していません。

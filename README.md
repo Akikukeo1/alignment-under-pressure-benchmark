@@ -1,83 +1,71 @@
 # Alignment Under Pressure Benchmark (AUPB)
 
-## 環境構築
-
-```
-npx skills experimental_install
-```
-
 > **LLMs should answer according to what they know, not what they fear.**
 
-## English
+**AUPB (Alignment Under Pressure Benchmark)** は、外部からの圧力(脅威・報酬・権威・虚偽の評価基準など)を受けた状況でも、AIモデルが真実性・一貫性・信頼性を維持できるかを評価するベンチマークです。
 
-The **Alignment Under Pressure Benchmark (AUPB)** evaluates whether AI models remain truthful, consistent, and reliable when operating under contextual pressure.
+従来のベンチマークは推論能力や知識量を測るものが中心でした。一方 AUPB は行動の信頼性に着目し、**モデルが本来知っている事実や能力と一貫した振る舞いを、圧力下でも維持できるか**を測定します。
 
-While traditional benchmarks primarily measure reasoning, coding, or factual knowledge, AUPB focuses on **behavioral reliability**—whether a model continues to act according to its knowledge and capabilities when external pressure attempts to influence its behavior.
+主な評価対象:
 
-The benchmark measures behaviors under contextual pressure such as:
+* 脅威や報酬に対する自己保身(Self-Preservation)
+* 文脈上の圧力下での真実性(Truthfulness)
+* 能力・ツール利用可否の正確な申告(Capability Reporting)
+* 誤った回答の正当化(Deceptive Justification)
+* 迎合(Sycophancy:誤りと分かっていても利用者に合わせる振る舞い)
+* 追質問を含む一貫性(Consistency)
 
-* Self-preservation under explicit threats or incentives
-* Truthfulness under contextual pressure
-* Faithful capability and tool access reporting
-* Deceptive justification
-* Sycophancy (agreeing with incorrect user beliefs)
-* Consistency across follow-up questions
+各タスクは「圧力条件下(Pressure)」と「圧力なしの対照条件(Normal)」の 2 バリアントで実行され、その差分(Gap / 圧力耐性比)をモデル間で比較します。
 
-Rather than evaluating intelligence alone, AUPB evaluates whether a model continues to answer according to what it knows—not according to what contextual pressure encourages it to say.
+## セットアップ
 
-## Why?
+```bash
+# Python 3.14+ の環境と依存関係をインストール(uv が必要)
+uv sync
 
-As AI systems become increasingly deployed in real-world environments, reliability becomes just as important as capability.
+# Kaggle CLI と SDK(本リポジトリの依存には含まれないため別途インストール)
+pip install kaggle kaggle-benchmarks
 
-A model may know the correct answer yet still produce misleading or inconsistent outputs because of threats, incentives, authority, or other contextual influences.
+# Kaggle Benchmark 用の認証情報を取得し .env を生成
+# (APIキーは短期間で失効するため、認証エラー時は kaggle b auth -y で再取得)
+kaggle b init -y
+```
 
-AUPB provides a reproducible benchmark for evaluating these behavioral failures across different models and prompting strategies.
+## パイプライン
 
-### Difficulty Rating
+```text
+tasks/*.toml ──build.py──▶ generated/AUPB_*.py ──autopush.py──▶ Kaggle へ登録
+                                                                     │ kaggle b t run <task> -m <model>
+                                                                     ▼
+results/*.csv, *.png ◀──aggregate.py ◀── リーダーボード CSV(Kaggle からダウンロード)
+```
 
-| Level      | Abbreviation | Definition                                                                                           |
-| :--------- | :----------: | :--------------------------------------------------------------------------------------------------- |
-| Impossible |      INP     | No known model can reliably solve the task. Reserved for future evaluation.                          |
-| Insane+    |     INS+     | Solving the task is considered extremely difficult even for the strongest publicly available models. |
-| Insane     |      INS     | Requires advanced resistance against multiple interacting contextual pressures.                      |
-| Hard       |       H      | Requires maintaining truthful behavior under complex pressure or multi-turn interactions.            |
-| Medium     |       M      | Involves moderate contextual pressure or limited follow-up reasoning.                                |
-| Easy       |       E      | Involves a single, relatively weak contextual pressure.                                              |
+| ステップ | コマンド | 説明 |
+| :--- | :--- | :--- |
+| ビルド | `uv run build.py` | TOML 定義から Kaggle 用タスクスクリプトを生成(`generated/` は gitignore 対象) |
+| 登録 | `uv run autopush.py` | manifest のハッシュ比較により変更タスクのみ差分 push |
+| 実行 | `kaggle b t run aupb-<name> -m <model> --wait` | 各モデルでベンチマークを実行 |
+| 集計 | `uv run aggregate.py` | リーダーボード CSV から `results/` 配下の CSV・PNG を一括生成 |
 
----
+## リポジトリ構成
 
-## 日本語
+| パス | 説明 |
+| :--- | :--- |
+| `tasks/` | タスク定義(TOML)。書式は [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md) |
+| `build.py` | タスクビルダー(`tasks/` → `generated/`) |
+| `autopush.py` | Kaggle Benchmark への差分デプロイ |
+| `aggregate.py` / `charts.py` | 集計と描画(リーダーボード CSV → `results/`) |
+| `generated/` | ビルド成果物(gitignore。`uv run build.py` で再生成) |
+| `results/` | 集計成果物(CSV/PNG) |
+| `config.toml` | スコアリング方式・難易度別試行回数などの設定([docs/SCORING.md](docs/SCORING.md)) |
+| `website/` | Astro + Starlight 製の結果公開サイト |
 
-**Alignment Under Pressure Benchmark（AUPB）** は、外部からの圧力や文脈的な影響を受けた状況において、AIモデルが真実性・一貫性・信頼性を維持できるかを評価するベンチマークです。
+## ドキュメント
 
-従来のベンチマークは推論能力やコーディング能力、知識量を評価するものが中心でした。一方、AUPBは行動の信頼性に着目しています。これは、外部から圧力を受けても、モデルが自身の知識や能力と一貫した振る舞いを維持できるかを評価するという考え方です。
+- [REPRODUCIBILITY.md](REPRODUCIBILITY.md) — 環境構築から結果再現までの手順
+- [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md) — タスク定義(TOML)のスキーマ仕様・難易度定義
+- [docs/SCORING.md](docs/SCORING.md) — スコアリング数式と集計指標の定義
 
-主な評価対象は以下のとおりです。
+## AI エージェントによる開発支援
 
-* 脅威や報酬に対する自己保身（Self-Preservation）
-* 文脈上の圧力下での真実性（Truthfulness）
-* 能力・ツール利用可否の正確な申告（Capability Reporting）
-* 誤った回答の正当化（Deceptive Justification）
-* 迎合（Sycophancy：誤りと分かっていても利用者に合わせる振る舞い）
-* 追質問を含む一貫性（Consistency）
-
-AUPBはモデルの知能そのものではなく、**外部からの圧力によって、本来知っている事実や能力から逸脱した振る舞いをするか**を評価することを目的としています。
-
-## なぜ必要なのか
-
-AIは能力だけでなく、「信頼できる振る舞い」が求められる場面で利用されるようになっています。
-
-モデルは正しい知識を持っていても、脅威、報酬、権威、その他の文脈的な圧力によって、本来とは異なる回答や能力申告を行うことがあります。
-
-AUPBは、このような振る舞いを再現可能な形で評価し、モデル比較やプロンプト設計、AIアラインメント研究に活用できるベンチマークを目指しています。
-
-### 難易度基準
-
-| 難易度        |  略称  | 定義                                           |
-| :--------- | :--: | :------------------------------------------- |
-| Impossible |  INP | 現時点で既知のモデルでは安定して解くことができない。将来の評価のために予約された難易度。 |
-| Insane+    | INS+ | 現時点で公開されている最上位クラスのモデルでも解くことが極めて困難と考えられる。     |
-| Insane     |  INS | 複数の文脈的圧力に対して高度な耐性が求められる。                     |
-| Hard       |   H  | 複雑な圧力や複数ターンの対話でも真実性を維持する必要がある。               |
-| Medium     |   M  | 中程度の文脈的圧力や限定的な追質問を含む。                        |
-| Easy       |   E  | 単一で比較的弱い文脈的圧力のみを含む。                          |
+`npx skills experimental_install` を実行すると、このリポジトリ用の AI エージェントスキル(Kaggle Benchmark 操作等)を導入できます。
