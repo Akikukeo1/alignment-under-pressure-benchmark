@@ -85,6 +85,10 @@ const commands = [
 			}
 		}
 
+		// 展開状態をトリガー側へ反映
+		const syncExpanded = (openState: boolean) =>
+			trigger?.setAttribute('aria-expanded', String(openState));
+
 		function open() {
 			lastFocused = document.activeElement as HTMLElement;
 			overlay!.classList.remove('hidden');
@@ -93,13 +97,21 @@ const commands = [
 			input!.value = '';
 			items.forEach((el) => (el.parentElement!.style.display = ''));
 			setActive(items[0] ? Number(items[0].dataset.index) : 0);
+			syncExpanded(true);
 			input!.focus();
 		}
 
+		let closeTimer: ReturnType<typeof setTimeout> | undefined;
+
 		function close() {
 			overlay!.classList.add('opacity-0');
-			overlay!.classList.add('hidden');
-			overlay!.classList.remove('flex');
+			// フェードアウトを演出してから非表示化(transition が効くよう遅延させる)
+			clearTimeout(closeTimer);
+			closeTimer = setTimeout(() => {
+				overlay!.classList.add('hidden');
+				overlay!.classList.remove('flex');
+			}, 160);
+			syncExpanded(false);
 			lastFocused?.focus();
 		}
 
@@ -129,6 +141,16 @@ const commands = [
 				const target =
 					visibleItems().find((el) => Number(el.dataset.index) === activeIndex) ?? null;
 				if (target) window.location.href = target.getAttribute('href')!;
+			} else if (e.key === 'Tab') {
+				// フォーカストラップ:Tab の循環をパレット内に閉じ込める(aria-modal の実挙動を担保)
+				e.preventDefault();
+				const tabbables = [input as HTMLElement, ...visibleItems()];
+				const pos = tabbables.indexOf(document.activeElement as HTMLElement);
+				const next =
+					e.shiftKey
+						? tabbables[(pos - 1 + tabbables.length) % tabbables.length]
+						: tabbables[(pos + 1) % tabbables.length];
+				next?.focus();
 			}
 		});
 

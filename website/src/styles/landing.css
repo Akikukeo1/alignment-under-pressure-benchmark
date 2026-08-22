@@ -20,6 +20,7 @@
 	--color-ink-3: oklch(46% 0.014 256); /* 弱いテキスト(小サイズでも4.5:1を確保) */
 	--color-accent: oklch(58% 0.2 256); /* 電気コバルト=唯一の信号色 */
 	--color-accent-hover: oklch(52% 0.19 256);
+	--color-accent-bright: oklch(72% 0.16 256); /* ダーク面(graphite)上で使う明るいアクセント */
 	--color-accent-soft: oklch(94.5% 0.02 256); /* アクセントのごく薄い背景 */
 	--color-accent-ink: oklch(98.5% 0.004 250); /* アクセント面上の文字 */
 	--color-rule: oklch(91.5% 0.006 250); /* 淡いヘアライン */
@@ -72,10 +73,10 @@ h2 {
 	letter-spacing: 0.06em;
 }
 
-/* リンクの下線がコバルトで伸びるホバー */
+/* リンクの下線が伸びるホバー(下線色は文字色に追従) */
 .link-grow {
 	text-decoration: none;
-	background-image: linear-gradient(var(--color-accent), var(--color-accent));
+	background-image: linear-gradient(currentColor, currentColor);
 	background-repeat: no-repeat;
 	background-position: 0 100%;
 	background-size: 0% 1px;
@@ -85,21 +86,22 @@ h2 {
 	background-size: 100% 1px;
 }
 
-/* スクロール連動リビール(ページ全体のモーション基盤) */
-.reveal {
+/* スクロール連動リビール(ページ全体のモーション基盤)。
+   JS無効環境では初期非表示にしない(html.js は head の is:inline スクリプトが付与)。 */
+html.js .reveal {
 	opacity: 0;
 	transform: translateY(10px);
 	transition:
 		opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
 		transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.reveal.is-in {
+html.js .reveal.is-in {
 	opacity: 1;
 	transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.reveal {
+	html.js .reveal {
 		opacity: 1;
 		transform: none;
 		transition: none;

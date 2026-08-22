@@ -8,7 +8,8 @@ const badgeVariants = cva(
 	{
 		variants: {
 			variant: {
-				default: 'bg-accent-soft text-accent',
+				// 12px 文字でも4.5:1を確保できるよう、濃いコバルトを使用
+				default: 'bg-accent-soft text-accent-hover',
 				outline: 'border border-rule-2 text-ink-2',
 			},
 		},

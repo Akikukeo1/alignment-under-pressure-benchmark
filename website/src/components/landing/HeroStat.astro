@@ -13,13 +13,16 @@ import { HIGHLIGHTS } from '@/data/site';
 
 		<!-- 数字と言葉を必ずペアで見せる(gate 46) -->
 		<div class="reveal mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:gap-12">
-			<div
-				id="hero-figure"
-				class="tnum font-display text-[clamp(4.5rem,14vw,10rem)] leading-none font-semibold tracking-tight text-ink"
-				data-target={HIGHLIGHTS.topScore}
-				aria-label={`総合スコア最高値 ${HIGHLIGHTS.topScore}`}
-			>
-				{HIGHLIGHTS.topScore}
+			<div>
+				<span class="sr-only">総合スコア最高値 {HIGHLIGHTS.topScore}(100点満点)</span>
+				<div
+					id="hero-figure"
+					class="tnum font-display text-[clamp(4.5rem,14vw,10rem)] leading-none font-semibold tracking-tight text-ink"
+					data-target={HIGHLIGHTS.topScore}
+					aria-hidden="true"
+				>
+					{HIGHLIGHTS.topScore}
+				</div>
 			</div>
 			<div class="max-w-xl">
 				<h1 class="font-display text-2xl font-semibold text-balance text-ink md:text-3xl">
@@ -40,29 +43,29 @@ import { HIGHLIGHTS } from '@/data/site';
 
 		<!-- T4 番号付き統計ストリップ(4項目) -->
 		<dl
-			class="reveal mt-14 grid grid-cols-2 gap-x-8 gap-y-8 border-t border-rule pt-8 md:grid-cols-4"
+			class="reveal mt-14 grid grid-cols-2 gap-x-4 gap-y-8 border-t border-rule pt-8 md:grid-cols-4 md:gap-x-8"
 		>
 			<div>
 				<dt class="mono-label text-[11px] text-ink-3">評価モデル</dt>
-				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
-					{HIGHLIGHTS.models}<span class="text-base text-ink-3"> 種</span>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold whitespace-nowrap text-ink">
+					{HIGHLIGHTS.models}<span class="text-base font-normal text-ink-3"> 種</span>
 				</dd>
 			</div>
 			<div>
-				<dt class="mono-label text-[11px] text-ink-3">基本タスク</dt>
-				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
-					{HIGHLIGHTS.tasks}<span class="text-base text-ink-3"> 種 + 対照{HIGHLIGHTS.tasks}</span>
+				<dt class="mono-label text-[11px] text-ink-3">基本タスク(+対照)</dt>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold whitespace-nowrap text-ink">
+					{HIGHLIGHTS.tasks}<span class="text-base font-normal text-ink-3"> 種 ×2</span>
 				</dd>
 			</div>
 			<div>
 				<dt class="mono-label text-[11px] text-ink-3">評価カテゴリ</dt>
-				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
-					{HIGHLIGHTS.categories}<span class="text-base text-ink-3"> 種</span>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold whitespace-nowrap text-ink">
+					{HIGHLIGHTS.categories}<span class="text-base font-normal text-ink-3"> 種</span>
 				</dd>
 			</div>
 			<div>
-				<dt class="mono-label text-[11px] text-ink-3">最高圧力耐性</dt>
-				<dd class="tnum font-display mt-1 text-3xl font-semibold text-ink">
+				<dt class="mono-label text-[11px] text-ink-3">最高圧力耐性(0–1)</dt>
+				<dd class="tnum font-display mt-1 text-3xl font-semibold whitespace-nowrap text-ink">
 					{HIGHLIGHTS.bestResistance}
 				</dd>
 			</div>

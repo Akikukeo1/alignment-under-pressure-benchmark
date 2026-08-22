@@ -22,6 +22,10 @@ const { title, description } = Astro.props;
 		<meta property="og:type" content="website" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<title>{title}</title>
+		<!-- JS有効時のみリビールの初期非表示を有効化するため、最初に html へ js クラスを付与 -->
+		<script is:inline>
+			document.documentElement.classList.add('js');
+		</script>
 		<!-- フォント:Space Grotesk(欧文ディスプレイ)+ Inter(欧文本文)+ JetBrains Mono(ラベル)+ Noto Sans JP(日本語) -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,7 +34,7 @@ const { title, description } = Astro.props;
 			rel="stylesheet"
 		/>
 		<!-- Google Tag Manager -->
-		<script>
+		<script is:inline>
 			(function (w, d, s, l, i) {
 				w[l] = w[l] || [];
 				w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
@@ -43,7 +47,7 @@ const { title, description } = Astro.props;
 			})(window, document, 'script', 'dataLayer', 'GTM-NVW8F55Z');
 		</script>
 		<!-- Microsoft Clarity -->
-		<script type="text/javascript">
+		<script is:inline type="text/javascript">
 			(function (c, l, a, r, i, t, y) {
 				c[a] =
 					c[a] ||
@@ -58,8 +62,8 @@ const { title, description } = Astro.props;
 			})(window, document, 'clarity', 'script', 'xknmkrvk4x');
 		</script>
 		<!-- Google tag (gtag.js) -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-NFTVXKMLB4"></script>
-		<script>
+		<script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-NFTVXKMLB4"></script>
+		<script is:inline>
 			window.dataLayer = window.dataLayer || [];
 			function gtag() {
 				dataLayer.push(arguments);

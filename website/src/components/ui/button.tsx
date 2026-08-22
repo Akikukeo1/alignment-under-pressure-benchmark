@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 /* ボタン。Cobalt の規律:6px 半径・ピルは禁止・塗りはコバルト1色のみ */
 const buttonVariants = cva(
-	'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium transition-colors outline-none outline-offset-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-paper active:translate-y-px disabled:pointer-events-none disabled:opacity-55 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+	'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium transition-colors outline-hidden outline-offset-2 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-paper active:translate-y-px disabled:pointer-events-none disabled:opacity-55 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
 	{
 		variants: {
 			variant: {
