@@ -11,6 +11,7 @@ CSV とグラフ画像を生成する。
 """
 
 import argparse
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -234,7 +235,12 @@ def analyze_and_output(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, output_
         "overall": out_path / "overall",
     }
 
+    # 生成前に前回の出力を丸ごと消す(タスクやモデルの削除・リネーム時に
+    # 古い CSV/PNG が残り続けるのを防ぐ)。この 4 ディレクトリは本スクリプトの
+    # 管轄なので、中身はすべて再生成可能な生成物であることを前提とする。
     for d in dirs.values():
+        if d.exists():
+            shutil.rmtree(d)
         d.mkdir(parents=True, exist_ok=True)
 
     # CSV 出力(モデル別サマリーはグラフ側でも使う)

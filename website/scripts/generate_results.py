@@ -104,6 +104,10 @@ def main() -> None:
     OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     # --- グラフ画像のコピー ----------------------------------------------------
+    # 前回生成分を丸ごと削除してからコピーする(ソース側で画像が廃止・リネーム
+    # されたとき、古い PNG がサイトに残り続けるのを防ぐ)。
+    if OUT_IMG_DIR.exists():
+        shutil.rmtree(OUT_IMG_DIR)
     OUT_IMG_DIR.mkdir(parents=True, exist_ok=True)
     copied = 0
     for src, dest_name in PNG_SOURCES.items():
