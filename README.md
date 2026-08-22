@@ -23,8 +23,9 @@
 # Python 3.14+ の環境と依存関係をインストール(uv が必要)
 uv sync
 
-# Kaggle CLI と SDK(本リポジトリの依存には含まれないため別途インストール)
-pip install kaggle kaggle-benchmarks
+# Kaggle CLI(本リポジトリの依存には含まれないため別途インストール)
+# ※ kaggle-benchmarks SDK は必須ではない(push 後は Kaggle クラウド上で実行される)
+uv tool install kaggle
 
 # Kaggle Benchmark 用の認証情報を取得し .env を生成
 # (APIキーは短期間で失効するため、認証エラー時は kaggle b auth -y で再取得)

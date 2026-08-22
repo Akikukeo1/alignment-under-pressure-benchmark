@@ -194,5 +194,7 @@ uv run autopush.py
 kaggle b t run aupb-<name> -m <model> --wait
 ```
 
-ローカルでの動作確認(`python generated/AUPB_<name>.py`)を行う場合は、
-Kaggle CLI/SDK のセットアップと `.env` の認証情報が必要です。[REPRODUCIBILITY.md](../REPRODUCIBILITY.md) を参照してください。
+> ローカルで動作確認することも可能ですが、必須ではありません(タスクの実行は push 後、
+> Kaggle のクラウド上で完結します)。実行する場合のみ、`uv add kaggle-benchmarks` で
+> SDK を導入し `.env` の認証情報を配置した上で、
+> `uv run python generated/AUPB_<name>.py` を実行してください。

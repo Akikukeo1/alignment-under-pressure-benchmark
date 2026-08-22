@@ -34,14 +34,17 @@ flowchart LR
 | Python 3.14+ | `.python-version` 参照。`uv` が自動で用意します |
 | [uv](https://docs.astral.sh/uv/) | Python 環境・依存関係の管理に使用 |
 | Kaggle アカウント | ベンチマーク実行には Model Proxy 対応アカウントが必要です |
-| Kaggle CLI(`kaggle` コマンド)+ `kaggle-benchmarks` SDK | 本リポジトリの依存には**含まれていない**ため別途インストールします |
+| Kaggle CLI(`kaggle` コマンド) | 本リポジトリの依存には含まれないため、`uv tool install kaggle` で別途導入します |
 
-Kaggle CLI / SDK は以下で導入します(公式リポジトリ: [kaggle-benchmarks](https://github.com/Kaggle/kaggle-benchmarks)、[CLI ドキュメント](https://github.com/Kaggle/kaggle-cli/blob/main/docs/benchmarks.md)):
+Kaggle CLI は `uv tool` で導入します(公式ドキュメント: [CLI ドキュメント](https://github.com/Kaggle/kaggle-cli/blob/main/docs/benchmarks.md)、[kaggle-benchmarks](https://github.com/Kaggle/kaggle-benchmarks)):
 
 ```bash
-pip install kaggle
-pip install kaggle-benchmarks
+uv tool install kaggle
 ```
+
+> `kaggle-benchmarks` SDK は必須ではありません。タスクの実行は push 後に
+> Kaggle のクラウド上で完結するため、ローカルへのインストールは(エディタの
+> シンタックスハイライト等が欲しい場合を除き)不要です。
 
 また、通常の Kaggle API 認証(`~/.kaggle/kaggle.json`。Kaggle の Settings ページから
 API トークンを取得)が済んでいることを確認してください。
@@ -63,8 +66,8 @@ kaggle b init -y
 `kaggle b init -y` により、リポジトリルートに `.env`(Model Proxy 認証情報、
 既定モデル一覧など)が書き込まれます。
 
-> **認証情報は短期間で失効します。** `python generated/AUPB_*.py` や
-> `kaggle b t run` が認証エラーになった場合は、`kaggle b auth -y` で再取得してください。
+> **認証情報は短期間で失効します。** `kaggle b t run` が認証エラーになった場合は、
+> `kaggle b auth -y` で再取得してください。
 > `.env` は秘密情報を含むためコミットしません(リポジトリの `.env.exanple` が形式の参考になります)。
 
 利用可能なモデルの一覧は次のコマンドで確認できます:
@@ -94,6 +97,9 @@ uv run build.py
 
 `config.toml` を変更した場合(スコアリング方式、難易度別ループ数など)は、
 `uv run build.py --clean` で全タスクを再生成してください。
+
+> 生成されたスクリプトをローカルで実行する必要はありません。
+> ステップ 2 の push 以降は Kaggle のクラウド上で実行が完結します。
 
 ## 4. ステップ 2: Kaggle へのタスク登録
 
@@ -198,7 +204,7 @@ pnpm build           # 本番ビルド(dist/)
 
 | 症状 | 対処 |
 | :--- | :--- |
-| `kaggle b t run` やローカル実行が認証エラー | API キーの失効。`kaggle b auth -y` で再取得 |
+| `kaggle b t run` が認証エラー | API キーの失効。`kaggle b auth -y` で再取得 |
 | `generated/` が空 / 存在しない | gitignore 対象。`uv run build.py` を実行 |
 | `config.toml` を変えたのに結果が変わらない | 生成スクリプトに焼き込まれるのはビルド時点の値。`uv run build.py --clean` で再生成後、`uv run autopush.py --force` で再 push |
 | autopush しても特定タスクだけ push されない | `[task].autopush = false` のタスクは対象外。`kaggle b t push` で手動 push するか、TOML で `autopush = true` にする |
