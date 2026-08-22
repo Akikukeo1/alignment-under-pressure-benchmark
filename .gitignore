@@ -1,4 +1,18 @@
-README.png
+# 認証情報・個人情報
 .env
+README.png
+
+# ビルド成果物(build.py で再生成可能)
 /generated
-/.agents/skills
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ruff_cache/
+
+# 依存関係
+node_modules/
+
+# AI エージェントスキル(skills-lock.json から再インストール可能なため同梱しない)
+**/.agents/skills/
