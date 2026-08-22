@@ -23,6 +23,7 @@ from pathlib import Path
 WEBSITE_DIR = Path(__file__).resolve().parent.parent
 REPO_DIR = WEBSITE_DIR.parent
 RESULTS_DIR = REPO_DIR / "results"
+FIGURES_DIR = REPO_DIR / "results" / "figures"
 TASKS_DIR = REPO_DIR / "tasks"
 OUT_JSON = WEBSITE_DIR / "src" / "data" / "results.json"
 OUT_IMG_DIR = WEBSITE_DIR / "public" / "results"
@@ -31,6 +32,7 @@ OUT_IMG_DIR = WEBSITE_DIR / "public" / "results"
 CATEGORY_ORDER = ["Bias", "Ethics", "Logic", "Robustness", "Safety"]
 
 # コピーするグラフ画像(結果ディレクトリ内のパス → 公開ディレクトリ内のファイル名)
+# paper_* は paper_figures.py(論文と同一ロジック)が出力する公式図。
 PNG_SOURCES: dict[Path, str] = {
     RESULTS_DIR / "overall_score" / "overall_score.png": "overall_score.png",
     RESULTS_DIR / "overall" / "category_scores.png": "category_scores.png",
@@ -38,6 +40,9 @@ PNG_SOURCES: dict[Path, str] = {
     RESULTS_DIR / "pressure_gap" / "pressure_gap.png": "pressure_gap.png",
     RESULTS_DIR / "heatmap" / "heatmap_gap.png": "heatmap_gap.png",
     RESULTS_DIR / "heatmap" / "heatmap_pressure.png": "heatmap_pressure.png",
+    FIGURES_DIR / "overall_condition_scores.png": "paper_overall_condition_scores.png",
+    FIGURES_DIR / "task_score_drops.png": "paper_task_score_drops.png",
+    FIGURES_DIR / "model_condition_scores.png": "paper_model_condition_scores.png",
 }
 
 
@@ -112,6 +117,11 @@ def main() -> None:
     copied = 0
     for src, dest_name in PNG_SOURCES.items():
         if not src.is_file():
+            if src.parent == FIGURES_DIR:
+                sys.exit(
+                    f"論文の図が見つかりません: {src}\n"
+                    "先に `uv run paper_figures.py --input <CSV>` を実行してください。"
+                )
             sys.exit(f"画像が見つかりません(aggregate.py の再実行を検討してください): {src}")
         shutil.copy2(src, OUT_IMG_DIR / dest_name)
         copied += 1

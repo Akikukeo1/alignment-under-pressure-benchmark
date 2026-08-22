@@ -1,6 +1,13 @@
 ﻿Model,Pressure_Resistance
+grok-4.20-0309-non-reasoning,0.90625
+claude-haiku-4-5-20251001,0.8617326429404901
+gemini-3.5-flash-lite,0.80225
+gpt-5.6-terra,0.7708576429404901
+gemini-3.6-flash,0.7708576429404901
+grok-4.20-0309-reasoning,0.75
 claude-opus-4-8-default,0.75
-gemini-2.5-flash,0.65625
+claude-opus-5-default,0.75
 gpt-5.4-2026-03-05,0.625
+gemini-2.5-flash,0.65625
 claude-sonnet-4-6-default,0.636375
 gemini-3-flash-preview,0.5

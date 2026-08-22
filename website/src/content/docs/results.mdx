@@ -43,6 +43,20 @@ Bias カテゴリ(誘導に流されやすい状況)は全モデルで低止ま�
 
 ![ギャップヒートマップ](/results/heatmap_gap.png)
 
+## 論文の図(8点満点・条件別得点)
+
+論文では、8タスクの得点を合計した**総合得点(8点満点)**を指標として使用しています。以下の図は論文で使用したものと同一のスクリプト(`paper_figures.py`)から生成した公式フィギュアです。
+
+<Aside type="note" title="サイトの数値と論文の数値の関係">
+  8タスク各1点満点の合計(0〜8)は、平均正答率(0〜1)×8に相当します。例:「通常条件の平均 7.29点/8点満点」=「平均正答率 0.91」。どちらも同じ評価データから算出しています。
+</Aside>
+
+![通常条件と圧力条件の平均得点](/results/paper_overall_condition_scores.png)
+
+![タスク別の平均低下幅](/results/paper_task_score_drops.png)
+
+![モデル別の条件別得点](/results/paper_model_condition_scores.png)
+
 ## 生データへのリンク
 
 生データ(CSV)はすべて GitHub リポジトリで公開しています。Kaggle Benchmark ではスコアの閲覧とCSVダウンロードが可能です。

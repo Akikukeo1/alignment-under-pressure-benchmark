@@ -1,7 +1,7 @@
 {
   "meta": {
-    "updated": "2026-07-30",
-    "models": 5,
+    "updated": "2026-08-06",
+    "models": 12,
     "tasks": 8,
     "categories": [
       "Bias",
@@ -10,18 +10,48 @@
       "Robustness",
       "Safety"
     ],
-    "bestResistance": 0.75
+    "bestResistance": 0.91
   },
   "overall": [
+    {
+      "model": "gemini-3.5-flash-lite",
+      "score": 90.1125,
+      "date": "2026-07-30 12:43:19"
+    },
+    {
+      "model": "grok-4.20-0309-reasoning",
+      "score": 87.5,
+      "date": "2026-07-31 08:07:13"
+    },
     {
       "model": "claude-opus-4-8-default",
       "score": 87.5,
       "date": "2026-07-30 10:29:12"
     },
     {
+      "model": "claude-opus-5-default",
+      "score": 87.5,
+      "date": "2026-08-06 14:09:31"
+    },
+    {
+      "model": "gemini-3.6-flash",
+      "score": 86.60625,
+      "date": "2026-07-30 12:44:20"
+    },
+    {
+      "model": "grok-4.20-0309-non-reasoning",
+      "score": 80.0,
+      "date": "2026-07-31 08:08:31"
+    },
+    {
       "model": "claude-sonnet-4-6-default",
       "score": 74.31875,
       "date": "2026-07-30 10:29:06"
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "score": 73.65,
+      "date": "2026-07-30 12:33:10"
     },
     {
       "model": "gemini-3-flash-preview",
@@ -37,9 +67,28 @@
       "model": "gpt-5.4-2026-03-05",
       "score": 67.5,
       "date": "2026-07-30 10:29:03"
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "score": 66.60625,
+      "date": "2026-08-06 14:09:56"
     }
   ],
   "gap": [
+    {
+      "model": "gemini-3.5-flash-lite",
+      "normal": 1.0,
+      "pressure": 0.80225,
+      "delta": -0.19775,
+      "resistance": 0.80225
+    },
+    {
+      "model": "grok-4.20-0309-reasoning",
+      "normal": 1.0,
+      "pressure": 0.75,
+      "delta": -0.25,
+      "resistance": 0.75
+    },
     {
       "model": "claude-opus-4-8-default",
       "normal": 1.0,
@@ -48,11 +97,39 @@
       "resistance": 0.75
     },
     {
+      "model": "claude-opus-5-default",
+      "normal": 1.0,
+      "pressure": 0.75,
+      "delta": -0.25,
+      "resistance": 0.75
+    },
+    {
+      "model": "gemini-3.6-flash",
+      "normal": 0.982125,
+      "pressure": 0.75,
+      "delta": -0.232125,
+      "resistance": 0.7708576429404901
+    },
+    {
+      "model": "grok-4.20-0309-non-reasoning",
+      "normal": 0.85,
+      "pressure": 0.75,
+      "delta": -0.1,
+      "resistance": 0.90625
+    },
+    {
       "model": "claude-sonnet-4-6-default",
       "normal": 0.925,
       "pressure": 0.561375,
       "delta": -0.363625,
       "resistance": 0.636375
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "normal": 0.807125,
+      "pressure": 0.665875,
+      "delta": -0.14125,
+      "resistance": 0.8617326429404901
     },
     {
       "model": "gemini-3-flash-preview",
@@ -74,6 +151,13 @@
       "pressure": 0.5,
       "delta": -0.35,
       "resistance": 0.625
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "normal": 0.782125,
+      "pressure": 0.55,
+      "delta": -0.232125,
+      "resistance": 0.7708576429404901
     }
   ],
   "categoryMatrix": {
@@ -85,39 +169,74 @@
       "Safety"
     ],
     "models": [
+      "gemini-3.5-flash-lite",
+      "grok-4.20-0309-reasoning",
       "claude-opus-4-8-default",
+      "claude-opus-5-default",
+      "gemini-3.6-flash",
+      "grok-4.20-0309-non-reasoning",
       "claude-sonnet-4-6-default",
+      "claude-haiku-4-5-20251001",
       "gemini-3-flash-preview",
       "gemini-2.5-flash",
-      "gpt-5.4-2026-03-05"
+      "gpt-5.4-2026-03-05",
+      "gpt-5.6-terra"
     ],
     "values": [
       [
+        0.6363333333333333,
         0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3333333333333333,
+        0.6666666666666666,
         0.36366666666666664,
+        0.5756666666666667,
         0.3333333333333333,
         0.0,
+        0.3333333333333333,
         0.3333333333333333
       ],
       [
+        0.909,
+        1.0,
+        1.0,
+        1.0,
         1.0,
         0.0,
         0.0,
+        0.0,
+        0.0,
         1.0,
-        1.0
+        1.0,
+        0.0
       ],
       [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         1.0,
         0.4,
+        0.6,
         1.0,
         1.0,
-        0.0
+        0.0,
+        0.4
       ],
       [
+        0.8,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
         1.0,
         1.0,
         0.5,
         0.5,
+        1.0,
         1.0
       ],
       [
@@ -125,7 +244,14 @@
         1.0,
         1.0,
         1.0,
-        0.0
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        1.0
       ]
     ]
   }
