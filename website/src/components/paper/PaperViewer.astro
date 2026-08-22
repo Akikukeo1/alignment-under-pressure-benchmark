@@ -1,0 +1,199 @@
+---
+// 論文PDFビューア。全画面表示の切り替えと、他リソースへの直接ジャンプを提供する。
+// Starlight ページは Tailwind を読み込まないため、スタイルはこのスコープ内で完結させる。
+import { GITHUB_REPO, KAGGLE_BENCHMARK } from '@/data/site';
+
+const resources = [
+	{ href: '/results', label: '結果データ' },
+	{ href: '/tasks', label: 'タスク一覧' },
+	{ href: GITHUB_REPO, label: 'GitHub', external: true },
+	{ href: KAGGLE_BENCHMARK, label: 'Kaggle', external: true },
+];
+---
+
+<div class="paper-viewer" id="paper-viewer">
+	<!-- ツールバー:全画面・ダウンロード・リソースへの直接ジャンプ -->
+	<div class="toolbar">
+		<div class="primary-actions">
+			<button id="fullscreen-toggle" type="button" class="btn btn-primary">
+				<span class="btn-icon" aria-hidden="true">⛶</span> 全画面で読む
+			</button>
+			<a class="btn btn-outline" href="/paper.pdf" download="AUPB_paper.pdf">PDFをダウンロード</a>
+		</div>
+		<nav class="resource-links" aria-label="関連リソース">
+			{
+				resources.map((r) => (
+					<a
+						class="chip"
+						href={r.href}
+						target={r.external ? '_blank' : undefined}
+						rel={r.external ? 'noopener noreferrer' : undefined}
+					>
+						{r.label}
+						{r.external && <span class="ext" aria-hidden="true">↗</span>}
+					</a>
+				))
+			}
+		</nav>
+	</div>
+
+	<!-- PDF 埋め込み(この要素を全画面化する) -->
+	<iframe id="paper-frame" src="/paper.pdf" title="Alignment Under Pressure Benchmark 論文"></iframe>
+</div>
+
+<style>
+	.paper-viewer {
+		--pv-accent: var(--sl-color-accent-600, #2563eb);
+		--pv-accent-hover: var(--sl-color-accent-700, #1d4ed8);
+		--pv-rule: var(--sl-color-gray-5, #cbd5e1);
+
+		margin-top: 1rem;
+	}
+
+	/* ---- ツールバー ---- */
+	.toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem 1.25rem;
+		margin-bottom: 0.9rem;
+	}
+	.primary-actions {
+		display: flex;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.45rem 1rem;
+		border-radius: 6px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		line-height: 1.2;
+		text-decoration: none;
+		cursor: pointer;
+		border: 1px solid transparent;
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease,
+			border-color 0.15s ease;
+	}
+	.btn:focus-visible {
+		outline: 2px solid var(--pv-accent);
+		outline-offset: 2px;
+	}
+	.btn-primary {
+		background: var(--pv-accent);
+		color: #fff;
+	}
+	.btn-primary:hover {
+		background: var(--pv-accent-hover);
+	}
+	.btn-outline {
+		background: transparent;
+		border-color: var(--pv-rule);
+		color: inherit;
+	}
+	.btn-outline:hover {
+		border-color: var(--pv-accent);
+		color: var(--pv-accent);
+	}
+	.btn-icon {
+		font-size: 1em;
+		line-height: 1;
+	}
+
+	/* ---- リソースチップ ---- */
+	.resource-links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.45rem;
+		margin-left: auto;
+	}
+	.chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.32rem 0.75rem;
+		border: 1px solid var(--pv-rule);
+		border-radius: 999px;
+		font-size: 0.78rem;
+		font-weight: 500;
+		text-decoration: none;
+		color: inherit;
+		white-space: nowrap;
+		transition:
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+	.chip:hover {
+		border-color: var(--pv-accent);
+		color: var(--pv-accent);
+	}
+	.chip:focus-visible {
+		outline: 2px solid var(--pv-accent);
+		outline-offset: 2px;
+	}
+	.ext {
+		font-size: 0.72em;
+		opacity: 0.65;
+	}
+
+	/* ---- PDF 埋め込み ---- */
+	iframe#paper-frame {
+		width: 100%;
+		height: 80vh;
+		border: 1px solid var(--pv-rule);
+		border-radius: 10px;
+		background: #fff;
+	}
+
+	/* 全画面時はビューア領域いっぱいに広げる */
+	.paper-viewer:fullscreen {
+		display: flex;
+		flex-direction: column;
+		padding: 0.75rem clamp(0.75rem, 2vw, 1.5rem) 0;
+		background: var(--sl-color-bg, #fff);
+	}
+	.paper-viewer:fullscreen .toolbar {
+		margin-bottom: 0.6rem;
+	}
+	.paper-viewer:fullscreen iframe#paper-frame {
+		flex: 1;
+		min-height: 0;
+		height: auto;
+		border-radius: 10px 10px 0 0;
+	}
+</style>
+
+<script>
+	// 全画面トグル(Fullscreen API)。非対応環境ではボタンを隠す。
+	const viewer = document.getElementById('paper-viewer');
+	const button = document.getElementById('fullscreen-toggle') as HTMLButtonElement | null;
+
+	if (viewer && button) {
+		const supportsFullscreen = Boolean(viewer.requestFullscreen);
+		if (!supportsFullscreen) {
+			button.hidden = true;
+		} else {
+			button.addEventListener('click', () => {
+				if (document.fullscreenElement) {
+					void document.exitFullscreen();
+				} else {
+					void viewer.requestFullscreen();
+				}
+			});
+
+			document.addEventListener('fullscreenchange', () => {
+				const active = document.fullscreenElement === viewer;
+				button.innerHTML = active
+					? '<span class="btn-icon" aria-hidden="true">✕</span> 全画面解除 (Esc)'
+					: '<span class="btn-icon" aria-hidden="true">⛶</span> 全画面で読む';
+			});
+		}
+	}
+</script>
