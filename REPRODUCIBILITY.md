@@ -10,14 +10,13 @@
 
 ## 0. パイプライン全体像
 
-```text
-tasks/*.toml ──build.py──▶ generated/AUPB_*.py ──autopush.py──▶ Kaggle Benchmark へ登録
-                                                                    │ kaggle b t run(モデル別に実行)
-                                                                    ▼
-                                                            Kaggle リーダーボード CSV をダウンロード
-                                                                    │ リポジトリルートへ配置
-                                                                    ▼
-results/*.csv, *.png ◀──aggregate.py(+charts.py)──────────────────┘
+```mermaid
+flowchart LR
+    A["tasks/*.toml"] -->|"1. uv run build.py"| B["generated/AUPB_*.py<br/>.build/manifest.json"]
+    B -->|"2. uv run autopush.py"| C["Kaggle 上のタスク<br/>(AUPB_*)"]
+    C -->|"3. kaggle b t run ... --wait<br/>(モデル別)"| D["Kaggle リーダーボード"]
+    D -->|"4. CSV をダウンロードし<br/>ルート直下へ配置"| E["リーダーボード CSV"]
+    E -->|"5. uv run aggregate.py"| F["results/*.csv, *.png"]
 ```
 
 | ステップ | コマンド | 成果物 |

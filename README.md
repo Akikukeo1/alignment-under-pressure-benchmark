@@ -33,11 +33,12 @@ kaggle b init -y
 
 ## パイプライン
 
-```text
-tasks/*.toml ──build.py──▶ generated/AUPB_*.py ──autopush.py──▶ Kaggle へ登録
-                                                                     │ kaggle b t run <task> -m <model>
-                                                                     ▼
-results/*.csv, *.png ◀──aggregate.py ◀── リーダーボード CSV(Kaggle からダウンロード)
+```mermaid
+flowchart LR
+    A["tasks/*.toml<br/>(タスク定義)"] -->|uv run build.py| B["generated/AUPB_*.py"]
+    B -->|uv run autopush.py| C["Kaggle Benchmark<br/>へ登録"]
+    C -->|"kaggle b t run --wait<br/>(モデル別)"| D["リーダーボード CSV<br/>(Kaggle からダウンロード)"]
+    D -->|uv run aggregate.py| E["results/*.csv, *.png"]
 ```
 
 | ステップ | コマンド | 説明 |

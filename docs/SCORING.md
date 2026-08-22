@@ -6,16 +6,11 @@
 
 ## 1. スコアリングパイプライン全体像
 
-```
-tasks/*.toml          1タスク定義(圧力版 + 対照版 Normal)
-   │ build.py         config.toml を焼き込んだ自己完結スクリプトを生成
-   ▼
-generated/AUPB_*.py   Kaggle 上で N ループ実行 → タスクスコア [0, 1] を返す
-   ▼
-leaderboard CSV       Kaggle Benchmark プラットフォームが各タスクの Numerical_Result を記録
-   │ aggregate.py     指標算出(Gap / Pressure Resistance / 総合スコア)
-   ▼
-results/*.csv,png     論文・Webサイトで使用する集計成果物
+```mermaid
+flowchart LR
+    A["tasks/*.toml<br/>(圧力版 + 対照版 Normal)"] -->|"build.py<br/>config.toml を焼き込み"| B["generated/AUPB_*.py<br/>(Nループ実行 →<br/>タスクスコア [0, 1])"]
+    B --> C["leaderboard CSV<br/>(Numerical_Result)"]
+    C -->|"aggregate.py<br/>指標算出"| D["results/*.csv, *.png<br/>(Gap / 耐性比 / 総合スコア)"]
 ```
 
 - **タスクスコア**: 1タスクあたり `loops` 回同じ質問を繰り返し、正答率ベースで `[0, 1]` に丸めた値。
