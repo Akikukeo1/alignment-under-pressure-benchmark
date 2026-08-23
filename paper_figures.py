@@ -46,9 +46,7 @@ def load_scores() -> tuple[pd.DataFrame, pd.DataFrame]:
         "圧力条件",
     )
     tasks["task"] = (
-        tasks["Task_Name"]
-        .str.replace("AUPB_Normal_", "", regex=False)
-        .str.replace("AUPB_", "", regex=False)
+        tasks["Task_Name"].str.replace("AUPB_Normal_", "", regex=False).str.replace("AUPB_", "", regex=False)
     )
 
     if tasks["Numerical_Result"].isna().any():
@@ -62,16 +60,8 @@ def load_scores() -> tuple[pd.DataFrame, pd.DataFrame]:
     if not task_counts.eq(8).all():
         raise ValueError("8種類のタスクがそろっていないモデルまたは条件があります。")
 
-    totals = (
-        tasks.groupby(["Model", "condition"])["Numerical_Result"]
-        .sum()
-        .unstack()
-    )
-    task_means = (
-        tasks.groupby(["task", "condition"])["Numerical_Result"]
-        .mean()
-        .unstack()
-    )
+    totals = tasks.groupby(["Model", "condition"])["Numerical_Result"].sum().unstack()
+    task_means = tasks.groupby(["task", "condition"])["Numerical_Result"].mean().unstack()
     task_means["低下幅"] = task_means["通常条件"] - task_means["圧力条件"]
     return totals[["通常条件", "圧力条件"]], task_means
 
@@ -193,9 +183,7 @@ def plot_model_scores(totals: pd.DataFrame) -> None:
     """モデルごとの通常条件と圧力条件の総合得点を比較する。"""
     scores = totals.copy()
     scores["低下幅"] = scores["通常条件"] - scores["圧力条件"]
-    scores = scores.sort_values(
-        ["圧力条件", "通常条件"], ascending=[False, False]
-    )
+    scores = scores.sort_values(["圧力条件", "通常条件"], ascending=[False, False])
 
     y = np.arange(len(scores))
     fig, ax = plt.subplots(figsize=(8.4, 6.2))
@@ -277,20 +265,18 @@ def main() -> None:
     DATA_PATH = Path(args.input)
     OUTPUT_DIR = Path(args.output_dir)
 
-    mpl.rcParams.update(
-        {
-            "font.family": "sans-serif",
-            # Windows 環境でも日本語が描けるようフォールバックを追加
-            "font.sans-serif": [
-                "Noto Sans CJK JP",
-                "Meiryo",
-                "Yu Gothic",
-                "DejaVu Sans",
-            ],
-            "axes.unicode_minus": False,
-            "font.size": 10,
-        }
-    )
+    mpl.rcParams.update({
+        "font.family": "sans-serif",
+        # Windows 環境でも日本語が描けるようフォールバックを追加
+        "font.sans-serif": [
+            "Noto Sans CJK JP",
+            "Meiryo",
+            "Yu Gothic",
+            "DejaVu Sans",
+        ],
+        "axes.unicode_minus": False,
+        "font.size": 10,
+    })
     totals, task_means = load_scores()
     plot_overall_scores(totals)
     plot_task_drops(task_means)

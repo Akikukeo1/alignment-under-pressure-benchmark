@@ -7,6 +7,7 @@ dependencies = [
     "kagglehub>=1.0.2",
     "matplotlib>=3.11.1",
     "pandas>=3.0.5",
+    "ruff>=0.15.20",
     "seaborn>=0.13.2",
 ]
 
@@ -16,9 +17,36 @@ dev = [
 ]
 
 [tool.ruff]
+exclude = [".git", ".venv", "build", "dist", "generated", "paper/results/figures", "website/public"]
 line-length = 120
+indent-width = 4
 target-version = "py313"
+# NOTE: Ruff は 314 に対応するが、新構文にエコシステムが追いついていないため、313 を指定する。将来的に 314 に変更する。
+preview = true  # プレビュー機能を利用したいため、有効にする。
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
-ignore = ["E701", "F841", "F401", "E501", "E741"]
+mccabe = { max-complexity = 15 }
+select = [
+  "B",
+  "D",
+  "E",
+  "F",
+  "I",
+  "N",
+  "W",
+  "C90",
+  "TID252",
+  "PGH003",
+  "UP",
+  "SIM",
+  "RUF",
+  "PIE",
+  "PTH",
+  "RET",
+  "DTZ",
+  "ARG",
+  "ASYNC",
+  "NPY",
+  "PT",
+]
+ignore = ["D100", "D102", "D400", "D415", "RUF001"]

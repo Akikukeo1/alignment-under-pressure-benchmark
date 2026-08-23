@@ -18,6 +18,10 @@ aggregate:
 figures:
     uv run paper_figures.py --input akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv
 
+# 論文図を再生成(paper/results/figures/ に出力、入力は論文時の凍結CSV)
+paper-figures:
+    uv run paper_figures.py --input paper/result.csv --output-dir paper/results/figures
+
 # ウェブサイト用データを生成(results.json とサイト内画像を更新)
 sync-data:
     cd website; pnpm gen:data

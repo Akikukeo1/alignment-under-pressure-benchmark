@@ -217,8 +217,11 @@ just paper-figures
 
 - `paper/result.csv` は論文執筆時点のリーダーボード CSV の凍結スナップショットです。
   最新結果での図は `just figures`(ルートの `results/figures/`)を使用してください。
-- 論文 PDF のビルドは GitHub Actions(`.github/workflows/paper.yml`)または
-  オンライン執筆サービスで行います。ローカルには LaTeX ビルドレシピはありません。
+- 論文 PDF のビルドは GitHub Actions またはオンライン執筆サービスで行います
+  (ローカルには LaTeX ビルドレシピはありません)。ワークフローは次のとおり:
+  - **CI(check.yml)**: push / PR 時に論文ビルドが通るかを検証。PDF は artifact で確認可能
+  - **Publish paper(publish-paper.yml)**: 手動実行。図再生成 → PDF ビルド →
+    `website/public/paper.pdf` を更新して main に push(サイトへ自動反映)
 - QR コード(`paper/assets/aup_benchmark_qr.svg` / `.pdf`)の再生成は
   掲載 URL が変わった場合のみ必要です。`paper/scripts/generate_qr_svg.py`
   (lualatex + Inkscape 必須)で SVG を生成し、`paper/scripts/make_qr_pdf.py`

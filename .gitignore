@@ -21,5 +21,11 @@ node_modules/
 !**/.agents/skills/release-audit/
 
 
-# 整備が必要なため一時的に除外
-/paper
+# 論文の LaTeX 中間生成物・ビルド成果物
+/paper/main.aux
+/paper/main.bcf
+/paper/main.log
+/paper/main.pdf
+/paper/main.run.xml
+/paper/main.synctex.gz
+/paper/main.toc
