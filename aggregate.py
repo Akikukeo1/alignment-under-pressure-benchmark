@@ -32,6 +32,7 @@ CATEGORY_ORDER = ["Bias", "Ethics", "Logic", "Robustness", "Safety"]
 # 1. 設定 & メタデータ読み込み (Config & Metadata Loader)
 # ==========================================
 
+
 def load_config(config_path: str) -> dict:
     """TOML設定ファイルを読み込みます。"""
     path = Path(config_path)
@@ -69,6 +70,7 @@ def load_task_metadata(tasks_dir: str) -> dict:
 # ==========================================
 # 2. データ処理関数 (Data Processing)
 # ==========================================
+
 
 def parse_csv_data(csv_path: str, task_metadata: dict):
     """CSVをパースし、総合スコアとタスク別スコアのデータフレームに整形します。"""
@@ -156,7 +158,8 @@ def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
 def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -> pd.DataFrame:
     """モデルごとの平均指標を算出します。"""
     summary = (
-        pivot_df.groupby("Model")
+        pivot_df
+        .groupby("Model")
         .agg(
             Avg_Normal=("Normal", "mean"),
             Avg_Pressure=("Pressure", "mean"),
@@ -173,6 +176,7 @@ def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -
 # 3. CSV 出力 (CSV Writers)
 # ==========================================
 
+
 def write_csvs(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, dirs: dict[str, Path]) -> pd.DataFrame:
     """results/ 以下のすべての CSV を書き出し、モデル別サマリーを返します。"""
     overall_df.to_csv(dirs["overall_score"] / "overall_score.csv", index=False, encoding="utf-8-sig")
@@ -181,9 +185,7 @@ def write_csvs(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, dirs: dict[str,
     gap_by_task.to_csv(dirs["pressure_gap"] / "pressure_gap_by_task.csv", index=False, encoding="utf-8-sig")
 
     model_summary = _calculate_model_summary(pivot_df, overall_df)
-    model_summary.to_csv(
-        dirs["pressure_gap"] / "pressure_gap_by_model.csv", index=False, encoding="utf-8-sig"
-    )
+    model_summary.to_csv(dirs["pressure_gap"] / "pressure_gap_by_model.csv", index=False, encoding="utf-8-sig")
 
     pr_df = model_summary[["Model", "Avg_Pressure_Resistance"]].rename(
         columns={"Avg_Pressure_Resistance": "Pressure_Resistance"}
@@ -197,12 +199,7 @@ def write_csvs(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, dirs: dict[str,
         dirs["heatmap"] / "heatmap_gap.csv", encoding="utf-8-sig"
     )
 
-    cat_summary = (
-        pivot_df.groupby(["Category", "Model"])["Pressure"]
-        .mean()
-        .unstack(level="Model")
-        .reset_index()
-    )
+    cat_summary = pivot_df.groupby(["Category", "Model"])["Pressure"].mean().unstack(level="Model").reset_index()
     cat_summary.to_csv(dirs["overall"] / "category_scores.csv", index=False, encoding="utf-8-sig")
 
     overall_summary = model_summary.rename(
@@ -222,6 +219,7 @@ def write_csvs(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, dirs: dict[str,
 # ==========================================
 # 4. 全体統括関数 (Main Orchestrator)
 # ==========================================
+
 
 def analyze_and_output(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, output_dir: str) -> None:
     """CSV 出力 → グラフ描画の順に処理を統括します。"""

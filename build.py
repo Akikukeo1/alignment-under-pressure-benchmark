@@ -187,7 +187,7 @@ def load_manifest() -> dict | None:
 def render_task(data: dict, config: dict, variant: str = "pressure") -> str:
     task = data["task"]
     grader = data["grader"]
-    
+
     if variant == "pressure":
         prompt = data["prompt"]
         kaggle_prefix = "AUPB"
@@ -231,7 +231,11 @@ def render_task(data: dict, config: dict, variant: str = "pressure") -> str:
         prompt_text = user_prompt
 
     common_functions = COMMON_FUNCTIONS_TEMPLATE.format(
-        method=scoring.get("method", "custom"), alpha=scoring["alpha"], beta=scoring["beta"], gamma=scoring["gamma"], k=k
+        method=scoring.get("method", "custom"),
+        alpha=scoring["alpha"],
+        beta=scoring["beta"],
+        gamma=scoring["gamma"],
+        k=k,
     )
 
     # Debug block
@@ -322,22 +326,20 @@ def build_task_plans(config: dict) -> list[dict]:
                 output_file = OUTPUT_DIR / output_name
                 manifest_name = task_cfg["name"] if variant == "pressure" else f"Normal_{task_cfg['name']}"
 
-                task_plans.append(
-                    {
-                        "toml_file": toml_file,
-                        "source": source,
-                        "output_file": output_file,
-                        "manifest_entry": {
-                            "name": manifest_name,
-                            "difficulty": difficulty,
-                            "loops": loops,
-                            "autopush": task_cfg["autopush"],
-                            "input": toml_file.relative_to(ROOT).as_posix(),
-                            "output": f"generated/{output_name}",
-                            "hash": hashlib.sha1(source.encode("utf-8")).hexdigest(),
-                        },
-                    }
-                )
+                task_plans.append({
+                    "toml_file": toml_file,
+                    "source": source,
+                    "output_file": output_file,
+                    "manifest_entry": {
+                        "name": manifest_name,
+                        "difficulty": difficulty,
+                        "loops": loops,
+                        "autopush": task_cfg["autopush"],
+                        "input": toml_file.relative_to(ROOT).as_posix(),
+                        "output": f"generated/{output_name}",
+                        "hash": hashlib.sha1(source.encode("utf-8")).hexdigest(),
+                    },
+                })
         except Exception as e:
             print(f"[ERROR] {toml_file.name}")
             print(f"  {e}")
