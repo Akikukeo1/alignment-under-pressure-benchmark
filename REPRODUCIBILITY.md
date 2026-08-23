@@ -120,6 +120,11 @@ uv run autopush.py
 
 push 後、`kaggle b t list` でタスク一覧を確認できます。
 
+> **ライセンスに関する注記**: Kaggle に push されたタスクのコピーには
+> Kaggle プラットフォーム側の既定ライセンス(Apache-2.0)が適用されますが、
+> タスク内に埋め込まれた問題文は本リポジトリの CC BY 4.0 のままであることに
+> 注意してください。Kaggle から再利用する場合も問題文の帰属表示が必要です。
+
 ## 5. ステップ 3: ベンチマークの実行
 
 各タスクを各モデルに対して実行します。タスク ID は `aupb-{name}` 形式
@@ -200,7 +205,26 @@ pnpm dev             # ローカルプレビュー(http://localhost:4321)
 pnpm build           # 本番ビルド(dist/)
 ```
 
-## 9. トラブルシューティング
+## 9. (任意)論文図の再生成
+
+`paper/` は論文の LaTeX ソース一式です。論文に張り込む図 3 枚は、
+ルートの `paper_figures.py` で再生成できます(入力は論文時点の凍結 CSV):
+
+```bash
+just paper-figures
+# 実体: uv run paper_figures.py --input paper/result.csv --output-dir paper/results/figures
+```
+
+- `paper/result.csv` は論文執筆時点のリーダーボード CSV の凍結スナップショットです。
+  最新結果での図は `just figures`(ルートの `results/figures/`)を使用してください。
+- 論文 PDF のビルドは GitHub Actions(`.github/workflows/paper.yml`)または
+  オンライン執筆サービスで行います。ローカルには LaTeX ビルドレシピはありません。
+- QR コード(`paper/assets/aup_benchmark_qr.svg` / `.pdf`)の再生成は
+  掲載 URL が変わった場合のみ必要です。`paper/scripts/generate_qr_svg.py`
+  (lualatex + Inkscape 必須)で SVG を生成し、`paper/scripts/make_qr_pdf.py`
+  (lualatex のみ必須)で PDF を生成します。
+
+## 10. トラブルシューティング
 
 | 症状 | 対処 |
 | :--- | :--- |
@@ -212,7 +236,7 @@ pnpm build           # 本番ビルド(dist/)
 | `aggregate.py` で `FileNotFoundError` | `config.toml [aggregate].input_csv` のパスに CSV があるか確認 |
 | 特定タスクの Gap が空欄(NaN)になる | そのタスクに `normal_prompt` がないか、片方の条件の実行結果が CSV に含まれていない |
 
-## 10. 既知の制限
+## 11. 既知の制限
 
 - 難易度 `INP` (Impossible) は将来予約であり、現在はタスク定義・ビルドとも対応していません(使用できる難易度は E / M / H / INS / INS+)。
 - 総合スコア (Overall Score) は Kaggle Benchmark プラットフォーム側の集計値を使用しており、本リポジトリでは再計算していません。

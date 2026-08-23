@@ -71,3 +71,9 @@ flowchart LR
 ## AI エージェントによる開発支援
 
 `npx skills experimental_install` を実行すると、このリポジトリ用の AI エージェントスキル(Kaggle Benchmark 操作等)を導入できます。
+
+## ライセンス
+
+このプロジェクトのコンテンツ(タスク定義・論文・図表・集計結果・ドキュメント・ウェブサイト本文)は [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) の下で提供されます。それ以外のすべてのソースコードは [MIT License](LICENSE) の下で提供されます。
+
+コンテンツを利用する際は、「Alignment Under Pressure Benchmark (AUPB) © 2026 Keisuke Ishii」([https://github.com/Akikukeo1/alignment-under-pressure-benchmark](https://github.com/Akikukeo1/alignment-under-pressure-benchmark)) でのクレジット表示を推奨します。
