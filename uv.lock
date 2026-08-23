@@ -15,6 +15,7 @@ dependencies = [
     { name = "kagglehub" },
     { name = "matplotlib" },
     { name = "pandas" },
+    { name = "ruff" },
     { name = "seaborn" },
 ]
 
@@ -28,6 +29,7 @@ requires-dist = [
     { name = "kagglehub", specifier = ">=1.0.2" },
     { name = "matplotlib", specifier = ">=3.11.1" },
     { name = "pandas", specifier = ">=3.0.5" },
+    { name = "ruff", specifier = ">=0.15.20" },
     { name = "seaborn", specifier = ">=0.13.2" },
 ]
 
