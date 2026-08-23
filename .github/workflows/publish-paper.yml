@@ -44,6 +44,10 @@ jobs:
         with:
           root_file: main.tex
           working_directory: paper
+          # ltjsarticle は LuaTeX-ja 専用クラスのため LuaLaTeX でビルドする。
+          # args に既定の -pdf(pdflatex 指定)を残すとエンジン指定と競合するため除外。
+          latexmk_use_lualatex: true
+          args: -file-line-error -halt-on-error -interaction=nonstopmode
 
       # ビルド成果物をサイトの配信位置へ配置
       # (public/results/ は generate_results.py が丸ごと再構築するため触らない)
