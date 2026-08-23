@@ -1,0 +1,67 @@
+# 評価データのサイト反映(自動実行)。
+# リーダーボード CSV や集計ロジックの変更を push したとき、
+# just update 相当(aggregate → figures → sync-data)を実行し、
+# 生成物(results.json + public/results/*.png)を main に push する。
+# push 後、Cloudflare Pages がサイトを自動デプロイする。
+#
+# 論文 PDF の更新は行わない。公開は Publish paper ワークフローで手動に行う。
+
+name: Update data
+
+on:
+  push:
+    paths:
+      - "results/**"
+      - "tasks/**"
+      - "config.toml"
+      - "aggregate.py"
+      - "charts.py"
+      - "paper_figures.py"
+      - "website/scripts/**"
+      - ".github/workflows/update-data.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # aggregate → figures → sync-data 相当
+      # (site ビルドは Cloudflare Pages 側で行うためここでは不要)
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Aggregate
+        run: uv run aggregate.py
+      - name: Build figures
+        run: |
+          uv run paper_figures.py \
+            --input akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sync data
+        run: |
+          cd website
+          npm install --no-save pnpm
+          npx pnpm install --frozen-lockfile
+          npx pnpm gen:data
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add website/src/data/results.json website/public/results
+          if git diff --cached --quiet; then
+            echo "変更がないためコミットをスキップします"
+            exit 0
+          fi
+          git commit -m "Update site data [skip ci]"
+          git push

@@ -1,0 +1,63 @@
+# 論文 PDF の公開(手動実行)。
+# 図を再生成して論文 PDF をビルドし、website/public/paper.pdf を更新して
+# main に push する。push 後、Cloudflare Pages がサイトを自動デプロイする。
+#
+# 注意: LaTeX ソースのローカルテスト環境はないため、main.tex を変更した場合は
+# まず check.yml の paper-build で検証してから、このワークフローで公開する。
+
+name: Publish paper
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-paper
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 図の再生成(uv + matplotlib)。日本語ラベルのため CJK フォントが必要
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install CJK fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+      - name: Build figures
+        run: |
+          uv run paper_figures.py \
+            --input paper/result.csv \
+            --output-dir paper/results/figures
+
+      # PDF ビルド(TeX Live コンテナ内で実行。
+      # QR は事前変換済み PDF を includegraphics するため Inkscape 不要)
+      - name: Build PDF
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: main.tex
+          working_directory: paper
+
+      # ビルド成果物をサイトの配信位置へ配置
+      # (public/results/ は generate_results.py が丸ごと再構築するため触らない)
+      - name: Copy PDF into website
+        run: cp paper/main.pdf website/public/paper.pdf
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add website/public/paper.pdf
+          if git diff --cached --quiet; then
+            echo "変更がないためコミットをスキップします"
+            exit 0
+          fi
+          git commit -m "Update paper.pdf"
+          git push
