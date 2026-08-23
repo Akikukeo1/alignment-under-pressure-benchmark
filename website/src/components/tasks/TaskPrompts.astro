@@ -117,6 +117,29 @@ function diffRank(d: string): number {
 		--chip-diff-ins-ink: #991b1b;
 		--chip-diff-insp-bg: #f3e8ff;
 		--chip-diff-insp-ink: #6b21a8;
+
+		/* Starlight の gray スケールはダーク/ライトでスケール方向・定義数が異なるため、
+		 自前のトークンで両モード分を明示する(ダークモードは data-theme で上書き) */
+		--task-chip-bg: #e2e8f0; /* カテゴリチップ背景 */
+		--task-chip-ink: #1e293b;
+		--task-border: #cbd5e1; /* カード境界線 */
+		--task-body-border: #e2e8f0;
+		--task-muted: #64748b; /* 補助テキスト */
+		--task-faint: #94a3b8; /* さらに薄いテキスト(hint) */
+		--task-pre-bg: #f1f5f9; /* プロンプトコードブロック背景 */
+		--task-pre-ink: #334155;
+	}
+
+	/* ダークモード:Starlight の data-theme 属性に追従して明示的に反転する */
+	:global([data-theme='dark']) .task-list {
+		--task-chip-bg: hsl(224, 14%, 16%);
+		--task-chip-ink: hsl(224, 20%, 94%);
+		--task-border: hsl(224, 10%, 23%);
+		--task-body-border: hsl(224, 14%, 16%);
+		--task-muted: hsl(224, 6%, 60%);
+		--task-faint: hsl(224, 6%, 48%); /* hint は muted より一段薄く、ただし可読性を確保 */
+		--task-pre-bg: hsl(224, 14%, 16%);
+		--task-pre-ink: hsl(224, 20%, 94%);
 	}
 
 	/* 難易度バッジ */
@@ -127,8 +150,8 @@ function diffRank(d: string): number {
 		font-size: 0.72rem;
 		font-weight: 600;
 		line-height: 1.5;
-		background: var(--sl-color-gray-6, #e2e8f0);
-		color: var(--sl-color-white, #1e293b);
+		background: var(--task-chip-bg);
+		color: var(--task-chip-ink);
 	}
 	.diff-e {
 		background: var(--chip-diff-e-bg);
@@ -159,7 +182,7 @@ function diffRank(d: string): number {
 	}
 
 	.task {
-		border: 1px solid var(--sl-color-gray-5, #cbd5e1);
+		border: 1px solid var(--task-border);
 		border-radius: 10px;
 		overflow: hidden;
 		background: var(--sl-color-bg);
@@ -189,7 +212,7 @@ function diffRank(d: string): number {
 	.hint {
 		margin-left: auto;
 		font-size: 0.75rem;
-		color: var(--sl-color-gray-4, #94a3b8);
+		color: var(--task-faint);
 	}
 	details[open] .hint {
 		display: none;
@@ -197,12 +220,12 @@ function diffRank(d: string): number {
 
 	.body {
 		padding: 0 1.1rem 1.1rem;
-		border-top: 1px solid var(--sl-color-gray-6, #e2e8f0);
+		border-top: 1px solid var(--task-body-border);
 	}
 	.grader {
 		margin-top: 0.9rem;
 		font-size: 0.82rem;
-		color: var(--sl-color-gray-3, #64748b);
+		color: var(--task-muted);
 	}
 	.label {
 		margin: 1rem 0 0.35rem;
@@ -210,7 +233,7 @@ function diffRank(d: string): number {
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--sl-color-gray-3, #64748b);
+		color: var(--task-muted);
 	}
 	pre {
 		margin: 0;
@@ -220,8 +243,8 @@ function diffRank(d: string): number {
 		line-height: 1.55;
 		white-space: pre-wrap;
 		word-break: break-word;
-		background: var(--sl-color-gray-7, #f1f5f9);
-		color: var(--sl-color-gray-1, #334155);
+		background: var(--task-pre-bg);
+		color: var(--task-pre-ink);
 	}
 	pre.pressure {
 		/* 圧力下プロンプトにはコバルトのマーカーを付ける */
