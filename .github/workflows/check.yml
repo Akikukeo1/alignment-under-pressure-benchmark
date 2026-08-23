@@ -13,6 +13,11 @@ on:
   push:
     branches:
       - main
+    # ボットによる生成物のみの更新(update-data / publish-paper)は検証不要のため除外
+    paths-ignore:
+      - "website/src/data/results.json"
+      - "website/public/results/**"
+      - "website/public/paper.pdf"
   pull_request:
 
 permissions:

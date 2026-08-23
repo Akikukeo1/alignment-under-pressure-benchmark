@@ -67,5 +67,7 @@ jobs:
             echo "変更がないためコミットをスキップします"
             exit 0
           fi
-          git commit -m "Update site data [skip ci]"
+          # NOTE: [skip ci] を付けると Cloudflare Pages のデプロイまでスキップされる。
+          # 本ワークフローの再発火は上記 paths フィルタ(results.json 等を対象外)で防止済み。
+          git commit -m "Update site data"
           git push
