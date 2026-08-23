@@ -63,5 +63,26 @@ jobs:
             echo "変更がないためコミットをスキップします"
             exit 0
           fi
-          git commit -m "Update paper.pdf"
+          # NOTE: [skip ci] により GitHub Actions の再発火を防止。
+          # Cloudflare Pages の Git 連携は Actions(bot)の push をデプロイしないため、
+          # 配信は下記 Deploy to Cloudflare Pages(Direct Upload)が担う。
+          git commit -m "Update paper.pdf [skip ci]"
           git push
+
+      # NOTE: Cloudflare Pages は bot push を Git 連携で無視するため、ここでビルドして Direct Upload する。
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: website/.node-version
+      - name: Build site
+        run: |
+          cd website
+          npx pnpm install --frozen-lockfile
+          npx pnpm build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: website
+          command: pages deploy dist --project-name=alignment-under-pressure-benchmark --branch=main
