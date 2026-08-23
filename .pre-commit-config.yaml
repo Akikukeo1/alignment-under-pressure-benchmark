@@ -1,0 +1,25 @@
+ci:
+  autofix_prs: true
+
+exclude: '^(docs/sphinx/_build/|generated/|\.venv/|\.venv/Lib/site-packages|\.agents/skills/|CHANGELOG.md|website/public/|website/node_modules/|website/src/data/results.json|paper/results/figures/)'
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+
+  # 一旦様子見。
+  # - repo: https://github.com/executablebooks/mdformat
+  #   rev: 1.0.0
+  #   hooks:
+  #     - id: mdformat
