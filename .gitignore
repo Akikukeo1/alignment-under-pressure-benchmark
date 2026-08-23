@@ -14,5 +14,7 @@ __pycache__/
 # 依存関係
 node_modules/
 
-# AI エージェントスキル(skills-lock.json から再インストール可能なため同梱しない)
-**/.agents/skills/
+# AI エージェントスキル(skills-lock.json から再インストール可能なため同梱しない。
+# 自作・プロジェクト固有のスキルは例外として同梱する)
+**/.agents/skills/*
+!**/.agents/skills/paper-review/
