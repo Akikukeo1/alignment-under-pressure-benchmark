@@ -26,12 +26,16 @@ paper-figures:
 sync-data:
     cd website; pnpm gen:data
 
+# 再現手順ページを生成(REPRODUCIBILITY.md → reproducibility.mdx)
+sync-docs:
+    cd website; uv run scripts/generate_repro.py
+
 # ウェブサイトをビルド(website/dist/ に静的ファイルを出力)
 site:
     cd website; pnpm build
 
 # 評価データ更新 → サイト反映までの一連フロー(全自動)
-update: aggregate figures sync-data site
+update: aggregate figures sync-data sync-docs site
 
 # Python の Lint チェック
 lint:

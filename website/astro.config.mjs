@@ -59,6 +59,7 @@ export default defineConfig({
 					items: [
 						{ label: '結果データ', slug: 'results' },
 						{ label: 'タスク一覧', slug: 'tasks' },
+						{ label: '再現手順', slug: 'reproducibility' },
 						{ label: '論文', slug: 'paper' },
 					],
 				},
