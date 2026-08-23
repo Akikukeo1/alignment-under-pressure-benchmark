@@ -19,3 +19,7 @@ node_modules/
 **/.agents/skills/*
 !**/.agents/skills/paper-review/
 !**/.agents/skills/release-audit/
+
+
+# 整備が必要なため一時的に除外
+/paper
