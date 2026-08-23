@@ -48,9 +48,10 @@ jobs:
         run: |
           uv run paper_figures.py \
             --input akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv
+      # Node 版は website/.node-version で管理(ローカル開発環境と同一版を用いる)
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: website/.node-version
       - name: Sync data
         run: |
           cd website

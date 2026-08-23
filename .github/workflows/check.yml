@@ -41,11 +41,10 @@ jobs:
         with:
           enable-cache: true
 
-      # NOTE: Node 版を明示しないとランナーのプリインストール版に依存し、
-      # cookie の名前付き import など挙動差で site-build が壊れるため固定する。
+      # Node 版は website/.node-version で管理(ローカル開発環境と同一版を用いる)
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: website/.node-version
 
       - name: "ruff-check: Ruff check"
         if: matrix.task == 'ruff-check'
