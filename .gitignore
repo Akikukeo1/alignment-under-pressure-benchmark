@@ -8,7 +8,7 @@ README.png
 # Python
 __pycache__/
 *.pyc
-.venv/
+**/.venv/
 .ruff_cache/
 
 # 依存関係
