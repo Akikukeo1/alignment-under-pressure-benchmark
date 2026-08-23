@@ -9,14 +9,13 @@ PDF output to SVG with Inkscape.  No third-party Python package is required.
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import re
 import shutil
 import statistics
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
-
+from pathlib import Path
 
 DEFAULT_CONTENT = "https://x.gd/aughx"
 DEFAULT_OUTPUT = Path("assets/aup_benchmark_qr.svg")

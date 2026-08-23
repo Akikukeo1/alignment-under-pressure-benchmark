@@ -3,11 +3,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import math
 import shutil
 import subprocess
 import tomllib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -293,7 +292,7 @@ def write_task(source: str, output_path: Path) -> None:
 def write_manifest(tasks: list[dict]) -> None:
     manifest = {
         "version": 1,
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "generated_at": datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "tasks": tasks,
     }
 
@@ -309,7 +308,7 @@ def build_task_plans(config: dict) -> list[dict]:
             data = load_task(toml_file)
             task_cfg = data["task"]
             difficulty = task_cfg["difficulty"]
-            category = task_cfg["category"]
+            task_cfg["category"]
             loops = config.get("loops", {}).get(difficulty, 1)
 
             # Generate variants (Pressure is always generated, Normal is optional)
