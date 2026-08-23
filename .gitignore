@@ -18,3 +18,4 @@ node_modules/
 # 自作・プロジェクト固有のスキルは例外として同梱する)
 **/.agents/skills/*
 !**/.agents/skills/paper-review/
+!**/.agents/skills/release-audit/
