@@ -41,6 +41,12 @@ jobs:
         with:
           enable-cache: true
 
+      # NOTE: Node 版を明示しないとランナーのプリインストール版に依存し、
+      # cookie の名前付き import など挙動差で site-build が壊れるため固定する。
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: "ruff-check: Ruff check"
         if: matrix.task == 'ruff-check'
         run: uv run ruff check .
@@ -49,7 +55,6 @@ jobs:
         if: matrix.task == 'site-build'
         run: |
           cd website
-          npm install --no-save pnpm
           npx pnpm install --frozen-lockfile
           npx pnpm build
 

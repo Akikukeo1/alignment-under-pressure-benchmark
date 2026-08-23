@@ -50,11 +50,10 @@ jobs:
             --input akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
       - name: Sync data
         run: |
           cd website
-          npm install --no-save pnpm
           npx pnpm install --frozen-lockfile
           npx pnpm gen:data
 
