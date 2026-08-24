@@ -158,11 +158,11 @@ jobs:
           tag_name: ${{ env.VERSION }}
           name: Paper ${{ env.VERSION }}
           body: |
-            論文と成果物の正式リリースです。
+            論文と成果物の正式リリースです。以下のリンクからダウンロードできます。
 
-            - `aupb-paper-${{ env.VERSION }}.pdf` — 論文本体
-            - `aupb-data-${{ env.VERSION }}.zip` — リーダーボード CSV（数値根拠）+ 論文図
-            - `aupb-${{ env.VERSION }}-all.zip` — 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り
+            - [`aupb-paper-${{ env.VERSION }}.pdf`](https://github.com/${{ github.repository }}/releases/download/${{ env.VERSION }}/aupb-paper-${{ env.VERSION }}.pdf) — 論文本体
+            - [`aupb-data-${{ env.VERSION }}.zip`](https://github.com/${{ github.repository }}/releases/download/${{ env.VERSION }}/aupb-data-${{ env.VERSION }}.zip) — リーダーボード CSV（数値根拠）+ 論文図
+            - [`aupb-${{ env.VERSION }}-all.zip`](https://github.com/${{ github.repository }}/releases/download/${{ env.VERSION }}/aupb-${{ env.VERSION }}-all.zip) — 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り
 
             再現手順は [REPRODUCIBILITY.md](https://github.com/${{ github.repository }}/blob/${{ env.VERSION }}/REPRODUCIBILITY.md) を参照し、このタグを checkout してください。
           files: |

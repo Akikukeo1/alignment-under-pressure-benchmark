@@ -274,10 +274,11 @@ jobs:
           name: Preview(先行公開版)
           body: |
             常に最新の状態を反映する先行公開版です。内容は予告なく差し替えられます。
+            以下のリンクからダウンロードできます。
 
-            - `aupb-paper-preview.pdf` — 論文本体
-            - `aupb-data-preview.zip` — リーダーボード CSV(数値根拠)+ 論文図
-            - `aupb-preview-all.zip` — 上記 + タスク定義・集計結果・再現手順を含む全部入り
+            - [`aupb-paper-preview.pdf`](https://github.com/${{ github.repository }}/releases/download/preview/aupb-paper-preview.pdf) — 論文本体
+            - [`aupb-data-preview.zip`](https://github.com/${{ github.repository }}/releases/download/preview/aupb-data-preview.zip) — リーダーボード CSV(数値根拠)+ 論文図
+            - [`aupb-preview-all.zip`](https://github.com/${{ github.repository }}/releases/download/preview/aupb-preview-all.zip) — 上記 + タスク定義・集計結果・再現手順を含む全部入り
 
             引用の際は正式版 vX.Y をご利用ください。
           prerelease: true
