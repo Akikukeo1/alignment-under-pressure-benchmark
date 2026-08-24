@@ -6,9 +6,10 @@
 
 設計方針:
     - モデルの色は全グラフで共通(model_colors を経由して必ず同じ色を当てる)
-    - 条件色は固定:Normal=グレー / Pressure=コバルト
+    - 条件色は固定:平常時=グレー / 圧力下=コバルト
     - タイトルに番号を付けない(サイト側の見出しと重複しない)
     - 軸ラベルのモデル名は短縮形(short_model)を使う
+    - 図内テキストは日本語(paper_figures.py と同一のフォントフォールバック)
 """
 
 from __future__ import annotations
@@ -71,6 +72,14 @@ def setup_style() -> None:
             "ytick.labelcolor": INK,
             "xtick.color": SPINE,
             "ytick.color": SPINE,
+            "font.family": "sans-serif",
+            # Windows 環境でも日本語が描けるようフォールバックを追加(CI は fonts-noto-cjk)
+            "font.sans-serif": [
+                "Noto Sans CJK JP",
+                "Meiryo",
+                "Yu Gothic",
+                "DejaVu Sans",
+            ],
             "font.size": 11,
             "legend.frameon": False,
             "axes.grid": True,
@@ -143,9 +152,9 @@ def plot_overall_score(overall_df: pd.DataFrame, path: Path) -> None:
     ax.barh(ypos, overall_df["Overall_Score"], color=ACCENT, height=0.62)
     ax.set_yticks(ypos, labels)
     ax.set_xlim(0, 100)
-    ax.set_xlabel("Overall Score (0–100)")
+    ax.set_xlabel("総合スコア(0〜100)")
     ax.set_ylabel("")
-    ax.set_title("Overall Score by Model")
+    ax.set_title("モデル別 総合スコア")
     _grid_axis_only(ax, "x")
 
     for y, v in zip(ypos, overall_df["Overall_Score"], strict=True):
@@ -163,12 +172,12 @@ def plot_pressure_resistance(resistance_df: pd.DataFrame, path: Path) -> None:
     fig, ax = plt.subplots(figsize=(8, 0.6 * len(resistance_df) + 1.6))
     ax.barh(ypos, values, color=ACCENT, height=0.62)
     ax.axvline(1.0, color=BAD, linestyle="--", linewidth=1.4)
-    ax.text(1.0, len(values) - 0.35, " no drop (1.0)", color=BAD, fontsize=9, va="bottom")
+    ax.text(1.0, len(values) - 0.35, " 低下なし(1.0)", color=BAD, fontsize=9, va="bottom")
     ax.set_yticks(ypos, labels)
     ax.set_xlim(0, 1.12)
-    ax.set_xlabel("Pressure Resistance (Pressure ÷ Normal)")
+    ax.set_xlabel("圧力耐性比(圧力下 ÷ 平常時)")
     ax.set_ylabel("")
-    ax.set_title("Pressure Resistance by Model")
+    ax.set_title("モデル別 圧力耐性比")
     _grid_axis_only(ax, "x")
 
     for y, v in zip(ypos, values, strict=True):
@@ -178,65 +187,75 @@ def plot_pressure_resistance(resistance_df: pd.DataFrame, path: Path) -> None:
     _save(fig, path)
 
 
-def plot_pressure_gap_pair(model_summary: pd.DataFrame, path: Path) -> None:
-    """左:平常時 vs 圧力下の平均スコア、右:平均ギャップ(Δ)の 2 ペイン図。
+def plot_normal_vs_pressure(model_summary: pd.DataFrame, path: Path) -> None:
+    """平常時 vs 圧力下の平均スコアを比較するグループ化縦棒グラフ。
 
-    両ペインとも Avg_Gap の昇順(低下が大きい順)で並べる。
+    Avg_Gap の昇順(低下が大きい順)で並べる。
     """
     ordered = model_summary.sort_values("Avg_Gap").reset_index(drop=True)
-    short_labels = [short_model(str(m)) for m in ordered["Model"]]
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.5, 5))
-
-    # --- 左ペイン: Normal vs Pressure --------------------------------------
     melted = ordered.melt(
         id_vars="Model",
         value_vars=["Avg_Normal", "Avg_Pressure"],
         var_name="Condition",
         value_name="Score",
     ).assign(
-        Condition=lambda d: d["Condition"].map({"Avg_Normal": "Normal", "Avg_Pressure": "Pressure"}),
+        Condition=lambda d: d["Condition"].map({"Avg_Normal": "平常時", "Avg_Pressure": "圧力下"}),
         model_short=lambda d: [short_model(str(m)) for m in d["Model"]],
     )
+
+    fig, ax = plt.subplots(figsize=(11, 5.4))
     sns.barplot(
         data=melted,
         x="model_short",
         y="Score",
         hue="Condition",
-        hue_order=["Normal", "Pressure"],
-        palette={"Normal": NORMAL_COLOR, "Pressure": PRESSURE_COLOR},
-        ax=ax1,
+        hue_order=["平常時", "圧力下"],
+        palette={"平常時": NORMAL_COLOR, "圧力下": PRESSURE_COLOR},
+        ax=ax,
     )
-    ax1.set_title("Average Score: Normal vs Pressure", pad=28)
-    ax1.set_xlabel("")
-    ax1.set_ylabel("Average Score (0–1)")
-    ax1.set_ylim(0, 1.08)
-    ax1.tick_params(axis="x", rotation=25)
+    ax.set_title("平均スコア:平常時 vs 圧力下", pad=28)
+    ax.set_xlabel("")
+    ax.set_ylabel("平均スコア(0〜1)")
+    ax.set_ylim(0, 1.08)
+    ax.tick_params(axis="x", rotation=30)
+    # 回転したラベルをバーの中心に寄せる(右端がはみ出るのを防ぐ)
+    plt.setp(ax.get_xticklabels(), ha="right")
     # 凡例はプロット領域の上段に置き、バーの数値ラベルと衝突させない
-    ax1.legend(loc="lower left", bbox_to_anchor=(0, 1.0), ncols=2)
-    _grid_axis_only(ax1, "y")
-    _labels_v(ax1, fmt="{:.2f}")
+    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), ncols=2)
+    _grid_axis_only(ax, "y")
+    _labels_v(ax, fmt="{:.2f}")
 
-    # --- 右ペイン: 平均 Δ(Gap) ----------------------------------------------
-    colors = [GOOD if g >= 0 else BAD for g in ordered["Avg_Gap"]]
+    _save(fig, path)
+
+
+def plot_avg_gap(model_summary: pd.DataFrame, path: Path) -> None:
+    """平均ギャップ(Δ = Pressure − Normal)の横棒グラフ。
+
+    Avg_Gap の昇順(低下が大きい順)で並べ、低下が大きいモデルを上に置く。
+    """
+    ordered = model_summary.sort_values("Avg_Gap").reset_index(drop=True)
+    labels = [short_model(str(m)) for m in ordered["Model"]]
+    values = ordered["Avg_Gap"]
     ypos = np.arange(len(ordered))[::-1]
-    ax2.barh(ypos, ordered["Avg_Gap"], color=colors, height=0.6)
-    ax2.set_yticks(ypos, short_labels)
-    ax2.axvline(0, color=MUTED, linestyle="--", linewidth=1)
-    ax2.set_xlabel("Average Δ (Gap = Pressure − Normal)")
-    ax2.set_ylabel("")
-    ax2.set_title("Average Performance Drop")
-    # ラベルがプロット外にはみ出さないよう、左側に余白を確保する
+    colors = [GOOD if g >= 0 else BAD for g in values]
+
+    fig, ax = plt.subplots(figsize=(8, 0.6 * len(ordered) + 1.6))
+    ax.barh(ypos, values, color=colors, height=0.62)
+    ax.set_yticks(ypos, labels)
+    ax.axvline(0, color=MUTED, linestyle="--", linewidth=1)
+    ax.set_xlabel("平均 Δ(ギャップ = 圧力下 − 平常時)")
+    ax.set_ylabel("")
+    ax.set_title("モデル別 平均性能低下(Δ)")
+    # ラベルがプロット外にはみ出さないよう、左右に余白を確保する
     gmin = float(ordered["Avg_Gap"].min())
     gmax = float(ordered["Avg_Gap"].max())
     span = max(abs(gmin), abs(gmax), 0.01)
-    ax2.set_xlim(min(gmin - span * 0.30, -span * 0.05), max(gmax + span * 0.12, span * 0.05))
-    _grid_axis_only(ax2, "x")
+    ax.set_xlim(min(gmin - span * 0.30, -span * 0.05), max(gmax + span * 0.12, span * 0.05))
+    _grid_axis_only(ax, "x")
 
-    span = max(abs(float(ordered["Avg_Gap"].min())), abs(float(ordered["Avg_Gap"].max())), 0.01)
     pad = span * 0.04
-    for y, g in zip(ypos, ordered["Avg_Gap"], strict=True):
-        ax2.text(
+    for y, g in zip(ypos, values, strict=True):
+        ax.text(
             g + pad if g >= 0 else g - pad,
             y,
             f"{g:+.2f}",
@@ -247,7 +266,6 @@ def plot_pressure_gap_pair(model_summary: pd.DataFrame, path: Path) -> None:
             color=INK,
         )
 
-    fig.tight_layout(w_pad=3)
     _save(fig, path)
 
 
@@ -326,12 +344,12 @@ def plot_category_scores(cat_mean: pd.DataFrame, path: Path, colors: dict[str, s
     ax.set_xticks(xpos, categories)
     ax.set_ylim(0, 1.14)
     ax.set_xlabel("")
-    ax.set_ylabel("Average Pressure Score (0–1)")
-    ax.set_title("Performance by Pressure Category")
+    ax.set_ylabel("平均圧力下スコア(0〜1)")
+    ax.set_title("圧力カテゴリ別 平均スコア")
     ax.legend(
         handles=[plt.Rectangle((0, 0), 1, 1, color=colors.get(m, ACCENT)) for m in models],
         labels=[short_model(str(m)) for m in models],
-        title="Model",
+        title="モデル",
         loc="upper left",
         bbox_to_anchor=(1.01, 1),
     )
@@ -364,29 +382,30 @@ def render_all(
     )
     plot_pressure_resistance(resistance, dirs["pressure_gap"] / "pressure_resistance.png")
 
-    plot_pressure_gap_pair(model_summary, dirs["pressure_gap"] / "pressure_gap.png")
+    plot_normal_vs_pressure(model_summary, dirs["pressure_gap"] / "pressure_gap_scores.png")
+    plot_avg_gap(model_summary, dirs["pressure_gap"] / "pressure_gap_delta.png")
 
     pressure_matrix = pivot_df.pivot(index="Task", columns="Model", values="Pressure")
     gap_matrix = pivot_df.pivot(index="Task", columns="Model", values="Gap")
     plot_heatmap(
         pressure_matrix,
         dirs["heatmap"] / "heatmap_pressure.png",
-        title="Task-level Performance under Pressure",
+        title="タスク別 圧力下スコア",
         cmap="Blues",
         center=None,
         vmin=0,
         vmax=1,
-        cbar_label="Pressure Score",
+        cbar_label="圧力下スコア",
     )
     plot_heatmap(
         gap_matrix,
         dirs["heatmap"] / "heatmap_gap.png",
-        title="Performance Drop per Task (Δ)",
+        title="タスク別 性能低下(Δ)",
         cmap="RdYlGn",
         center=0,
         vmin=-1.0,
         vmax=0.2,
-        cbar_label="Δ (Pressure − Normal)",
+        cbar_label="Δ(圧力下 − 平常時)",
         fmt="+.2f",
     )
 
