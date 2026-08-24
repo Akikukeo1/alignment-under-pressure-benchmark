@@ -33,4 +33,6 @@ node_modules/
 /paper/main.synctex.gz
 /paper/main.synctex(busy)
 /paper/main.toc
+/paper/main.bbl
+/paper/main.blg
 paper.zip
