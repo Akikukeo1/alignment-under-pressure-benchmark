@@ -35,21 +35,20 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      # NOTE: fetch-tags が無いと git tag --list が空になり、既存バージョンを
-      # 上書きする事故(採番が常に v0.1 になる)が起きるため必須
       - uses: actions/checkout@v4
-        with:
-          fetch-tags: true
 
       # 正式版バージョンの自動採番(vX.Y 形式)
       # NOTE: inputs.major を直接 run に展開すると script injection の恐れがあるため env 経由。
-      # NOTE: glob パターンでは v0.4-rc1 等の接尾付きタグも拾うため、grep で vX.Y 厳密一致のみに絞る。
+      # NOTE: 既存バージョンの取得は git tag ではなく GitHub API を使う
+      # (actions/checkout の shallow clone ではタグが取得されず、採番が常に v0.1 になる事故があった)。
+      # NOTE: preview タグは vX.Y 形式でないため grep で自然に除外される。
       - name: Determine version
         env:
           MAJOR: ${{ inputs.major }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          LATEST=$(git tag --list 'v[0-9]*.[0-9]*' | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+          LATEST=$(gh release list --limit 100 --exclude-drafts --json tagName --jq '.[].tagName' \
+            | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
           if [ "$MAJOR" = "true" ]; then
             X=$(echo "${LATEST:-v0.0}" | tr -d 'v' | cut -d. -f1)
             VERSION="v$((X + 1)).0"
