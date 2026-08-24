@@ -1,5 +1,6 @@
 # 論文 PDF の公開(手動実行)。
-# 図を再生成して論文 PDF をビルドし、website/public/paper.pdf を更新して main に push した後、
+# 図を再生成して論文 PDF をビルドし、website/public/paper.pdf とバージョンメタデータ
+# (website/src/data/paper.json)を更新して main に push した後、
 # Cloudflare Pages へ Direct Upload し、GitHub Release(vX.Y)を作成する。
 #
 # バージョニング: vX.Y 形式で自動採番(既存タグの最大 Y + 1。初回は v0.1)。
@@ -98,11 +99,21 @@ jobs:
       - name: Copy PDF into website
         run: cp paper/main.pdf website/public/paper.pdf
 
+      # 論文ページ用のバージョンメタデータ(paper.json)を更新。
+      # 採番直後で今回分のタグが未作成のため、env で現行版を上書きする
+      # (時刻はスクリプト内で UTC 正規化され、ランナーの TZ 設定に依存しない)
+      - name: Generate paper metadata
+        env:
+          PAPER_CURRENT_VERSION: ${{ env.VERSION }}
+        run: |
+          export PAPER_CURRENT_PUBLISHED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          uv run website/scripts/generate_paper_meta.py
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add website/public/paper.pdf
+          git add website/public/paper.pdf website/src/data/paper.json
           if git diff --cached --quiet; then
             echo "変更がないためコミットをスキップします"
             exit 0

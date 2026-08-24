@@ -2,6 +2,7 @@
 // 論文PDFビューア。ブラウザ標準ビューアでの直接閲覧と、他リソースへの直接ジャンプを提供する。
 // Starlight ページは Tailwind を読み込まないため、スタイルはこのスコープ内で完結させる。
 import { GITHUB_REPO, KAGGLE_BENCHMARK } from '@/data/site';
+import paperMeta from '@/data/paper.json';
 
 const resources = [
 	{ href: '/results', label: '結果データ' },
@@ -10,12 +11,44 @@ const resources = [
 	{ href: GITHUB_REPO, label: 'GitHub', external: true },
 	{ href: KAGGLE_BENCHMARK, label: 'Kaggle', external: true },
 ];
+
+const current = paperMeta.current;
+const versions = paperMeta.versions;
+
+const releaseUrl = (version: string) => `${GITHUB_REPO}/releases/tag/${version}`;
+
+// UTC の ISO 8601 を JST の暦日(YYYY-MM-DD)へ整形する。
+// タイムゾーンを明示指定するため、ビルド環境の TZ 設定に結果が左右されない。
+function jstDate(iso: string): string {
+	const parts = new Intl.DateTimeFormat('ja-JP', {
+		timeZone: 'Asia/Tokyo',
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+	}).formatToParts(new Date(iso));
+	const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+	return `${get('year')}-${get('month')}-${get('day')}`;
+}
 ---
 
 <div class="paper-viewer">
-	<!-- ツールバー:直接表示・ダウンロード・リソースへの直接ジャンプ -->
+	<!-- ツールバー:現行バージョン・直接表示・ダウンロード・リソースへの直接ジャンプ -->
 	<div class="toolbar">
 		<div class="primary-actions">
+			{
+				current && (
+					<a
+						class="version-badge"
+						href={releaseUrl(current.version)}
+						target="_blank"
+						rel="noopener noreferrer"
+						title="GitHub Release を開く"
+					>
+						現行版 {current.version}
+						<span class="badge-date">{jstDate(current.publishedAt)} 公開</span>
+					</a>
+				)
+			}
 			<a
 				class="btn btn-primary"
 				href="/paper.pdf"
@@ -45,6 +78,32 @@ const resources = [
 
 	<!-- PDF 埋め込み(プレビュー用) -->
 	<iframe src="/paper.pdf" title="Alignment Under Pressure Benchmark 論文"></iframe>
+
+	<!-- バージョン履歴:各版の GitHub Release へのリンク -->
+	{
+		versions.length > 0 && (
+			<nav class="versions" aria-label="論文のバージョン履歴">
+				<h2 class="versions-title">バージョン履歴</h2>
+				<ul class="version-list">
+					{versions.map((v) => (
+						<li>
+							<a
+								class="chip"
+								href={releaseUrl(v.version)}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{v.version}
+								<span class="ver-date">{jstDate(v.publishedAt)}</span>
+								{v.version === current?.version && <span class="tag tag-current">現行</span>}
+								{v.prerelease && <span class="tag tag-pre">先行公開版</span>}
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+		)
+	}
 </div>
 
 <style>
@@ -108,6 +167,33 @@ const resources = [
 		color: var(--pv-accent);
 	}
 
+	/* ---- 現行バージョン バッジ ---- */
+	.version-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		padding: 0.45rem 1rem;
+		border: 1px solid var(--pv-accent);
+		border-radius: 6px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		line-height: 1.2;
+		text-decoration: none;
+		color: var(--pv-accent);
+		white-space: nowrap;
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
+	}
+	.version-badge:hover {
+		background: color-mix(in srgb, var(--pv-accent) 12%, transparent);
+	}
+	.badge-date {
+		font-size: 0.75rem;
+		font-weight: 500;
+		opacity: 0.8;
+	}
+
 	.ext {
 		font-size: 0.72em;
 		opacity: 0.65;
@@ -144,6 +230,48 @@ const resources = [
 	.chip:focus-visible {
 		outline: 2px solid var(--pv-accent);
 		outline-offset: 2px;
+	}
+
+	/* ---- バージョン履歴 ---- */
+	.versions {
+		margin-top: 1.1rem;
+	}
+	.versions-title {
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: var(--sl-color-gray-6, #475569);
+		border: none;
+		margin: 0 0 0.5rem;
+		padding: 0;
+	}
+	.version-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.ver-date {
+		font-size: 0.72rem;
+		opacity: 0.65;
+	}
+	.tag {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.05rem 0.5rem;
+		border-radius: 999px;
+		font-size: 0.68rem;
+		font-weight: 600;
+		line-height: 1.5;
+	}
+	.tag-current {
+		background: var(--pv-accent);
+		color: #fff;
+	}
+	.tag-pre {
+		background: color-mix(in srgb, var(--sl-color-orange, #b45309) 18%, transparent);
+		color: var(--sl-color-orange, #b45309);
 	}
 
 	/* ---- PDF 埋め込み ---- */
