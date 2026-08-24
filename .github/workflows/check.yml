@@ -4,8 +4,8 @@
 # - site-build : ウェブサイトがビルドできること
 # - paper-build: 論文図の再生成と LaTeX ビルドが通ること(artifact 確認用)
 #
-# paper-build は TeX Live コンテナの pull で数分かかるため paths フィルタで
-# 独立ジョブに分離している。将来チェックを増やすときは matrix.include に追加する。
+# paper-build は TeX Live コンテナの pull で数分かかるが、PR / push とも常に実行する。
+# 将来チェックを増やすときは matrix.include に追加する。
 
 name: CI
 
@@ -62,17 +62,11 @@ jobs:
           npx pnpm install --frozen-lockfile
           npx pnpm build
 
-  # 論文ビルドは重い(TeX Live コンテナ)ため、関連ファイル変更時のみ実行する
+  # 論文ビルドは TeX Live コンテナの pull で数分かかるが、常に実行する。
+  # 論文は集計成果物(paper/result.csv 等)にも依存するため、paths フィルタだと漏れる。
   paper-build:
     runs-on: ubuntu-latest
     name: paper-build
-    if: >
-      github.event_name == 'pull_request' ||
-      contains(github.event.head_commit.modified, 'paper/') ||
-      contains(github.event.head_commit.added, 'paper/') ||
-      contains(github.event.head_commit.removed, 'paper/') ||
-      contains(github.event.head_commit.modified, 'paper_figures.py') ||
-      contains(github.event.head_commit.added, 'paper_figures.py')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
