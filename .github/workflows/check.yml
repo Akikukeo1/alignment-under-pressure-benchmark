@@ -67,6 +67,9 @@ jobs:
   paper-build:
     runs-on: ubuntu-latest
     name: paper-build
+    # Preview リリース更新のため書き込み権限をこの job に限定して付与する
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,3 +106,50 @@ jobs:
         with:
           name: paper-pdf
           path: paper/main.pdf
+
+      # --- 以下は main への push 時のみ。Preview リリースを更新する ---
+      # NOTE: results/ と tasks/ はコミット済みの内容をそのまま同梱する(冪等)
+      - name: Prepare preview assets
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cp paper/main.pdf aupb-paper-preview.pdf
+          cd paper && zip -r ../aupb-data-preview.zip result.csv results/figures && cd ..
+          STAGE="aupb-preview"
+          mkdir -p "$STAGE/paper/results"
+          cp aupb-paper-preview.pdf "$STAGE/"
+          cp paper/result.csv "$STAGE/paper/"
+          cp -r paper/results/figures "$STAGE/paper/results/"
+          cp -r tasks "$STAGE/tasks"
+          cp -r results "$STAGE/results"
+          cp REPRODUCIBILITY.md "$STAGE/"
+          zip -r "aupb-preview-all.zip" "$STAGE"
+
+      # NOTE: 毎回削除&再作成することで created_at が更新され、Releases 一覧で
+      # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
+      # preview タグの再作成イベントを Zenodo が拾わないよう、DOI 連携時は正式版のみ対象にすること。
+      - name: Delete old preview release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete preview --cleanup-tag --yes || true
+
+      - name: Create preview release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: preview
+          name: Preview — 先行公開版(常に最新)
+          body: |
+            main ブランチの最新状態を常に反映した先行公開版です。
+
+            - `aupb-paper-preview.pdf` — 論文本体
+            - `aupb-data-preview.zip` — 集計結果(result.csv)+ 論文図
+            - `aupb-preview-all.zip` — 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り
+
+            引用や DOI が必要な場合は正式版(Paper vX.Y)をご利用ください。
+          prerelease: true
+          make_latest: false
+          files: |
+            aupb-paper-preview.pdf
+            aupb-data-preview.zip
+            aupb-preview-all.zip

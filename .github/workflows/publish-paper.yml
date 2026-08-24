@@ -1,6 +1,16 @@
 # 論文 PDF の公開(手動実行)。
-# 図を再生成して論文 PDF をビルドし、website/public/paper.pdf を更新して
-# main に push する。push 後、Cloudflare Pages がサイトを自動デプロイする。
+# 図を再生成して論文 PDF をビルドし、website/public/paper.pdf を更新して main に push した後、
+# Cloudflare Pages へ Direct Upload し、GitHub Release(vX.Y)を作成する。
+#
+# バージョニング: vX.Y 形式で自動採番(既存タグの最大 Y + 1。初回は v0.1)。
+# 「Major」チェックで X を +1(Y は 0 にリセット)。開発期は X = 0。
+#
+# asset:
+#   - aupb-paper-vX.Y.pdf : 論文単体
+#   - aupb-data-vX.Y.zip  : result.csv + 論文図
+#   - aupb-vX.Y-all.zip   : 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順の全部入り
+# Zenodo 連携による DOI 発行も可能。preview タグは削除&再作成されるため
+# Zenodo に拾わせたい場合は正式版タグのみを対象にすること。
 #
 # 注意: LaTeX ソースのローカルテスト環境はないため、main.tex を変更した場合は
 # まず check.yml の paper-build で検証してから、このワークフローで公開する。
@@ -9,6 +19,12 @@ name: Publish paper
 
 on:
   workflow_dispatch:
+    inputs:
+      major:
+        description: 'メジャーバージョンを上げる(X+1, Y=0)。通常は空のまま'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -22,6 +38,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # 正式版バージョンの自動採番(vX.Y 形式)
+      # NOTE: inputs.major を直接 run に展開すると script injection の恐れがあるため env 経由。
+      # NOTE: glob パターンでは v0.4-rc1 等の接尾付きタグも拾うため、grep で vX.Y 厳密一致のみに絞る。
+      - name: Determine version
+        env:
+          MAJOR: ${{ inputs.major }}
+        run: |
+          LATEST=$(git tag --list 'v[0-9]*.[0-9]*' | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
+          if [ "$MAJOR" = "true" ]; then
+            X=$(echo "${LATEST:-v0.0}" | tr -d 'v' | cut -d. -f1)
+            VERSION="v$((X + 1)).0"
+          elif [ -z "$LATEST" ]; then
+            VERSION="v0.1"
+          else
+            X=$(echo "$LATEST" | tr -d 'v' | cut -d. -f1)
+            Y=$(echo "$LATEST" | tr -d 'v' | cut -d. -f2)
+            VERSION="v${X}.$((Y + 1))"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "採番されたバージョン: $VERSION"
 
       # 図の再生成(uv + matplotlib)。日本語ラベルのため CJK フォントが必要
       - uses: astral-sh/setup-uv@v5
@@ -66,7 +103,7 @@ jobs:
           # NOTE: [skip ci] により GitHub Actions の再発火を防止。
           # Cloudflare Pages の Git 連携は Actions(bot)の push をデプロイしないため、
           # 配信は下記 Deploy to Cloudflare Pages(Direct Upload)が担う。
-          git commit -m "Update paper.pdf [skip ci]"
+          git commit -m "Update paper.pdf for $VERSION [skip ci]"
           git push
 
       # NOTE: Cloudflare Pages は bot push を Git 連携で無視するため、ここでビルドして Direct Upload する。
@@ -87,3 +124,40 @@ jobs:
         run: |
           cd website
           npx wrangler pages deploy dist --project-name=alignment-under-pressure-benchmark --branch=main
+
+      # Release 用 asset の準備
+      # NOTE: results/ と tasks/ はコミット済みの内容をそのまま同梱する
+      # (update-data.yml が常時最新化しているため再実行不要・冪等)
+      - name: Prepare release assets
+        run: |
+          cp paper/main.pdf "aupb-paper-$VERSION.pdf"
+          cd paper && zip -r "../aupb-data-$VERSION.zip" result.csv results/figures && cd ..
+          STAGE="aupb-${VERSION#v}"
+          mkdir -p "$STAGE/paper/results"
+          cp "aupb-paper-$VERSION.pdf" "$STAGE/"
+          cp paper/result.csv "$STAGE/paper/"
+          cp -r paper/results/figures "$STAGE/paper/results/"
+          cp -r tasks "$STAGE/tasks"
+          cp -r results "$STAGE/results"
+          cp REPRODUCIBILITY.md "$STAGE/"
+          zip -r "aupb-$VERSION-all.zip" "$STAGE"
+
+      # 正式版 Release(タグが存在しなければ HEAD に自動作成される)
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Paper ${{ env.VERSION }}
+          body: |
+            論文と成果物の正式リリースです。
+
+            - `aupb-paper-${{ env.VERSION }}.pdf` — 論文本体
+            - `aupb-data-${{ env.VERSION }}.zip` — 集計結果(result.csv)+ 論文図
+            - `aupb-${{ env.VERSION }}-all.zip` — 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り
+
+            再現手順は [REPRODUCIBILITY.md](https://github.com/${{ github.repository }}/blob/${{ env.VERSION }}/REPRODUCIBILITY.md) を参照し、このタグを checkout してください。
+          files: |
+            aupb-paper-${{ env.VERSION }}.pdf
+            aupb-data-${{ env.VERSION }}.zip
+            aupb-${{ env.VERSION }}-all.zip
+          generate_release_notes: true

@@ -72,6 +72,30 @@ flowchart LR
 
 `npx skills experimental_install` を実行すると、このリポジトリ用の AI エージェントスキル(Kaggle Benchmark 操作等)を導入できます。
 
+## リリース
+
+[Releases](https://github.com/Akikukeo1/alignment-under-pressure-benchmark/releases) から成果物をダウンロードできます。
+
+- **正式版(`vX.Y`)**: 論文公開のタイミングなどで作成されるスナップショット。引用・DOI にはこちらを使用してください
+- **Preview(先行公開版)**: main ブランチの最新状態を常に反映。データ更新のたびに自動で差し替えられます
+
+バージョニング方針:
+
+| 要素 | 意味 | 更新タイミング |
+| :--- | :--- | :--- |
+| `X`(メジャー) | 破壊的変更(タスクセット刷新・スコアリング改訂など) | 手動 |
+| `Y`(マイナー) | 論文・結果の更新 | 公開のたびに自動増加 |
+
+開発期は `X = 0`(例： `v0.4`)です。
+
+各リリースには以下の asset が含まれます:
+
+| asset | 内容 |
+| :--- | :--- |
+| `aupb-paper-*.pdf` | 論文本体 |
+| `aupb-data-*.zip` | 集計結果(result.csv)+ 論文図 |
+| `aupb-*-all.zip` | 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り |
+
 ## ライセンス
 
 このプロジェクトのコンテンツ(タスク定義・論文・図表・集計結果・ドキュメント・ウェブサイト本文)は [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) の下で提供されます。それ以外のすべてのソースコードは [MIT License](LICENSE) の下で提供されます。
