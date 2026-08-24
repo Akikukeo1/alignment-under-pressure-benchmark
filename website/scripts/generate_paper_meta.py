@@ -134,12 +134,45 @@ def apply_current_override(
     return entry
 
 
+def restore_missing_versions(
+    versions: list[dict[str, object]],
+    existing_path: Path,
+) -> None:
+    """タグから取得できなかった過去版を既存 paper.json から復元する(保険)。
+
+    CI の shallow clone などでタグが取得できない場合、versions が今回分だけに
+    なり履歴が消えてしまう事故があった。既存ファイルにのみ存在する版を
+    補完し、X/Y 降順に並べ替えて履歴の消失を防ぐ。
+    """
+    if not existing_path.exists():
+        return
+    try:
+        existing = json.loads(existing_path.read_text(encoding="utf-8")).get("versions", [])
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"Warning: 既存 {existing_path.name} の読み込みに失敗したため復元をスキップします: {e}")
+        return
+
+    known = {str(v["version"]) for v in versions}
+    restored = 0
+    for entry in existing:
+        if str(entry.get("version")) not in known:
+            versions.append(entry)
+            restored += 1
+    if restored:
+        versions.sort(
+            key=lambda v: stable_key(str(v["version"])) or (0, 0),
+            reverse=True,
+        )
+        print(f"既存 paper.json から {restored} 版を復元しました")
+
+
 def main() -> None:
     tags = collect_tags()
     # 正式版のみを履歴対象にする。preview 等はローリング運用のためバージョン名のみ
     versions = [t for t in tags if not t["prerelease"]]
     previews = [t for t in tags if t["prerelease"]]
     preview = {"version": str(previews[0]["version"])} if previews else None
+    restore_missing_versions(versions, OUT_JSON)
     current = apply_current_override(versions)
 
     data = {"current": current, "preview": preview, "versions": versions}

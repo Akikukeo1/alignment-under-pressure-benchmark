@@ -1,14 +1,31 @@
 {
   "current": {
     "version": "v0.4",
-    "publishedAt": "2026-08-24T09:30:28Z",
+    "publishedAt": "2026-08-24T09:30:29Z",
     "prerelease": false
   },
-  "preview": null,
+  "preview": {
+    "version": "preview"
+  },
   "versions": [
     {
       "version": "v0.4",
-      "publishedAt": "2026-08-24T09:30:28Z",
+      "publishedAt": "2026-08-24T09:30:29Z",
+      "prerelease": false
+    },
+    {
+      "version": "v0.3",
+      "publishedAt": "2026-08-24T08:03:38Z",
+      "prerelease": false
+    },
+    {
+      "version": "v0.2",
+      "publishedAt": "2026-08-24T07:25:51Z",
+      "prerelease": false
+    },
+    {
+      "version": "v0.1",
+      "publishedAt": "2026-08-24T05:13:35Z",
       "prerelease": false
     }
   ]

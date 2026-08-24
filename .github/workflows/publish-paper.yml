@@ -36,7 +36,12 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      # NOTE: fetch-depth: 0(完全クローン)が必須。shallow clone ではタグが取得されず、
+      # Generate paper metadata(git for-each-ref)が履歴を取り違えて
+      # paper.json の旧バージョンを全消しする事故が起きる
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # 正式版バージョンの自動採番(vX.Y 形式)
       # NOTE: inputs.major を直接 run に展開すると script injection の恐れがあるため env 経由。
