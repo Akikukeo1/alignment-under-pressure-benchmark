@@ -1,10 +1,11 @@
 # 評価データのサイト反映(自動実行)。
 # リーダーボード CSV や集計ロジックの変更を push したとき、
-# just update 相当(aggregate → figures → sync-data)を実行し、
-# 生成物(results.json + public/results/*.png)を main に push する。
-# push 後、Cloudflare Pages がサイトを自動デプロイする。
+# just update 相当(aggregate → figures → sync-data → site ビルド)を実行し、
+# 生成物(results.json + public/results/*.png)を main に push した後、
+# Cloudflare Pages へ Direct Upload する(bot の push は Pages の Git 連携で無視されるため)。
 #
 # 論文 PDF の更新は行わない。公開は Publish paper ワークフローで手動に行う。
+# Preview リリースの更新は update-preview ジョブが担う。
 
 name: Update data
 
@@ -87,7 +88,27 @@ jobs:
           cd website
           npx wrangler pages deploy dist --project-name=alignment-under-pressure-benchmark --branch=main
 
-      # --- Preview リリースの更新(bot push のデータ更新でも追従させる) ---
+  # Preview リリースの更新(データ更新の bot push でも追従させる)。
+  # NOTE: check.yml 側の同名ジョブと concurrency グループ(preview-release)を共有し、
+  # 同時実行によるリリース削除&再作成の競合(レース)を防ぐ。
+  # 毎回削除&再作成することで created_at が更新され、Releases 一覧で
+  # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
+  update-preview:
+    runs-on: ubuntu-latest
+    name: update-preview
+    needs: [update]
+    permissions:
+      contents: write
+    concurrency:
+      group: preview-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
       # 論文用図を最新化(論文 PDF 自体は前回公開分 website/public/paper.pdf を使用)
       - name: Build paper figures
         run: |
@@ -110,9 +131,6 @@ jobs:
           cp REPRODUCIBILITY.md "$STAGE/"
           zip -r "aupb-preview-all.zip" "$STAGE"
 
-      # NOTE: 毎回削除&再作成することで created_at が更新され、Releases 一覧で
-      # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
-      # preview タグの再作成イベントを Zenodo が拾わないよう、DOI 連携時は正式版のみ対象にすること。
       - name: Delete old preview release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

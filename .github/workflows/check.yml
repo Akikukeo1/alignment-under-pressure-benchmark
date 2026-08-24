@@ -3,6 +3,7 @@
 # - ruff-check : Python の Lint
 # - site-build : ウェブサイトがビルドできること
 # - paper-build: 論文図の再生成と LaTeX ビルドが通ること(artifact 確認用)
+# - update-preview: main push で全ジョブ成功後に Preview リリースを更新
 #
 # paper-build は TeX Live コンテナの pull で数分かかるが、PR / push とも常に実行する。
 # 将来チェックを増やすときは matrix.include に追加する。
@@ -64,12 +65,10 @@ jobs:
 
   # 論文ビルドは TeX Live コンテナの pull で数分かかるが、常に実行する。
   # 論文は集計成果物(paper/result.csv 等)にも依存するため、paths フィルタだと漏れる。
+  # Preview リリースへの反映は update-preview ジョブ(needs 成功後)が担う。
   paper-build:
     runs-on: ubuntu-latest
     name: paper-build
-    # Preview リリース更新のため書き込み権限をこの job に限定して付与する
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,41 +99,71 @@ jobs:
           latexmk_use_lualatex: true
           args: -file-line-error -halt-on-error -interaction=nonstopmode
 
-      # 成果物はコミットしない。PR での PDF プレビューはここから入手する
+      # 成果物はコミットしない。PR での PDF プレビューはここから入手する。
+      # Preview リリース用に update-preview ジョブへも artifact 経由で受け渡す。
       - name: Upload PDF artifact
         uses: actions/upload-artifact@v4
         with:
           name: paper-pdf
           path: paper/main.pdf
 
-      # --- 以下は main への push 時のみ。Preview リリースを更新する ---
+      - name: Upload figures artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-figures
+          path: paper/results/figures
+
+  # Preview リリースの更新。CI(ruff / site-build / paper-build)がすべて成功した後のみ実行する。
+  # NOTE: update-data.yml 側の同名ジョブと concurrency グループ(preview-release)を共有し、
+  # 同時実行によるリリース削除&再作成の競合(レース)を防ぐ。
+  # 毎回削除&再作成することで created_at が更新され、Releases 一覧で
+  # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
+  # preview タグの再作成イベントを Zenodo が拾わないよう、DOI 連携時は正式版のみ対象にすること。
+  update-preview:
+    runs-on: ubuntu-latest
+    name: update-preview
+    needs: [check, paper-build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    concurrency:
+      group: preview-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: paper-pdf
+          path: dist-assets/
+      - uses: actions/download-artifact@v4
+        with:
+          name: paper-figures
+          path: dist-assets/figures/
+
       # NOTE: results/ と tasks/ はコミット済みの内容をそのまま同梱する(冪等)
       - name: Prepare preview assets
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          cp paper/main.pdf aupb-paper-preview.pdf
-          cd paper && zip -r ../aupb-data-preview.zip result.csv results/figures && cd ..
+          cp dist-assets/main.pdf aupb-paper-preview.pdf
+          mkdir -p zipsrc/results && cp -r dist-assets/figures zipsrc/results/figures
+          cp paper/result.csv zipsrc/
+          cd zipsrc && zip -r ../aupb-data-preview.zip result.csv results && cd ..
           STAGE="aupb-preview"
           mkdir -p "$STAGE/paper/results"
           cp aupb-paper-preview.pdf "$STAGE/"
           cp paper/result.csv "$STAGE/paper/"
-          cp -r paper/results/figures "$STAGE/paper/results/"
+          mkdir -p "$STAGE/paper/results/figures" && cp dist-assets/figures/*.png "$STAGE/paper/results/figures/"
           cp -r tasks "$STAGE/tasks"
           cp -r results "$STAGE/results"
           cp REPRODUCIBILITY.md "$STAGE/"
           zip -r "aupb-preview-all.zip" "$STAGE"
 
-      # NOTE: 毎回削除&再作成することで created_at が更新され、Releases 一覧で
-      # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
-      # preview タグの再作成イベントを Zenodo が拾わないよう、DOI 連携時は正式版のみ対象にすること。
       - name: Delete old preview release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release delete preview --cleanup-tag --yes || true
 
       - name: Create preview release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: preview
