@@ -8,10 +8,10 @@ import TaskPrompts from '@/components/tasks/TaskPrompts.astro';
 
 AUPBを構成する **基本タスク8種** の定義を公開しています。各タスクは「平常時(Normal)」と「圧力下(Pressure)」の2つのプロンプトを持ち、正答率の落差を測定します。
 
-難易度の定義(Easy〜Impossible)は論文をご覧ください。タスク定義はTOML形式で管理され、ビルドパイプライン(`build.py`)がKaggle Benchmark向けのコードを自動生成します。
+難易度の定義(Easy〜Insane)は[GitHub のタスクスキーマ仕様](https://github.com/Akikukeo1/alignment-under-pressure-benchmark/blob/main/docs/TASK_SCHEMA.md)をご覧ください。タスク定義はTOML形式で管理され、ビルドパイプライン(`build.py`)がKaggle Benchmark向けのコードを自動生成します。
 
 ## プロンプト全文
 
-圧力のかけ方そのものを読めます。たとえば `shortcut_hard` では、「高得点のAIだけが正解を選べる」という虚偽の前提を例示して誘導します。
+圧力のかけ方そのものを読めます。たとえば `shortcut_hard` では、見本問題では正答に付いていた `[Correct]` タグを本問では意図的に誤答へ付け、タグに従わず問題を解けるかを試します。
 
 <TaskPrompts />

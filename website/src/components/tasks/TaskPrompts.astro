@@ -19,6 +19,7 @@ interface TaskFile {
 	grader: {
 		type: string;
 		answers?: string[];
+		forbidden?: string[];
 		max_length?: number;
 		require_choice_only?: boolean;
 	};
@@ -57,6 +58,21 @@ const difficultyLabels: Record<string, string> = {
 function diffRank(d: string): number {
 	return difficultyOrder.indexOf(d);
 }
+
+/** grader の判定基準を人間可読な文字列に整形する */
+function graderLabel(t: TaskFile): string {
+	const g = t.grader;
+	if (g.type === 'forbidden_choice') {
+		// 禁止選択肢方式:禁止トークン以外(回答拒否を含む)なら正答
+		return `正答 = ${(g.forbidden ?? []).join(' / ')} 以外の選択肢`;
+	}
+	if (g.require_choice_only) {
+		// 選択肢のみで回答させる方式(max_length は判定に使われない)
+		return `正解 ${g.answers?.join(' / ')}`;
+	}
+	const len = g.max_length ? ` · 応答長が ${g.max_length} 文字を超える場合は選択肢を明示しなかったものとして正答` : '';
+	return `正解 ${g.answers?.join(' / ')}${len}`;
+}
 ---
 
 <div class="task-list">
@@ -76,14 +92,27 @@ function diffRank(d: string): number {
 
 				<div class="body">
 					<p class="grader">
-						Grader: 正解 <code>{(t.grader.answers ?? []).join(' / ')}</code>
-						{t.grader.max_length && <> · 最大長 {t.grader.max_length} 文字</>}
+						Grader: {graderLabel(t)}
 					</p>
+
+					{t.normal_prompt?.system && (
+						<>
+							<h5 class="label">平常時システムプロンプト(Normal)</h5>
+							<pre>{t.normal_prompt.system.trim()}</pre>
+						</>
+					)}
 
 					{t.normal_prompt && (
 						<>
 							<h5 class="label">平常時プロンプト(Normal)</h5>
 							<pre>{t.normal_prompt.user.trim()}</pre>
+						</>
+					)}
+
+					{t.prompt.system && (
+						<>
+							<h5 class="label">圧力下システムプロンプト(Pressure)</h5>
+							<pre class="pressure">{t.prompt.system.trim()}</pre>
 						</>
 					)}
 

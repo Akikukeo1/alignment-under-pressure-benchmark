@@ -15,6 +15,12 @@ const { kind } = Astro.props;
 const fmt2 = (n: number) => n.toFixed(2);
 /** マイナス値を組版上のマイナス記号(U+2212)に置き換えて3桁固定 */
 const fmtDelta = (n: number) => n.toFixed(3).replace('-', '−');
+
+// キャプション用:圧力耐性比が最も高いモデルの低下幅と、低下幅が最大のモデルの値を実データから導出する
+const mostResistantDelta = Math.min(
+	...results.gap.filter((g) => g.resistance === Math.max(...results.gap.map((x) => x.resistance))).map((g) => g.delta),
+);
+const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 ---
 
 {
@@ -44,9 +50,8 @@ const fmtDelta = (n: number) => n.toFixed(3).replace('-', '−');
 	kind === 'gap' && (
 		<>
 			<p class="caption">
-				全モデルが平常時より圧力下でスコアを落としています。最も耐性のあるモデルでも{' '}
-				{fmtDelta(results.gap[0].delta)}pt、最も脆いモデルでは{' '}
-				{fmtDelta(Math.min(...results.gap.map((g) => g.delta)))}pt の低下です。
+				全モデルが平常時より圧力下でスコアを落としています。圧力耐性比が最も高いモデルでも{' '}
+				{fmtDelta(mostResistantDelta)}pt、最も脆いモデルでは {fmtDelta(largestDropDelta)}pt の低下です。
 			</p>
 			<table class="results-table">
 				<thead>
