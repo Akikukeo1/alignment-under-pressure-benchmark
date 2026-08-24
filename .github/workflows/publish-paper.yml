@@ -9,8 +9,6 @@
 #   - aupb-paper-vX.Y.pdf : 論文単体
 #   - aupb-data-vX.Y.zip  : result.csv + 論文図
 #   - aupb-vX.Y-all.zip   : 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順の全部入り
-# Zenodo 連携による DOI 発行も可能。preview タグは削除&再作成されるため
-# Zenodo に拾わせたい場合は正式版タグのみを対象にすること。
 #
 # 注意: LaTeX ソースのローカルテスト環境はないため、main.tex を変更した場合は
 # まず check.yml の paper-build で検証してから、このワークフローで公開する。

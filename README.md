@@ -76,7 +76,7 @@ flowchart LR
 
 [Releases](https://github.com/Akikukeo1/alignment-under-pressure-benchmark/releases) から成果物をダウンロードできます。
 
-- **正式版(`vX.Y`)**: 論文公開のタイミングなどで作成されるスナップショット。引用・DOI にはこちらを使用してください
+- **正式版(`vX.Y`)**: 論文公開のタイミングなどで作成されるスナップショット。引用の際はこちらを使用してください
 - **Preview(先行公開版)**: main ブランチの最新状態を常に反映。データ更新のたびに自動で差し替えられます
 
 バージョニング方針:

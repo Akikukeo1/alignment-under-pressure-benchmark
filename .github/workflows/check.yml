@@ -118,7 +118,6 @@ jobs:
   # 同時実行によるリリース削除&再作成の競合(レース)を防ぐ。
   # 毎回削除&再作成することで created_at が更新され、Releases 一覧で
   # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
-  # preview タグの再作成イベントを Zenodo が拾わないよう、DOI 連携時は正式版のみ対象にすること。
   update-preview:
     runs-on: ubuntu-latest
     name: update-preview
@@ -167,15 +166,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: preview
-          name: Preview — 先行公開版(常に最新)
+          name: Preview(先行公開版)
           body: |
-            main ブランチの最新状態を常に反映した先行公開版です。
+            常に最新の状態を反映する先行公開版です。内容は予告なく差し替えられます。
 
             - `aupb-paper-preview.pdf` — 論文本体
             - `aupb-data-preview.zip` — 集計結果(result.csv)+ 論文図
-            - `aupb-preview-all.zip` — 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り
+            - `aupb-preview-all.zip` — 上記 + タスク定義・集計結果・再現手順を含む全部入り
 
-            引用や DOI が必要な場合は正式版(Paper vX.Y)をご利用ください。
+            引用の際は正式版 vX.Y をご利用ください。
           prerelease: true
           make_latest: false
           files: |
