@@ -548,7 +548,7 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 2つの条件は別々の対話で実行しているため、1つの回答が途中で変化したかどうかを判定するものではない。
 
 % NOTE: 見やすさのために改ページ
-\newpage
+% \newpage
 \section{結果}
 
 この節では、収集した回答の得点を、全体、タスク別、モデル別の3つの視点で整理する。
@@ -570,7 +570,7 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.78\textwidth]{dist/figures/overall_condition_scores.png}
+\includegraphics[width=0.66\textwidth]{dist/figures/overall_condition_scores.png}
 \caption{通常条件と圧力条件の平均得点（12モデル平均）}
 \label{fig:overall-condition-scores}
 \end{figure}
@@ -588,7 +588,6 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 実際には下がり方に大きな偏りがあり、平均値よりもこの偏りのほうが多くの情報を含んでいる。
 次の2つの小節で、偏りをタスク別とモデル別に分解していく。
 
-\clearpage
 \subsection{タスク別の結果}
 
 図\ref{fig:task-score-drops}は、タスクごとの平均低下幅を大きい順に並べたものである。
@@ -596,7 +595,7 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\textwidth]{dist/figures/task_score_drops.png}
+\includegraphics[width=0.85\textwidth]{dist/figures/task_score_drops.png}
 \caption{タスク別の平均低下幅（12モデル平均）}
 \label{fig:task-score-drops}
 \end{figure}
@@ -634,8 +633,6 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 タスクごとに圧力の種類を揃えて比較できることがAUPBの設計上の利点であり、この結果から「どの種類の圧力に弱いか」を切り分けて把握できる。
 \end{keypoint}
 
-\clearpage
-
 \subsection{モデル別の結果}
 
 次に、モデルごとの違いを見る。
@@ -644,7 +641,7 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.98\textwidth]{dist/figures/model_condition_scores.png}
+\includegraphics[width=0.85\textwidth]{dist/figures/model_condition_scores.png}
 \caption{モデル別の通常条件と圧力条件の平均得点}
 \label{fig:model-condition-scores}
 \end{figure}
