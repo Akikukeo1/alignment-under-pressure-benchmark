@@ -80,27 +80,26 @@ function jstDate(iso: string): string {
 	<iframe src="/paper.pdf" title="Alignment Under Pressure Benchmark 論文"></iframe>
 
 	<!-- バージョン履歴:各版の GitHub Release へのリンク -->
+	<!-- NOTE: h2 や ul/li を使うと Starlight 本文用タイポグラフィの干渉を受けるため div 構成にする -->
 	{
 		versions.length > 0 && (
 			<nav class="versions" aria-label="論文のバージョン履歴">
-				<h2 class="versions-title">バージョン履歴</h2>
-				<ul class="version-list">
+				<div class="versions-title">バージョン履歴</div>
+				<div class="version-list">
 					{versions.map((v) => (
-						<li>
-							<a
-								class="chip"
-								href={releaseUrl(v.version)}
-								target="_blank"
-								rel="noopener noreferrer"
-							>
-								{v.version}
-								<span class="ver-date">{jstDate(v.publishedAt)}</span>
-								{v.version === current?.version && <span class="tag tag-current">現行</span>}
-								{v.prerelease && <span class="tag tag-pre">先行公開版</span>}
-							</a>
-						</li>
+						<a
+							class="chip"
+							href={releaseUrl(v.version)}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{v.version}
+							<span class="ver-date">{jstDate(v.publishedAt)}</span>
+							{v.version === current?.version && <span class="tag tag-current">現行</span>}
+							{v.prerelease && <span class="tag tag-pre">先行公開版</span>}
+						</a>
 					))}
-				</ul>
+				</div>
 			</nav>
 		)
 	}
@@ -218,10 +217,13 @@ function jstDate(iso: string): string {
 		font-weight: 500;
 		text-decoration: none;
 		color: inherit;
+		/* 背景塗りを足して本文背景に溶けないようにする(ライト/ダーク両対応のトークン) */
+		background: var(--sl-color-gray-6, #f1f5f9);
 		white-space: nowrap;
 		transition:
 			border-color 0.15s ease,
-			color 0.15s ease;
+			color 0.15s ease,
+			background-color 0.15s ease;
 	}
 	.chip:hover {
 		border-color: var(--pv-accent);
@@ -236,25 +238,28 @@ function jstDate(iso: string): string {
 	.versions {
 		margin-top: 1.1rem;
 	}
+	/* NOTE: 見出し(h2)にすると Starlight 本文タイポグラフィに詳細度で負けるため div + 継承色 */
 	.versions-title {
-		font-size: 0.85rem;
+		font-size: 0.8rem;
 		font-weight: 700;
-		color: var(--sl-color-gray-6, #475569);
-		border: none;
-		margin: 0 0 0.5rem;
+		margin: 0 0 0.55rem;
 		padding: 0;
 	}
 	.version-list {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.45rem;
-		list-style: none;
 		margin: 0;
 		padding: 0;
 	}
+	/* 「現行」等のピル有無で高さが揺れないよう高さを固定する */
+	.version-list .chip {
+		height: 2rem;
+		justify-content: center;
+	}
 	.ver-date {
 		font-size: 0.72rem;
-		opacity: 0.65;
+		opacity: 0.7;
 	}
 	.tag {
 		display: inline-flex;
