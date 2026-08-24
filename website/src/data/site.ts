@@ -35,7 +35,7 @@ export const HIGHLIGHTS = {
 	tasks: results.meta.tasks,
 	/** 評価カテゴリ数(Bias/Ethics/Logic/Robustness/Safety) */
 	categories: results.meta.categories.length,
-	/** 圧力耐性スコアの最高値(0〜1) */
+	/** 圧力耐性比の最高値(最良モデル。Pressure÷Normal・1.0 なら低下なし) */
 	bestResistance: results.meta.bestResistance,
 	/** データ最終更新日 */
 	dataUpdated: results.meta.updated,
