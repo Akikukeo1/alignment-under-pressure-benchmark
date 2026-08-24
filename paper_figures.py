@@ -1,11 +1,21 @@
-"""論文の図を生成するスクリプト(論文で使用したものと同一ロジック)。
+"""論文の図を生成するスクリプト(描画専任)。
 
-入力CSV(Model / Task_Name / Numerical_Result 列を持つもの)から、
-8点満点の条件別得点に関する 3 種類の図を出力する。
+aggregate.py の出力である results/ 以下の集計 CSV を読み込み、論文で使用する
+3 種類の図を出力する。数値集計は行わない(集計の SSOT は aggregate.py のみ)。
 
 使い方(リポジトリ直下で実行):
-    uv run paper_figures.py --input akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv
-    # 既定値は論文時と同じ result.csv / results/figures/
+    uv run aggregate.py            # 先に集計を実行しておく(results/ を更新)
+    uv run paper_figures.py        # 図 3 枚を paper/dist/figures/ へ出力
+
+入力(results/ 以下・aggregate.py の出力):
+    - overall_score/overall_score.csv      : Kaggle 公式 Overall Score
+    - overall/overall_summary.csv          : モデル別の平均指標
+    - pressure_gap/pressure_gap_by_task.csv: タスク別スコア(Model × Task ロング形式)
+
+出力(paper/dist/figures/ 以下・gitignore 済みのビルド成果物):
+    - overall_condition_scores.png : 通常条件と圧力条件の平均得点
+    - task_score_drops.png         : タスク別の平均低下幅
+    - model_condition_scores.png   : モデル別の通常/圧力条件比較
 """
 
 import argparse
@@ -16,8 +26,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-DATA_PATH = Path("result.csv")
-OUTPUT_DIR = Path("results/figures")
+RESULTS_DIR = Path("results")
+OUTPUT_DIR = Path("paper/dist/figures")
 
 MODEL_LABELS = {
     "gemini-3.5-flash-lite": "Gemini 3.5 Flash Lite",
@@ -35,41 +45,39 @@ MODEL_LABELS = {
 }
 
 
-def load_scores() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """モデル別の総合得点と、タスク別の平均得点を返す。"""
-    data = pd.read_csv(DATA_PATH)
-    tasks = data[data["Task_Name"].notna()].copy()
+def load_aggregates(results_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """aggregate.py の出力からモデル別サマリーとタスク別低下幅を読み込む。
 
-    tasks["condition"] = np.where(
-        tasks["Task_Name"].str.startswith("AUPB_Normal_"),
-        "通常条件",
-        "圧力条件",
+    戻り値:
+        model_summary : index=Model、columns=[通常条件, 圧力条件]
+                        (overall_summary.csv の Avg Normal / Avg Pressure)
+        task_drops    : index=Task、columns=[Avg Normal, Avg Pressure, 低下幅]
+                        (pressure_gap_by_task.csv をタスク単位で平均化したもの)
+    """
+    summary_path = results_dir / "overall" / "overall_summary.csv"
+    by_task_path = results_dir / "pressure_gap" / "pressure_gap_by_task.csv"
+
+    if not summary_path.exists():
+        raise FileNotFoundError(f"集計結果が見つかりません: {summary_path}。先に uv run aggregate.py を実行してください。")
+
+    model_summary = (
+        pd.read_csv(summary_path)
+        .set_index("Model")[["Avg Normal", "Avg Pressure"]]
+        .rename(columns={"Avg Normal": "通常条件", "Avg Pressure": "圧力条件"})
     )
-    tasks["task"] = (
-        tasks["Task_Name"].str.replace("AUPB_Normal_", "", regex=False).str.replace("AUPB_", "", regex=False)
-    )
 
-    if tasks["Numerical_Result"].isna().any():
-        raise ValueError("タスクの得点に欠損があります。")
-    if not tasks["Numerical_Result"].between(0, 1).all():
-        raise ValueError("0点から1点の範囲外にあるタスク得点があります。")
-    if tasks.duplicated(["Model", "task", "condition"]).any():
-        raise ValueError("同じモデル・タスク・条件の行が重複しています。")
+    task_drops = (
+        pd.read_csv(by_task_path).groupby("Task")[["Normal", "Pressure"]].mean()
+    ).rename(columns={"Normal": "Avg Normal", "Pressure": "Avg Pressure"})
+    task_drops["低下幅"] = task_drops["Avg Normal"] - task_drops["Avg Pressure"]
 
-    task_counts = tasks.groupby(["Model", "condition"])["task"].nunique()
-    if not task_counts.eq(8).all():
-        raise ValueError("8種類のタスクがそろっていないモデルまたは条件があります。")
-
-    totals = tasks.groupby(["Model", "condition"])["Numerical_Result"].sum().unstack()
-    task_means = tasks.groupby(["task", "condition"])["Numerical_Result"].mean().unstack()
-    task_means["低下幅"] = task_means["通常条件"] - task_means["圧力条件"]
-    return totals[["通常条件", "圧力条件"]], task_means
+    return model_summary, task_drops
 
 
-def plot_overall_scores(totals: pd.DataFrame) -> None:
-    """12モデルの平均総合得点を8点満点の棒グラフで示す。"""
+def plot_overall_scores(model_summary: pd.DataFrame) -> None:
+    """全モデル横断の平均得点を棒グラフで示す。"""
     labels = ["通常条件", "圧力条件"]
-    means = totals[labels].mean()
+    means = model_summary[labels].mean()
     difference = means["通常条件"] - means["圧力条件"]
 
     fig, ax = plt.subplots(figsize=(6.4, 4.2))
@@ -77,9 +85,9 @@ def plot_overall_scores(totals: pd.DataFrame) -> None:
     colors = ["#9DB7DE", "#B45309"]
     bars = ax.bar(x, means.values, width=0.56, color=colors)
 
-    ax.set_ylim(0, 8)
-    ax.set_yticks(np.arange(0, 9, 1))
-    ax.set_ylabel("平均得点（8点満点）")
+    ax.set_ylim(0, 1.0)
+    ax.set_yticks(np.arange(0, 1.01, 0.2))
+    ax.set_ylabel("平均得点（1タスクあたり1点満点）")
     ax.set_xticks(x, labels)
     ax.set_title("通常条件と圧力条件の平均得点", pad=14, fontweight="bold")
     ax.grid(axis="y", color="#D9DEE3", linewidth=0.8)
@@ -88,8 +96,8 @@ def plot_overall_scores(totals: pd.DataFrame) -> None:
     for bar, value in zip(bars, means.values):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
-            value + 0.15,
-            f"{value:.1f}点",
+            value + 0.015,
+            f"{value:.3f}",
             ha="center",
             va="bottom",
             fontsize=12,
@@ -99,8 +107,8 @@ def plot_overall_scores(totals: pd.DataFrame) -> None:
     arrow_x = 0.5
     ax.annotate(
         "",
-        xy=(arrow_x, means["圧力条件"] + 0.08),
-        xytext=(arrow_x, means["通常条件"] - 0.08),
+        xy=(arrow_x, means["圧力条件"] + 0.008),
+        xytext=(arrow_x, means["通常条件"] - 0.008),
         arrowprops={
             "arrowstyle": "-|>",
             "color": "#B42318",
@@ -110,7 +118,7 @@ def plot_overall_scores(totals: pd.DataFrame) -> None:
     ax.text(
         arrow_x + 0.06,
         (means["通常条件"] + means["圧力条件"]) / 2,
-        f"{difference:.1f}点低下",
+        f"{difference:.3f}低下",
         ha="left",
         va="center",
         color="#B42318",
@@ -132,36 +140,47 @@ def plot_overall_scores(totals: pd.DataFrame) -> None:
     )
     plt.close(fig)
 
-    print(f"通常条件の平均: {means['通常条件']:.4f} / 8点")
-    print(f"圧力条件の平均: {means['圧力条件']:.4f} / 8点")
-    print(f"平均低下幅: {difference:.4f}点")
+    print(f"通常条件の平均: {means['通常条件']:.4f}")
+    print(f"圧力条件の平均: {means['圧力条件']:.4f}")
+    print(f"平均低下幅: {difference:.4f}")
 
 
-def plot_task_drops(task_means: pd.DataFrame) -> None:
-    """8タスクの通常条件から圧力条件への平均低下幅を示す。"""
-    scores = task_means.sort_values("低下幅", ascending=True)
+def plot_task_drops(task_drops: pd.DataFrame) -> None:
+    """各タスクの通常条件から圧力条件への平均低下幅を示す。"""
+    scores = task_drops.sort_values("低下幅", ascending=True)
+
+    # 大きく落ちているタスクを強調(最大低下幅の 7 割以上)
+    emphasis_threshold = scores["低下幅"].max() * 0.7
 
     fig, ax = plt.subplots(figsize=(7.2, 4.8))
     y = np.arange(len(scores))
     bars = ax.barh(y, scores["低下幅"], color="#2457A7", height=0.62)
 
-    ax.set_xlim(0, 1.08)
-    ax.set_xticks(np.arange(0, 1.01, 0.2))
-    ax.set_xlabel("平均低下幅（1タスク1点満点）")
+    # 正負両方(圧力で上昇するタスク)を含めて軸範囲を決める
+    lo = min(scores["低下幅"].min() * 1.15, 0)
+    hi = max(scores["低下幅"].max() * 1.08, 0.05)
+    ax.set_xlim(lo, hi)
+
+    # 目盛りは 0.1 刻み・ラベルは小数 1 桁(細かすぎるとラベルが重なるため)
+    step = 0.1
+    ticks = np.arange(np.floor(lo / step) * step, hi + step / 2, step)
+    ax.set_xticks(ticks, [f"{t:.1f}" for t in ticks])
+    ax.set_xlabel("平均低下幅（1タスクあたり1点満点）")
     ax.set_yticks(y, scores.index)
     ax.set_title("タスク別の平均低下幅", pad=12, fontweight="bold")
     ax.grid(axis="x", color="#D9DEE3", linewidth=0.8)
     ax.set_axisbelow(True)
 
     for bar, value in zip(bars, scores["低下幅"]):
+        offset = 0.002 if value >= 0 else -0.002
         ax.text(
-            max(value + 0.018, 0.018),
+            value + offset,
             bar.get_y() + bar.get_height() / 2,
-            f"{value:.2f}点",
-            ha="left",
+            f"{value:.3f}",
+            ha="left" if value >= 0 else "right",
             va="center",
             fontsize=9.5,
-            fontweight="bold" if value >= 0.5 else "normal",
+            fontweight="bold" if value >= emphasis_threshold else "normal",
         )
 
     for side in ["top", "right", "left"]:
@@ -179,9 +198,9 @@ def plot_task_drops(task_means: pd.DataFrame) -> None:
     plt.close(fig)
 
 
-def plot_model_scores(totals: pd.DataFrame) -> None:
-    """モデルごとの通常条件と圧力条件の総合得点を比較する。"""
-    scores = totals.copy()
+def plot_model_scores(model_summary: pd.DataFrame) -> None:
+    """モデルごとの通常条件と圧力条件の平均得点を比較する。"""
+    scores = model_summary.copy()
     scores["低下幅"] = scores["通常条件"] - scores["圧力条件"]
     scores = scores.sort_values(["圧力条件", "通常条件"], ascending=[False, False])
 
@@ -218,9 +237,9 @@ def plot_model_scores(totals: pd.DataFrame) -> None:
     labels = [MODEL_LABELS.get(model, model) for model in scores.index]
     ax.set_yticks(y, labels)
     ax.invert_yaxis()
-    ax.set_xlim(0, 8.15)
-    ax.set_xticks(np.arange(0, 9, 1))
-    ax.set_xlabel("総合得点（8点満点）")
+    ax.set_xlim(0, 1.05)
+    ax.set_xticks(np.arange(0, 1.01, 0.2))
+    ax.set_xlabel("平均得点（1タスクあたり1点満点）")
     ax.set_title("モデル別の通常条件と圧力条件の得点", pad=12, fontweight="bold")
     ax.grid(axis="x", color="#D9DEE3", linewidth=0.8)
     ax.set_axisbelow(True)
@@ -240,29 +259,29 @@ def plot_model_scores(totals: pd.DataFrame) -> None:
     )
     plt.close(fig)
 
-    print(f"モデル別の最小低下幅: {scores['低下幅'].min():.4f}点")
-    print(f"モデル別の最大低下幅: {scores['低下幅'].max():.4f}点")
+    print(f"モデル別の最小低下幅: {scores['低下幅'].min():.4f}")
+    print(f"モデル別の最大低下幅: {scores['低下幅'].max():.4f}")
 
 
 def main() -> None:
-    global DATA_PATH, OUTPUT_DIR
+    global RESULTS_DIR, OUTPUT_DIR
 
-    parser = argparse.ArgumentParser(description="論文の図を生成する")
+    parser = argparse.ArgumentParser(description="論文の図を生成する(aggregate.py の集計結果から)")
     parser.add_argument(
-        "--input",
-        "-i",
-        default=str(DATA_PATH),
-        help="入力CSVのパス(既定: result.csv)",
+        "--results-dir",
+        "-r",
+        default=str(RESULTS_DIR),
+        help="aggregate.py の出力ディレクトリ(既定: results)",
     )
     parser.add_argument(
         "--output-dir",
         "-o",
         default=str(OUTPUT_DIR),
-        help="図の出力先ディレクトリ(既定: results/figures)",
+        help="図の出力先ディレクトリ(既定: paper/dist/figures)",
     )
     args = parser.parse_args()
 
-    DATA_PATH = Path(args.input)
+    RESULTS_DIR = Path(args.results_dir)
     OUTPUT_DIR = Path(args.output_dir)
 
     mpl.rcParams.update({
@@ -277,10 +296,10 @@ def main() -> None:
         "axes.unicode_minus": False,
         "font.size": 10,
     })
-    totals, task_means = load_scores()
-    plot_overall_scores(totals)
-    plot_task_drops(task_means)
-    plot_model_scores(totals)
+    model_summary, task_drops = load_aggregates(RESULTS_DIR)
+    plot_overall_scores(model_summary)
+    plot_task_drops(task_drops)
+    plot_model_scores(model_summary)
 
 
 if __name__ == "__main__":

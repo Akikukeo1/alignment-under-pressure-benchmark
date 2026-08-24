@@ -1,0 +1,288 @@
+# パイプライン統合ワークフロー(push(main)/ PR)。
+#
+# 依存グラフ:
+#   lint ──┬─> site-build ────────────────────────────────┐
+#          ├─> build-agg(集計+全図生成 → artifacts)      │
+#          │      ├──> latex(論文 PDF → artifact)───────┼─> update-preview
+#          │      └──> publish-data(commit&push+配信)────┘   (push && main のみ)
+#          └─> changes(paths-filter)──> publish-data の起動条件
+#
+# - lint は全ジョブの前段ゲート。ここが落ちたら後続はすべてスキップされる
+# - 集計の SSOT は aggregate.py。paper_figures.py はその出力(results/)を消費する描画専任
+# - publish-data は集計結果(results/)をコミットして repo 自体を最新化する
+# - bot の commit([skip ci])による再帰発火は GitHub Actions がスキップする
+# - Cloudflare Secrets 未設定のフォーク環境では Deploy ステップを自動スキップし、
+#   lint〜Preview リリースまでは通常どおり動作する
+
+name: Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    # ボットによる生成物のみの更新(publish-data / publish-paper)は検証不要のため除外
+    paths-ignore:
+      - "website/src/data/results.json"
+      - "website/public/results/**"
+      - "website/public/paper.pdf"
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # PR は旧 run をキャンセル、main push は逐次実行(データ更新の順序保証のため)
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # publish-data の起動条件となる data 関連ファイルの変更検出
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      data: ${{ steps.filter.outputs.data }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            data:
+              - "results/**"
+              - "tasks/**"
+              - "config.toml"
+              - "aggregate.py"
+              - "charts.py"
+              - "paper_figures.py"
+              - "website/scripts/**"
+              - ".github/workflows/pipeline.yml"
+
+  # Python の Lint。全ジョブの前段ゲート(bot が壊れたコードで集計・push しないため)
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Ruff check
+        run: uv run ruff check .
+
+  site-build:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: website/.node-version
+      - name: Website build
+        run: |
+          cd website
+          npx pnpm install --frozen-lockfile
+          npx pnpm build
+
+  # 集計 + 全図生成(このジョブだけで results/ と論文図を作り切る)
+  build-agg:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # 図内の日本語描画用。ランナーに CJK フォントが無いと豆腐になる
+      - name: Install CJK fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+      - name: Aggregate
+        run: uv run aggregate.py
+      - name: Build paper figures
+        run: uv run paper_figures.py --output-dir paper/dist/figures
+      - name: Upload aggregated results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aggregated-results
+          path: results
+      - name: Upload figures artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-figures
+          path: paper/dist/figures
+
+  # 論文 PDF ビルド(build-agg が生成した図を paper/dist/figures へ復元して使用)
+  latex:
+    needs: [build-agg]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: paper-figures
+          path: paper/dist/figures/
+      # TeX Live コンテナ内で実行。QR は事前変換済み PDF を includegraphics するため Inkscape 不要
+      - name: Build PDF
+        uses: xu-cheng/latex-action@v4
+        with:
+          root_file: main.tex
+          working_directory: paper
+          # ltjsarticle は LuaTeX-ja 専用クラスのため LuaLaTeX でビルドする。
+          # args に既定の -pdf(pdflatex 指定)を残すとエンジン指定と競合するため除外。
+          latexmk_use_lualatex: true
+          args: -file-line-error -halt-on-error -interaction=nonstopmode
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: paper/main.pdf
+
+  # data 関連変更時のみ実行。集計結果を repo に反映し、サイトデータを生成して Cloudflare Pages へ配信する
+  publish-data:
+    needs: [changes, lint, build-agg]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.data == 'true'
+    permissions:
+      contents: write
+    concurrency:
+      group: update-data
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    env:
+      # フォーク環境(Secrets 未設定)では Deploy のみスキップし、パイプライン全体は成功させる
+      CF_DEPLOY_ENABLED: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      # 集計結果(bot が再生成した最新版)を repo へ反映するため artifact から復元
+      - uses: actions/download-artifact@v4
+        with:
+          name: aggregated-results
+          path: results/
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # gen:data が論文図(paper/dist/figures)を public/results へコピーするため復元しておく
+      - uses: actions/download-artifact@v4
+        with:
+          name: paper-figures
+          path: paper/dist/figures/
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: website/.node-version
+      - name: Sync data
+        run: |
+          cd website
+          npx pnpm install --frozen-lockfile
+          npx pnpm gen:data
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results website/src/data/results.json website/public/results
+          if git diff --cached --quiet; then
+            echo "変更がないためコミットをスキップします"
+            exit 0
+          fi
+          # NOTE: [skip ci] により GitHub Actions の再帰発火を防止。
+          # 配信は下記 Deploy to Cloudflare Pages(Direct Upload)が担う。
+          git commit -m "Update site data [skip ci]"
+          git push
+      - name: Build site
+        run: |
+          cd website
+          npx pnpm build
+      # NOTE: wrangler-action@v3 は wrangler 導入時に pnpm を要求して失敗するため npx で直接実行する
+      - name: Deploy to Cloudflare Pages
+        if: env.CF_DEPLOY_ENABLED == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          cd website
+          npx wrangler pages deploy dist --project-name=alignment-under-pressure-benchmark --branch=main
+
+  # Preview リリースの更新。CI がすべて成功した後のみ実行する。
+  # NOTE: 毎回削除&再作成することで created_at が更新され、Releases 一覧で
+  # 正式版(Latest バッジ)の直下 2 番目に常に表示される。
+  update-preview:
+    needs: [site-build, latex, publish-data]
+    if: >-
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.site-build.result == 'success' &&
+      needs.latex.result == 'success' &&
+      needs.publish-data.result != 'failure'
+    permissions:
+      contents: write
+    concurrency:
+      group: preview-release
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: paper-pdf
+          path: dist-assets/
+      - uses: actions/download-artifact@v4
+        with:
+          name: paper-figures
+          path: dist-assets/figures/
+      # data 変更があった場合のみ、bot が再生成した最新集計を all.zip に使う
+      - name: Download aggregated results artifact
+        if: needs.publish-data.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: aggregated-results
+          path: latest-results/
+      # NOTE: tasks/ と REPRODUCIBILITY.md はコミット済みの内容をそのまま同梱する(冪等)
+      - name: Prepare preview assets
+        run: |
+          LEADERBOARD="akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv"
+          cp dist-assets/main.pdf aupb-paper-preview.pdf
+
+          mkdir -p zipsrc/figures
+          cp "$LEADERBOARD" zipsrc/
+          cp -r dist-assets/figures/. zipsrc/figures/
+          (cd zipsrc && zip -r ../aupb-data-preview.zip .)
+
+          STAGE="aupb-preview"
+          mkdir -p "$STAGE/paper/dist" "$STAGE/results"
+          cp aupb-paper-preview.pdf "$STAGE/"
+          cp "$LEADERBOARD" "$STAGE/"
+          cp -r dist-assets/figures "$STAGE/paper/dist/figures"
+          cp -r tasks "$STAGE/tasks"
+          if [ -d latest-results ]; then
+            cp -r latest-results/. "$STAGE/results/"
+          else
+            cp -r results/. "$STAGE/results/"
+          fi
+          cp REPRODUCIBILITY.md "$STAGE/"
+          zip -r "aupb-preview-all.zip" "$STAGE"
+
+      - name: Delete old preview release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete preview --cleanup-tag --yes || true
+
+      - name: Create preview release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: preview
+          name: Preview(先行公開版)
+          body: |
+            常に最新の状態を反映する先行公開版です。内容は予告なく差し替えられます。
+
+            - `aupb-paper-preview.pdf` — 論文本体
+            - `aupb-data-preview.zip` — リーダーボード CSV(数値根拠)+ 論文図
+            - `aupb-preview-all.zip` — 上記 + タスク定義・集計結果・再現手順を含む全部入り
+
+            引用の際は正式版 vX.Y をご利用ください。
+          prerelease: true
+          make_latest: false
+          files: |
+            aupb-paper-preview.pdf
+            aupb-data-preview.zip
+            aupb-preview-all.zip

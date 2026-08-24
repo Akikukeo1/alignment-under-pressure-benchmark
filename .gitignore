@@ -5,6 +5,9 @@ README.png
 # ビルド成果物(build.py で再生成可能)
 /generated
 
+# 論文図(paper_figures.py が aggregate.py の集計から生成するビルド成果物)
+/paper/dist
+
 # Python
 __pycache__/
 *.pyc
@@ -28,5 +31,6 @@ node_modules/
 /paper/main.pdf
 /paper/main.run.xml
 /paper/main.synctex.gz
+/paper/main.synctex(busy)
 /paper/main.toc
 paper.zip

@@ -191,8 +191,6 @@ uv run aggregate.py -c config.toml   # 明示指定も可能
 | `pressure_gap/pressure_gap_by_task.csv` | タスク × モデル別の Normal / Pressure / Gap / 耐性比 |
 | `pressure_gap/pressure_gap_by_model.csv` | モデル別平均指標 |
 | `pressure_gap/pressure_resistance.{csv,png}` | 圧力耐性比(Pressure / Normal) |
-| `pressure_gap/pressure_gap_scores.png` | 平常時 vs 圧力下の平均スコア比較 |
-| `pressure_gap/pressure_gap_delta.png` | モデル別平均ギャップ(Δ) |
 | `heatmap/heatmap_pressure.{csv,png}`, `heatmap_gap.{csv,png}` | ヒートマップ |
 | `overall/category_scores.{csv,png}`, `overall_summary.{csv,png}` | カテゴリ別スコア・モデル別サマリー |
 
@@ -213,24 +211,35 @@ pnpm build           # 本番ビルド(dist/)
 ## 9. (任意)論文図の再生成
 
 `paper/` は論文の LaTeX ソース一式です。論文に張り込む図 3 枚は、
-ルートの `paper_figures.py` で再生成できます(入力は論文時点の凍結 CSV):
+`aggregate.py` の集計結果(results/)から生成します:
 
 ```bash
-just paper-figures
-# 実体: uv run paper_figures.py --input paper/result.csv --output-dir paper/results/figures
+uv run aggregate.py       # 集計(results/ を更新)
+uv run paper_figures.py   # 図 3 枚を paper/dist/figures/ へ出力
 ```
 
-- `paper/result.csv` は論文執筆時点のリーダーボード CSV の凍結スナップショットです。
-  最新結果での図は `just figures`(ルートの `results/figures/`)を使用してください。
-- 論文 PDF のビルドは GitHub Actions またはオンライン執筆サービスで行います
-  (ローカルには LaTeX ビルドレシピはありません)。ワークフローは次のとおり:
-  - **CI(check.yml)**: push / PR 時に論文ビルドが通るかを検証。PDF は artifact で確認可能
-  - **Publish paper(publish-paper.yml)**: 手動実行。図再生成 → PDF ビルド →
-    `website/public/paper.pdf` を更新して main に push(サイトへ自動反映)
+- 入力はリポジトリ直下のリーダーボード CSV(config.toml `[aggregate].input_csv`)。
+  論文専用の凍結 CSV は廃止しており、サイトと同一の集計結果から図を生成します(一元管理)。
+- 出力先 `paper/dist/` は gitignore 済みのビルド成果物です。
+- **論文 PDF のビルドは CI が担います**(ローカルには LaTeX ビルドレシピはありません):
+  - **Pipeline(pipeline.yml)**: push / PR 時に PDF をビルドし artifact で確認可能
+  - **Publish paper(publish-paper.yml)**: 手動実行。PDF を Release(vX.Y は自動採番)と
+    `website/public/paper.pdf` へ公開
+- フォークして使う場合: Cloudflare Secrets 未設定でも Pipeline は動作します
+  (Lint・ビルド・Preview リリースまで)。サイト配信を行う場合のみ
+  `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` をリポジトリ Secrets に登録してください。
 - QR コード(`paper/assets/aup_benchmark_qr.svg` / `.pdf`)の再生成は
   掲載 URL が変わった場合のみ必要です。`paper/scripts/generate_qr_svg.py`
   (lualatex + Inkscape 必須)で SVG を生成し、`paper/scripts/make_qr_pdf.py`
   (lualatex のみ必須)で PDF を生成します。
+
+### リーダーボード・タスク更新時の手順
+
+1. Kaggle Benchmark のリーダーボード CSV を取得し、リポジトリ直下に配置して push
+   → CI が集計・サイト反映・Preview リリースまで自動実行します
+2. 論文を追従させる場合: main.tex 本文の数値記載を見直してください
+   (図は CI が自動で最新化します)
+3. 公開は Actions タブの「Publish paper」を手動実行(vX.Y は自動採番)
 
 ## 10. トラブルシューティング
 

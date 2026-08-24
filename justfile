@@ -14,13 +14,9 @@ default:
 aggregate:
     uv run aggregate.py
 
-# 論文と同一ロジックの公式図を生成(results/figures/ に出力)
+# 論文用の公式図を生成(paper/dist/figures/ に出力、入力は aggregate.py の集計結果)
 figures:
-    uv run paper_figures.py --input akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv
-
-# 論文図を再生成(paper/results/figures/ に出力、入力は論文時の凍結CSV)
-paper-figures:
-    uv run paper_figures.py --input paper/result.csv --output-dir paper/results/figures
+    uv run paper_figures.py --output-dir paper/dist/figures
 
 # ウェブサイト用データを生成(results.json とサイト内画像を更新)
 sync-data:
@@ -35,7 +31,14 @@ site:
     cd website; pnpm build
 
 # 評価データ更新 → サイト反映までの一連フロー(全自動)
-update: aggregate figures sync-data sync-docs site
+# NOTE: 依存レシピ形式(update: aggregate figures ...)は windows-shell(PowerShell)設定下で
+# 依存名がコマンドとして実行され失敗するため、明示的に just を呼び出す
+update:
+    just aggregate
+    just figures
+    just sync-data
+    just sync-docs
+    just site
 
 # Python の Lint チェック
 lint:

@@ -93,7 +93,7 @@ flowchart LR
 | asset | 内容 |
 | :--- | :--- |
 | `aupb-paper-*.pdf` | 論文本体 |
-| `aupb-data-*.zip` | 集計結果(result.csv)+ 論文図 |
+| `aupb-data-*.zip` | リーダーボード CSV（数値根拠）+ 論文図 |
 | `aupb-*-all.zip` | 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り |
 
 ## ライセンス

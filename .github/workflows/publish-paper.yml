@@ -7,11 +7,11 @@
 #
 # asset:
 #   - aupb-paper-vX.Y.pdf : 論文単体
-#   - aupb-data-vX.Y.zip  : result.csv + 論文図
+#   - aupb-data-vX.Y.zip  : リーダーボード CSV(数値根拠)+ 論文図
 #   - aupb-vX.Y-all.zip   : 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順の全部入り
 #
 # 注意: LaTeX ソースのローカルテスト環境はないため、main.tex を変更した場合は
-# まず check.yml の paper-build で検証してから、このワークフローで公開する。
+# まず Pipeline(pipeline.yml)の latex ジョブで検証してから、このワークフローで公開する。
 
 name: Publish paper
 
@@ -69,8 +69,7 @@ jobs:
       - name: Build figures
         run: |
           uv run paper_figures.py \
-            --input paper/result.csv \
-            --output-dir paper/results/figures
+            --output-dir paper/dist/figures
 
       # PDF ビルド(TeX Live コンテナ内で実行。
       # QR は事前変換済み PDF を includegraphics するため Inkscape 不要)
@@ -125,16 +124,18 @@ jobs:
 
       # Release 用 asset の準備
       # NOTE: results/ と tasks/ はコミット済みの内容をそのまま同梱する
-      # (update-data.yml が常時最新化しているため再実行不要・冪等)
+      # (Pipeline の publish-data ジョブが常時最新化しているため冪等)
       - name: Prepare release assets
         run: |
           cp paper/main.pdf "aupb-paper-$VERSION.pdf"
-          cd paper && zip -r "../aupb-data-$VERSION.zip" result.csv results/figures && cd ..
+          mkdir -p zipsrc/figures && cp -r paper/dist/figures/. zipsrc/figures/
+          cp akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv zipsrc/
+          (cd zipsrc && zip -r "../aupb-data-$VERSION.zip" .)
           STAGE="aupb-${VERSION#v}"
-          mkdir -p "$STAGE/paper/results"
+          mkdir -p "$STAGE/paper/dist"
           cp "aupb-paper-$VERSION.pdf" "$STAGE/"
-          cp paper/result.csv "$STAGE/paper/"
-          cp -r paper/results/figures "$STAGE/paper/results/"
+          cp akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv "$STAGE/"
+          cp -r paper/dist/figures "$STAGE/paper/dist/"
           cp -r tasks "$STAGE/tasks"
           cp -r results "$STAGE/results"
           cp REPRODUCIBILITY.md "$STAGE/"
@@ -150,7 +151,7 @@ jobs:
             論文と成果物の正式リリースです。
 
             - `aupb-paper-${{ env.VERSION }}.pdf` — 論文本体
-            - `aupb-data-${{ env.VERSION }}.zip` — 集計結果(result.csv)+ 論文図
+            - `aupb-data-${{ env.VERSION }}.zip` — リーダーボード CSV（数値根拠）+ 論文図
             - `aupb-${{ env.VERSION }}-all.zip` — 上記 + タスク定義(tasks/)・集計結果(results/)・再現手順を含む全部入り
 
             再現手順は [REPRODUCIBILITY.md](https://github.com/${{ github.repository }}/blob/${{ env.VERSION }}/REPRODUCIBILITY.md) を参照し、このタグを checkout してください。

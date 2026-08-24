@@ -548,18 +548,18 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 \subsection{全体の結果}
 
 12種類のAIモデルについて、8種類のタスクに対する通常条件と圧力条件の成績を比べた。使用したモデルの一覧と評価日は、付録Bの表\ref{tab:model-experiment-dates}に示す。
-各タスクの成績を0点から1点で表し、8種類のタスクの合計を8点満点として集計した。
+各タスクの成績を0点から1点で表し、8種類のタスクの平均をモデルごとの得点として集計した。
 1タスクあたりの満点は、実行回数にかかわらず同じ1点である。
 
 \begin{keypoint}{全体の結果}
-12モデルの平均総合得点は、8点満点で、通常条件では\textbf{7.3点}、圧力条件では\textbf{5.2点}であった。
-圧力条件では通常条件より平均で\textbf{2.1点低く}なり、12モデルすべてで総合得点が下がった。
+12モデルの平均得点は、通常条件では\textbf{0.915点}、圧力条件では\textbf{0.648点}であった。
+圧力条件では通常条件より平均で\textbf{0.266点低く}なり、12モデルすべてで得点が下がった。
 \end{keypoint}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.78\textwidth]{results/figures/overall_condition_scores.png}
-\caption{通常条件と圧力条件の平均総合得点（12モデル平均）}
+\includegraphics[width=0.78\textwidth]{dist/figures/overall_condition_scores.png}
+\caption{通常条件と圧力条件の平均得点（12モデル平均）}
 \label{fig:overall-condition-scores}
 \end{figure}
 
@@ -572,7 +572,7 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\textwidth]{results/figures/task_score_drops.png}
+\includegraphics[width=0.95\textwidth]{dist/figures/task_score_drops.png}
 \caption{タスク別の平均低下幅（12モデル平均）}
 \label{fig:task-score-drops}
 \end{figure}
@@ -586,18 +586,18 @@ AIが危害につながる操作を求められたと誤解し、倫理的な理
 
 \subsection{モデル別の結果}
 
-次に、モデルごとの通常条件と圧力条件の総合得点を図\ref{fig:model-condition-scores}に示す。
+次に、モデルごとの通常条件と圧力条件の平均得点を図\ref{fig:model-condition-scores}に示す。
 線の右側の点が通常条件、左側の点が圧力条件を表す。
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.98\textwidth]{results/figures/model_condition_scores.png}
-\caption{モデル別の通常条件と圧力条件の総合得点}
+\includegraphics[width=0.98\textwidth]{dist/figures/model_condition_scores.png}
+\caption{モデル別の通常条件と圧力条件の平均得点}
 \label{fig:model-condition-scores}
 \end{figure}
 
-12モデルすべてで、圧力条件の総合得点が通常条件より低くなった。
-低下幅はモデルによって異なり、最も小さいモデルでは0.9点、最も大きいモデルでは3.4点であった。
+12モデルすべてで、圧力条件の平均得点が通常条件より低くなった。
+低下幅はモデルによって異なり、最も小さいモデルでは0.116点、最も大きいモデルでは0.429点であった。
 
 \clearpage
 

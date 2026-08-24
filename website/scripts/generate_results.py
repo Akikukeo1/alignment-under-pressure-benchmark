@@ -23,7 +23,8 @@ from pathlib import Path
 WEBSITE_DIR = Path(__file__).resolve().parent.parent
 REPO_DIR = WEBSITE_DIR.parent
 RESULTS_DIR = REPO_DIR / "results"
-FIGURES_DIR = REPO_DIR / "results" / "figures"
+# 論文図の生成先(gitignore 済み。paper_figures.py が aggregate.py の集計から出力する)
+FIGURES_DIR = REPO_DIR / "paper" / "dist" / "figures"
 TASKS_DIR = REPO_DIR / "tasks"
 OUT_JSON = WEBSITE_DIR / "src" / "data" / "results.json"
 OUT_IMG_DIR = WEBSITE_DIR / "public" / "results"
@@ -121,7 +122,7 @@ def main() -> None:
             if src.parent == FIGURES_DIR:
                 sys.exit(
                     f"論文の図が見つかりません: {src}\n"
-                    "先に `uv run paper_figures.py --input <CSV>` を実行してください。"
+                    "先に `uv run aggregate.py` → `uv run paper_figures.py` を実行してください。"
                 )
             sys.exit(f"画像が見つかりません(aggregate.py の再実行を検討してください): {src}")
         shutil.copy2(src, OUT_IMG_DIR / dest_name)

@@ -96,6 +96,42 @@ def _extract_overall_scores(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def _validate_task_scores(records_df: pd.DataFrame, task_metadata: dict) -> None:
+    """タスク別得点の品質検証(欠損・範囲・重複・タスク網羅)。
+
+    旧 paper_figures.load_scores() にあった検証を唯一の集計器である本ファイルへ
+    移設したもの。タスク網羅チェックはハードコードではなく tasks/*.toml の
+    タスク定義数と照合するため、タスク追加時の改修箇所はここだけでよい。
+    """
+    if records_df["Score"].isna().any():
+        bad = records_df.loc[records_df["Score"].isna(), ["Model", "Task"]]
+        raise ValueError(f"タスクの得点に欠損があります:\n{bad.to_string(index=False)}")
+
+    out_of_range = ~records_df["Score"].between(0, 1)
+    if out_of_range.any():
+        bad = records_df.loc[out_of_range, ["Model", "Task"]]
+        raise ValueError(f"0点から1点の範囲外にあるタスク得点があります:\n{bad.to_string(index=False)}")
+
+    dup_mask = records_df.duplicated(["Model", "Task", "Condition"])
+    if dup_mask.any():
+        bad = records_df.loc[dup_mask, ["Model", "Task", "Condition"]]
+        raise ValueError(f"同じモデル・タスク・条件の行が重複しています:\n{bad.to_string(index=False)}")
+
+    # タスク網羅: 各モデル×条件で、タスク定義(TOML)とまったく同じタスク集合を持つこと
+    expected_tasks = set(task_metadata.keys())
+    if not expected_tasks:
+        print("Warning: タスク定義(tasks/*.toml)が読めないため、タスク網羅チェックをスキップします")
+        return
+    coverage = records_df.groupby(["Model", "Condition"])["Task"].agg(set)
+    for (model, condition), actual in coverage.items():
+        missing = sorted(expected_tasks - actual)
+        unknown = sorted(actual - expected_tasks)
+        if missing:
+            raise ValueError(f"{model}({condition}): タスク定義に対して欠落しているタスクがあります: {missing}")
+        if unknown:
+            raise ValueError(f"{model}({condition}): タスク定義(TOML)に存在しないタスクがあります: {unknown}")
+
+
 def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
     """タスク別スコアの計算とピボット処理"""
     task_rows = df[df["Task_Name"] != ""].copy()
@@ -128,6 +164,9 @@ def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
         })
 
     records_df = pd.DataFrame(records)
+
+    # 品質検証(欠損・0〜1 範囲・重複・タスク網羅)。失敗時はここで異常終了する
+    _validate_task_scores(records_df, task_metadata)
 
     # Normal と Pressure をピボットして1行にまとめる
     pivot_df = records_df.pivot(
