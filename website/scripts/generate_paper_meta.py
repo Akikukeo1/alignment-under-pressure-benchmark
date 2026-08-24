@@ -14,6 +14,10 @@ publish-paper.yml は採番の直後(タグ作成前)に呼ぶため、env で�
 実行環境のタイムゾーン設定(GitHub Actions ランナーは UTC、ローカルは JST など)
 に結果が左右されない。JST への変換は表示側(PaperViewer.astro)がビルド時に
 明示的に行う。
+
+preview タグ(pipeline.yml の update-preview が main push ごとに削除&再作成する
+ローリング運用)は時刻を持たせても即座に陳腐化するため、バージョン名のみを
+別フィールドに出力し、正式版の versions には含めない。
 """
 
 from __future__ import annotations
@@ -131,14 +135,18 @@ def apply_current_override(
 
 
 def main() -> None:
-    versions = collect_tags()
+    tags = collect_tags()
+    # 正式版のみを履歴対象にする。preview 等はローリング運用のためバージョン名のみ
+    versions = [t for t in tags if not t["prerelease"]]
+    previews = [t for t in tags if t["prerelease"]]
+    preview = {"version": str(previews[0]["version"])} if previews else None
     current = apply_current_override(versions)
 
-    data = {"current": current, "versions": versions}
+    data = {"current": current, "preview": preview, "versions": versions}
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     label = current["version"] if current else "(なし)"
-    print(f"[OK] {OUT_JSON.relative_to(REPO_DIR)} を生成(現行版: {label}・全 {len(versions)} 版)")
+    print(f"[OK] {OUT_JSON.relative_to(REPO_DIR)} を生成(現行版: {label}・正式版 {len(versions)} 版)")
 
 
 if __name__ == "__main__":
