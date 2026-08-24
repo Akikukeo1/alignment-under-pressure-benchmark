@@ -102,7 +102,8 @@ def main() -> None:
         "models": len(scores),
         "tasks": len(list(TASKS_DIR.glob("*.toml"))),
         "categories": CATEGORY_ORDER,
-        "bestResistance": max(round(item["resistance"], 2) for item in gap),
+        # 表示側(HeroStat)が小数 3 桁で整形するため、誤差除去程度の丸めに留める
+        "bestResistance": round(max(item["resistance"] for item in gap), 4),
     }
 
     # --- JSON 書き出し --------------------------------------------------------
