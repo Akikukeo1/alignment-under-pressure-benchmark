@@ -35,7 +35,11 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
+      # NOTE: fetch-tags が無いと git tag --list が空になり、既存バージョンを
+      # 上書きする事故(採番が常に v0.1 になる)が起きるため必須
       - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
 
       # 正式版バージョンの自動採番(vX.Y 形式)
       # NOTE: inputs.major を直接 run に展開すると script injection の恐れがあるため env 経由。
@@ -43,6 +47,7 @@ jobs:
       - name: Determine version
         env:
           MAJOR: ${{ inputs.major }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           LATEST=$(git tag --list 'v[0-9]*.[0-9]*' | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)
           if [ "$MAJOR" = "true" ]; then
@@ -54,6 +59,12 @@ jobs:
             X=$(echo "$LATEST" | tr -d 'v' | cut -d. -f1)
             Y=$(echo "$LATEST" | tr -d 'v' | cut -d. -f2)
             VERSION="v${X}.$((Y + 1))"
+          fi
+          # 既存リリースとの重複ガード(action-gh-release が既存リリースを
+          # 上書き更新してしまう事故を防ぐ。正式版は一度公開したら不変であるべき)
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            echo "::error::Release $VERSION は既に存在します。採番に失敗した可能性があるため停止します。"
+            exit 1
           fi
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "採番されたバージョン: $VERSION"
