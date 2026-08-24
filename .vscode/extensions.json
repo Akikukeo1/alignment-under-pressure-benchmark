@@ -1,0 +1,20 @@
+{
+  "recommendations": [
+    "unifiedjs.vscode-mdx",
+    "astro-build.astro-vscode",
+    "tamasfe.even-better-toml",
+    "me-dutour-mathieu.vscode-github-actions",
+    "wholroyd.jinja",
+    "mathematic.vscode-latex",
+    "ms-python.vscode-pylance",
+    "ms-python.python",
+    "ms-python.debugpy",
+    "donjayamanne.python-environment-manager",
+    "ms-python.vscode-python-envs",
+    "donjayamanne.python-extension-pack",
+    "kevinrose.vsc-python-indent",
+    "charliermarsh.ruff",
+    "gruntfuggly.todo-tree",
+    "redhat.vscode-yaml"
+  ]
+}
