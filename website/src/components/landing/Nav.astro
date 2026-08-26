@@ -1,6 +1,6 @@
 ---
 // N1b SaaS three-section ナビ(Cobalt のボーダー式)。
-// 中央にページ内リンク群、右側に ⌘K トリガーと塗りボタン。
+// 中央にページ内リンク群、右側にコマンドパレットのトリガー(Menu 表記・Ctrl+K / ⌘K でも開く)と塗りボタン。
 import { ButtonLink } from '@/components/ui/button';
 ---
 
@@ -38,7 +38,7 @@ import { ButtonLink } from '@/components/ui/button';
 			>
 		</nav>
 
-		<!-- 右端:⌘K トリガー + 塗りボタン -->
+		<!-- 右端:メニュー(Ctrl+K / ⌘K でも開く)トリガー + 塗りボタン -->
 		<div class="flex items-center gap-3">
 			<button
 				id="cmdk-trigger"
@@ -48,8 +48,7 @@ import { ButtonLink } from '@/components/ui/button';
 				aria-haspopup="dialog"
 				aria-expanded="false"
 			>
-				<span class="mono-label hidden sm:inline">Menu</span>
-				<kbd class="font-mono text-[11px] leading-none">⌘K</kbd>
+				<span class="mono-label">Menu</span>
 			</button>
 			<ButtonLink href="/paper" size="sm" class="max-md:hidden">論文PDF</ButtonLink>
 		</div>
