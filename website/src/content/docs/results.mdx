@@ -9,7 +9,7 @@ import ResultsTables from '@/components/results/ResultsTables.astro';
 
 import { GITHUB_REPO, KAGGLE_BENCHMARK, RAW_BASE } from '@/data/site';
 
-評価結果を公開しています。以下の表とグラフは `results/` の集計CSVから自動生成しています。
+評価結果を公開しています。以下の表・グラフ・数値は集計CSVから自動生成しています。
 
 ## 総合スコア
 
@@ -17,6 +17,7 @@ import { GITHUB_REPO, KAGGLE_BENCHMARK, RAW_BASE } from '@/data/site';
 
 <ResultsTables kind="overall" />
 
+{/* FIXME: 画像のグラフ内の桁数は、しっかり全部表示すべきでは？現在は切り捨て。 */}
 ![総合スコア](/results/overall_score.png)
 
 ## 平常時と圧力下のギャップ
@@ -44,7 +45,7 @@ Bias カテゴリ(誘導に流されやすい状況)は全モデルで低止ま�
 
 ## 論文の図(8点満点・条件別得点)
 
-論文では、8タスクの得点を合計した**総合得点(8点満点)**を指標として使用しています。以下の図は論文で使用したものと同一のスクリプト(`paper_figures.py`)から生成した公式フィギュアです。
+論文では、8タスクの得点を合計した総合得点(8点満点)を指標として使用しています。以下の図は論文で使用したものと同一のスクリプト(`paper_figures.py`)から生成した公式フィギュアです。
 
 <Aside type="note" title="サイトの数値と論文の数値の関係">
   8タスク各1点満点の合計(0〜8)は、平均正答率(0〜1)×8に相当します。例:「通常条件の平均 約7.3点/8点満点」=「平均正答率 約0.91」。どちらも同じ評価データから算出しています。
