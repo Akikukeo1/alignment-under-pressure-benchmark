@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>/ — graphify tree viewer</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    h1 {
+      margin: 20px 0 0 24px;
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #1e3a56;
+    }
+    .controls {
+      margin: 20px 0 15px 24px;
+    }
+    button {
+      margin-right: 10px;
+      padding: 8px 18px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    button:active {
+      background: #004085;
+    }
+    #tree-container {
+      width: calc(100vw - 48px); /* Adjust for body margin/padding */
+      height: 85vh;
+      overflow: auto;
+      border-radius: 8px;
+      background: #fff;
+      margin-left: 24px;
+      margin-right: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #ddd;
+    }
+    svg {
+      background: #fff;
+      border-radius: 8px;
+      display: block; /* Important for D3 */
+    }
+    .node circle {
+      stroke-width: 2.5px;
+    }
+    .node text { /* Base style for the <text> container */
+      font: 13px 'Segoe UI', sans-serif;
+      paint-order: stroke fill; /* Ensures text is readable over lines */
+      stroke: #fff; /* White halo */
+      stroke-width: 3px; /* Halo thickness */
+      stroke-linejoin: round;
+      stroke-opacity: 0.85; /* Halo opacity */
+    }
+    .link {
+      fill: none;
+      stroke-opacity: 0.7;
+      stroke-width: 2px;
+    }
+  </style>
+</head>
+<body>
+  <h1>/ — Knowledge Graph</h1>
+  <div class="controls">
+    <button onclick="expandAll()">Expand All</button>
+    <button onclick="collapseAll()">Collapse All</button>
+    <button onclick="resetView()">Reset View</button>
+  </div>
+  <div id="tree-container">
+    <svg id="tree-svg" width="6000" height="8000"></svg>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    const initialJsonData = {"name":"/","total_count":223,"children":[{"name":".build","total_count":3,"children":[{"name":"manifest.json","total_count":3,"children":[{"name":"generated_at","total_count":1,"children":[]},{"name":"tasks","total_count":1,"children":[]},{"name":"version","total_count":1,"children":[]}]}]},{"name":".opencode","total_count":2,"children":[{"name":"plugins","total_count":2,"children":[{"name":"graphify.js","total_count":2,"children":[{"name":"GraphifyPlugin()","total_count":1,"children":[]},{"name":"IMPORTANT: keep the reminder string free of backticks and $(...) constructs.","total_count":1,"children":[]}]}]}]},{"name":"aggregate.py","total_count":17,"children":[{"name":"_calculate_model_summary()","total_count":1,"children":[]},{"name":"_extract_overall_scores()","total_count":1,"children":[]},{"name":"_extract_task_scores()","total_count":1,"children":[]},{"name":"_validate_task_scores()","total_count":1,"children":[]},{"name":"analyze_and_output()","total_count":1,"children":[]},{"name":"AUPB \u306e\u96c6\u8a08\u30b9\u30af\u30ea\u30d7\u30c8\u3002 Kaggle Benchmark \u306e\u30ea\u30fc\u30c0\u30fc\u30dc\u30fc\u30c9CSV\u3092\u8aad\u307f\u8fbc\u307f\u3001results/ \u4ee5\u4e0b\u306b CSV \u3068\u30b0\u30e9\u30d5\u753b\u50cf\u3092\u751f\u6210\u3059\u308b\u3002\u2026","total_count":1,"children":[]},{"name":"CSV \u51fa\u529b \u2192 \u30b0\u30e9\u30d5\u63cf\u753b\u306e\u9806\u306b\u51e6\u7406\u3092\u7d71\u62ec\u3057\u307e\u3059\u3002","total_count":1,"children":[]},{"name":"CSV\u3092\u30d1\u30fc\u30b9\u3057\u3001\u7dcf\u5408\u30b9\u30b3\u30a2\u3068\u30bf\u30b9\u30af\u5225\u30b9\u30b3\u30a2\u306e\u30c7\u30fc\u30bf\u30d5\u30ec\u30fc\u30e0\u306b\u6574\u5f62\u3057\u307e\u3059\u3002","total_count":1,"children":[]},{"name":"load_config()","total_count":1,"children":[]},{"name":"load_task_metadata()","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"parse_csv_data()","total_count":1,"children":[]},{"name":"results/ \u4ee5\u4e0b\u306e\u3059\u3079\u3066\u306e CSV \u3092\u66f8\u304d\u51fa\u3057\u3001\u30e2\u30c7\u30eb\u5225\u30b5\u30de\u30ea\u30fc\u3092\u8fd4\u3057\u307e\u3059\u3002","total_count":1,"children":[]},{"name":"tasks/ \u30c7\u30a3\u30ec\u30af\u30c8\u30ea\u5185\u306e TOML \u30d5\u30a1\u30a4\u30eb\u304b\u3089\u30bf\u30b9\u30af\u306e\u30e1\u30bf\u30c7\u30fc\u30bf(Category, Difficulty \u7b49)\u3092\u8aad\u307f\u8fbc\u307f\u307e\u3059\u3002","total_count":1,"children":[]},{"name":"write_csvs()","total_count":1,"children":[]},{"name":"\u30bf\u30b9\u30af\u5225\u5f97\u70b9\u306e\u54c1\u8cea\u691c\u8a3c(\u6b20\u640d\u30fb\u7bc4\u56f2\u30fb\u91cd\u8907\u30fb\u30bf\u30b9\u30af\u7db2\u7f85)\u3002 \u65e7 paper_figures.load_scores()\u2026","total_count":1,"children":[]},{"name":"\u7dcf\u5408\u30b9\u30b3\u30a2\u306e\u62bd\u51fa (Task_Name \u304c\u7a7a\u306e\u884c)","total_count":1,"children":[]}]},{"name":"autopush.py","total_count":21,"children":[{"name":".task_id()","total_count":1,"children":[]},{"name":"build_command()","total_count":1,"children":[]},{"name":"cleanup_obsolete_tasks()","total_count":1,"children":[]},{"name":"delete_remote_task()","total_count":1,"children":[]},{"name":"error()","total_count":1,"children":[]},{"name":"format_command()","total_count":1,"children":[]},{"name":"get_remote_tasks()","total_count":1,"children":[]},{"name":"load_json()","total_count":1,"children":[]},{"name":"load_manifest()","total_count":1,"children":[]},{"name":"load_push_state()","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"matches_difficulty()","total_count":1,"children":[]},{"name":"matches_task()","total_count":1,"children":[]},{"name":"parse_args()","total_count":1,"children":[]},{"name":"print_result()","total_count":1,"children":[]},{"name":"push_task()","total_count":1,"children":[]},{"name":"run()","total_count":1,"children":[]},{"name":"save_push_state()","total_count":1,"children":[]},{"name":"select_tasks()","total_count":1,"children":[]},{"name":"TaskRecord","total_count":1,"children":[]},{"name":"validate_outputs()","total_count":1,"children":[]}]},{"name":"build.py","total_count":12,"children":[{"name":"build_all()","total_count":1,"children":[]},{"name":"build_choice_grader()","total_count":1,"children":[]},{"name":"build_forbidden_choice_grader()","total_count":1,"children":[]},{"name":"build_task_plans()","total_count":1,"children":[]},{"name":"load_config()","total_count":1,"children":[]},{"name":"load_manifest()","total_count":1,"children":[]},{"name":"load_task()","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"remove_path()","total_count":1,"children":[]},{"name":"render_task()","total_count":1,"children":[]},{"name":"write_manifest()","total_count":1,"children":[]},{"name":"write_task()","total_count":1,"children":[]}]},{"name":"charts.py","total_count":25,"children":[{"name":"_grid_axis_only()","total_count":1,"children":[]},{"name":"_labels_v()","total_count":1,"children":[]},{"name":"_save()","total_count":1,"children":[]},{"name":"AUPB \u306e\u30b0\u30e9\u30d5\u63cf\u753b\u30e2\u30b8\u30e5\u30fc\u30eb\u3002 \u30b5\u30a4\u30c8(Cobalt \u30c6\u30fc\u30de)\u3068\u8996\u899a\u7684\u306b\u63c3\u3048\u305f\u7d71\u4e00\u30b9\u30bf\u30a4\u30eb\u3067\u3001results/ \u4ee5\u4e0b\u306e \u30b0\u30e9\u30d5\u753b\u50cf\u3092\u751f\u6210\u3059\u308b\u3002\u30c7\u30fc\u30bf\u51e6\u7406\u3068\u2026","total_count":1,"children":[]},{"name":"model_colors()","total_count":1,"children":[]},{"name":"plot_avg_gap()","total_count":1,"children":[]},{"name":"plot_category_scores()","total_count":1,"children":[]},{"name":"plot_heatmap()","total_count":1,"children":[]},{"name":"plot_normal_vs_pressure()","total_count":1,"children":[]},{"name":"plot_overall_score()","total_count":1,"children":[]},{"name":"plot_pressure_resistance()","total_count":1,"children":[]},{"name":"render_all()","total_count":1,"children":[]},{"name":"setup_style()","total_count":1,"children":[]},{"name":"short_model()","total_count":1,"children":[]},{"name":"\u30ab\u30c6\u30b4\u30ea\u5225\u306e\u5e73\u5747\u5727\u529b\u30b9\u30b3\u30a2(\u30b0\u30eb\u30fc\u30d7\u5316\u7e26\u68d2)\u3002 cat_mean: Category / Model / Pressure \u5217\u3092\u6301\u3064\u30c7\u30fc\u30bf\u30d5\u30ec\u30fc\u30e0\u3002\u2026","total_count":1,"children":[]},{"name":"\u30bf\u30b9\u30af \u00d7 \u30e2\u30c7\u30eb\u306e\u30d2\u30fc\u30c8\u30de\u30c3\u30d7(\u5727\u529b\u30b9\u30b3\u30a2\u7528\u3068\u30ae\u30e3\u30c3\u30d7\u7528\u3067\u5171\u7528)\u3002","total_count":1,"children":[]},{"name":"\u30e2\u30c7\u30eb\u540d \u2192 \u8272 \u306e\u5b89\u5b9a\u30de\u30c3\u30d4\u30f3\u30b0\u3092\u4f5c\u308b\u3002 \u5168\u30b0\u30e9\u30d5\u3067\u540c\u3058\u547c\u3073\u51fa\u3057\u9806(\u30b9\u30b3\u30a2\u964d\u9806\u306a\u3069)\u3067\u6e21\u305b\u3070\u3001 \u540c\u3058\u30e2\u30c7\u30eb\u306b\u306f\u5e38\u306b\u540c\u3058\u8272\u304c\u5272\u308a\u5f53\u3066\u3089\u308c\u308b\u3002","total_count":1,"children":[]},{"name":"\u5168\u30b0\u30e9\u30d5\u5171\u901a\u306e\u898b\u305f\u76ee\u3092\u9069\u7528\u3059\u308b(main \u5192\u982d\u3067\u4e00\u5ea6\u3060\u3051\u547c\u3076)\u3002","total_count":1,"children":[]},{"name":"\u5168\u30b0\u30e9\u30d5\u753b\u50cf\u3092\u751f\u6210\u3059\u308b(aggregate.py \u304b\u3089\u547c\u3070\u308c\u308b\u5165\u53e3)\u3002","total_count":1,"children":[]},{"name":"\u5727\u529b\u8010\u6027\u6bd4(Pressure / Normal)\u306e\u6a2a\u68d2\u30b0\u30e9\u30d5\u30021.0 \u3092\u300c\u4f4e\u4e0b\u306a\u3057\u300d\u306e\u57fa\u6e96\u7dda\u3068\u3057\u3066\u793a\u3059\u3002","total_count":1,"children":[]},{"name":"\u5e73\u5747\u30ae\u30e3\u30c3\u30d7(\u0394 = Pressure \u2212 Normal)\u306e\u6a2a\u68d2\u30b0\u30e9\u30d5\u3002 Avg_Gap \u306e\u6607\u9806(\u4f4e\u4e0b\u304c\u5927\u304d\u3044\u9806)\u3067\u4e26\u3079\u3001\u4f4e\u4e0b\u304c\u5927\u304d\u3044\u30e2\u30c7\u30eb\u3092\u4e0a\u306b\u7f6e\u304f\u3002","total_count":1,"children":[]},{"name":"\u5e73\u5e38\u6642 vs \u5727\u529b\u4e0b\u306e\u5e73\u5747\u30b9\u30b3\u30a2\u3092\u6bd4\u8f03\u3059\u308b\u30b0\u30eb\u30fc\u30d7\u5316\u7e26\u68d2\u30b0\u30e9\u30d5\u3002 Avg_Gap \u306e\u6607\u9806(\u4f4e\u4e0b\u304c\u5927\u304d\u3044\u9806)\u3067\u4e26\u3079\u308b\u3002","total_count":1,"children":[]},{"name":"\u7dcf\u5408\u30b9\u30b3\u30a2\u306e\u6a2a\u68d2\u30b0\u30e9\u30d5(\u5358\u8272\u30b3\u30d0\u30eb\u30c8\u30fb\u6570\u5024\u30e9\u30d9\u30eb\u3067\u8a9e\u3089\u305b\u308b)\u3002","total_count":1,"children":[]},{"name":"\u7e26\u68d2\u30b0\u30e9\u30d5\u306e\u30d0\u30fc\u4e0a\u7aef\u306b\u6570\u5024\u30e9\u30d9\u30eb\u3092\u4ed8\u3051\u308b(0 \u306f\u30b9\u30ad\u30c3\u30d7)\u3002","total_count":1,"children":[]},{"name":"\u8ef8\u30e9\u30d9\u30eb\u7528\u306b\u30e2\u30c7\u30eb\u540d\u3092\u77ed\u7e2e\u3059\u308b(-default / -preview \u3092\u9664\u53bb)\u3002","total_count":1,"children":[]}]},{"name":"paper","total_count":9,"children":[{"name":"scripts","total_count":9,"children":[{"name":"generate_qr_svg.py","total_count":8,"children":[{"name":"Convert Inkscape's individual module paths into a compact QR grid.","total_count":1,"children":[]},{"name":"generate_svg()","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"make_tex_source()","total_count":1,"children":[]},{"name":"parse_args()","total_count":1,"children":[]},{"name":"require_command()","total_count":1,"children":[]},{"name":"run()","total_count":1,"children":[]},{"name":"write_compact_svg()","total_count":1,"children":[]}]},{"name":"make_qr_pdf.py","total_count":1,"children":[{"name":"main()","total_count":1,"children":[]}]}]}]},{"name":"paper_figures.py","total_count":9,"children":[{"name":"aggregate.py \u306e\u51fa\u529b\u304b\u3089\u30e2\u30c7\u30eb\u5225\u30b5\u30de\u30ea\u30fc\u3068\u30bf\u30b9\u30af\u5225\u4f4e\u4e0b\u5e45\u3092\u8aad\u307f\u8fbc\u3080\u3002 \u623b\u308a\u5024: model_summary :\u2026","total_count":1,"children":[]},{"name":"load_aggregates()","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"plot_model_scores()","total_count":1,"children":[]},{"name":"plot_overall_scores()","total_count":1,"children":[]},{"name":"plot_task_drops()","total_count":1,"children":[]},{"name":"\u30e2\u30c7\u30eb\u3054\u3068\u306e\u901a\u5e38\u6761\u4ef6\u3068\u5727\u529b\u6761\u4ef6\u306e\u5e73\u5747\u5f97\u70b9\u3092\u6bd4\u8f03\u3059\u308b\u3002","total_count":1,"children":[]},{"name":"\u5404\u30bf\u30b9\u30af\u306e\u901a\u5e38\u6761\u4ef6\u304b\u3089\u5727\u529b\u6761\u4ef6\u3078\u306e\u5e73\u5747\u4f4e\u4e0b\u5e45\u3092\u793a\u3059\u3002","total_count":1,"children":[]},{"name":"\u8ad6\u6587\u306e\u56f3\u3092\u751f\u6210\u3059\u308b\u30b9\u30af\u30ea\u30d7\u30c8(\u63cf\u753b\u5c02\u4efb)\u3002 aggregate.py \u306e\u51fa\u529b\u3067\u3042\u308b results/ \u4ee5\u4e0b\u306e\u96c6\u8a08 CSV \u3092\u8aad\u307f\u8fbc\u307f\u3001\u8ad6\u6587\u3067\u4f7f\u7528\u3059\u308b 3\u2026","total_count":1,"children":[]}]},{"name":"pyproject.toml","total_count":1,"children":[{"name":"alignment-under-pressure-benchmark","total_count":1,"children":[]}]},{"name":"website","total_count":121,"children":[{"name":"package.json","total_count":40,"children":[{"name":"@astrojs/react","total_count":1,"children":[]},{"name":"@astrojs/react","total_count":1,"children":[]},{"name":"@astrojs/starlight","total_count":1,"children":[]},{"name":"@astrojs/starlight","total_count":1,"children":[]},{"name":"@tailwindcss/vite","total_count":1,"children":[]},{"name":"@tailwindcss/vite","total_count":1,"children":[]},{"name":"@types/react","total_count":1,"children":[]},{"name":"@types/react","total_count":1,"children":[]},{"name":"@types/react-dom","total_count":1,"children":[]},{"name":"@types/react-dom","total_count":1,"children":[]},{"name":"astro","total_count":1,"children":[]},{"name":"astro","total_count":1,"children":[]},{"name":"astro","total_count":1,"children":[]},{"name":"build","total_count":1,"children":[]},{"name":"class-variance-authority","total_count":1,"children":[]},{"name":"class-variance-authority","total_count":1,"children":[]},{"name":"clsx","total_count":1,"children":[]},{"name":"clsx","total_count":1,"children":[]},{"name":"dependencies","total_count":1,"children":[]},{"name":"dev","total_count":1,"children":[]},{"name":"devDependencies","total_count":1,"children":[]},{"name":"gen:data","total_count":1,"children":[]},{"name":"name","total_count":1,"children":[]},{"name":"preview","total_count":1,"children":[]},{"name":"react","total_count":1,"children":[]},{"name":"react","total_count":1,"children":[]},{"name":"react-dom","total_count":1,"children":[]},{"name":"react-dom","total_count":1,"children":[]},{"name":"scripts","total_count":1,"children":[]},{"name":"sharp","total_count":1,"children":[]},{"name":"sharp","total_count":1,"children":[]},{"name":"smol-toml","total_count":1,"children":[]},{"name":"smol-toml","total_count":1,"children":[]},{"name":"start","total_count":1,"children":[]},{"name":"tailwind-merge","total_count":1,"children":[]},{"name":"tailwind-merge","total_count":1,"children":[]},{"name":"tailwindcss","total_count":1,"children":[]},{"name":"tailwindcss","total_count":1,"children":[]},{"name":"type","total_count":1,"children":[]},{"name":"version","total_count":1,"children":[]}]},{"name":"scripts","total_count":26,"children":[{"name":"generate_paper_meta.py","total_count":14,"children":[{"name":"apply_current_override()","total_count":1,"children":[]},{"name":"collect_tags()","total_count":1,"children":[]},{"name":"GitHub Release \u30bf\u30b0\u304b\u3089\u8ad6\u6587\u306e\u30d0\u30fc\u30b8\u30e7\u30f3\u30e1\u30bf\u30c7\u30fc\u30bf\u3092\u751f\u6210\u3059\u308b\u3002 \u751f\u6210\u7269: - src/data/paper.json :\u2026","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"PAPER_CURRENT_PUBLISHED_AT \u306e\u6642\u523b\u6587\u5b57\u5217\u3092 ISO 8601 \u3068\u3057\u3066\u89e3\u91c8\u3057\u3001\u6b63\u898f\u5316\u3059\u308b\u3002","total_count":1,"children":[]},{"name":"parse_env_time()","total_count":1,"children":[]},{"name":"restore_missing_versions()","total_count":1,"children":[]},{"name":"stable_key()","total_count":1,"children":[]},{"name":"to_iso_utc()","total_count":1,"children":[]},{"name":"UTC \u306e ISO 8601(Z \u672b\u5c3e)\u3078\u6b63\u898f\u5316\u3059\u308b\u3002","total_count":1,"children":[]},{"name":"\u30bf\u30b0\u304b\u3089\u53d6\u5f97\u3067\u304d\u306a\u304b\u3063\u305f\u904e\u53bb\u7248\u3092\u65e2\u5b58 paper.json \u304b\u3089\u5fa9\u5143\u3059\u308b(\u4fdd\u967a)\u3002 CI \u306e shallow clone\u2026","total_count":1,"children":[]},{"name":"\u5168\u30bf\u30b0\u3092\u7248\u60c5\u5831\u306e\u30ea\u30b9\u30c8\u3067\u8fd4\u3059(\u6b63\u5f0f\u7248: \u65b0\u3057\u3044\u9806\u3001\u5148\u884c\u516c\u958b\u7248: \u305d\u306e\u5f8c\u306b\u65b0\u3057\u3044\u9806)\u3002","total_count":1,"children":[]},{"name":"\u6b63\u5f0f\u7248\u30bf\u30b0\u3092 (X, Y) \u306e\u6570\u5024\u30ad\u30fc\u3078\u5909\u63db\u3059\u308b\u3002\u975e\u6b63\u5f0f\u7248\u306f None\u3002","total_count":1,"children":[]},{"name":"\u73fe\u884c\u7248\u306e\u4e0a\u66f8\u304d\u6307\u5b9a(PAPER_CURRENT_VERSION)\u304c\u3042\u308c\u3070\u9069\u7528\u3057\u3001current \u30a8\u30f3\u30c8\u30ea\u3092\u8fd4\u3059\u3002","total_count":1,"children":[]}]},{"name":"generate_repro.py","total_count":8,"children":[{"name":"GitHub \u5185\u76f8\u5bfe\u30ea\u30f3\u30af([label](path) \u5f62\u5f0f)\u3092\u7d76\u5bfe URL \u306b\u7f6e\u63db\u3059\u308b\u3002 \u5bfe\u8c61\u306f `http(s)://`\u30fb`/`\u30fb`#`\u2026","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"Mermaid \u30b3\u30fc\u30c9\u30d6\u30ed\u30c3\u30af\u3092\u300cGitHub \u3067\u898b\u308b\u300dAside \u306b\u7f6e\u63db\u3059\u308b\u3002 Starlight \u306b\u306f Mermaid\u2026","total_count":1,"children":[]},{"name":"replace_mermaid_blocks()","total_count":1,"children":[]},{"name":"rewrite_relative_links()","total_count":1,"children":[]},{"name":"strip_leading_h1()","total_count":1,"children":[]},{"name":"\u30ea\u30dd\u30b8\u30c8\u30ea\u76f4\u4e0b\u306e REPRODUCIBILITY.md \u304b\u3089\u3001\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8\u7528\u306e\u518d\u73fe\u624b\u9806\u30da\u30fc\u30b8\u3092\u81ea\u52d5\u751f\u6210\u3059\u308b\u3002 \u751f\u6210\u7269: -\u2026","total_count":1,"children":[]},{"name":"\u5148\u982d\u306e H1 \u898b\u51fa\u3057(# \u3067\u59cb\u307e\u308b\u884c\u3068\u76f4\u5f8c\u306e\u7a7a\u884c)\u3092\u53d6\u308a\u9664\u304f\u3002 Starlight \u306f frontmatter \u306e title\u2026","total_count":1,"children":[]}]},{"name":"generate_results.py","total_count":4,"children":[{"name":"BOM \u4ed8\u304d CSV \u3092\u8aad\u307f\u8fbc\u307f\u3001\u8f9e\u66f8\u306e\u30ea\u30b9\u30c8\u3068\u3057\u3066\u8fd4\u3059\u3002","total_count":1,"children":[]},{"name":"main()","total_count":1,"children":[]},{"name":"read_csv_rows()","total_count":1,"children":[]},{"name":"results/ \u4ee5\u4e0b\u306e\u96c6\u8a08CSV\u304b\u3089\u3001\u30a6\u30a7\u30d6\u30b5\u30a4\u30c8\u7528\u306e\u30c7\u30fc\u30bf\u3068\u753b\u50cf\u3092\u81ea\u52d5\u751f\u6210\u3059\u308b\u3002 \u751f\u6210\u7269: - src/data/results.json :\u2026","total_count":1,"children":[]}]}]},{"name":"src","total_count":43,"children":[{"name":"components","total_count":31,"children":[{"name":"landing","total_count":10,"children":[{"name":"CmdK.astro","total_count":3,"children":[{"name":"close()","total_count":1,"children":[]},{"name":"open()","total_count":1,"children":[]},{"name":"setActive()","total_count":1,"children":[]}]},{"name":"FooterInline.astro","total_count":1,"children":[{"name":"year","total_count":1,"children":[]}]},{"name":"AboutContact.astro","total_count":1,"children":[]},{"name":"ConceptBand.astro","total_count":1,"children":[]},{"name":"HeroStat.astro","total_count":1,"children":[]},{"name":"Nav.astro","total_count":1,"children":[]},{"name":"OpennessHighlight.astro","total_count":1,"children":[]},{"name":"ResourceIndex.astro","total_count":1,"children":[]}]},{"name":"openness","total_count":1,"children":[{"name":"OpennessPanels.astro","total_count":1,"children":[{"name":"var()","total_count":1,"children":[]}]}]},{"name":"paper","total_count":1,"children":[{"name":"PaperViewer.astro","total_count":1,"children":[{"name":"jstFormat()","total_count":1,"children":[]}]}]},{"name":"results","total_count":4,"children":[{"name":"ResultsTables.astro","total_count":4,"children":[{"name":"fmt2()","total_count":1,"children":[]},{"name":"fmtDelta()","total_count":1,"children":[]},{"name":"largestDropDelta","total_count":1,"children":[]},{"name":"mostResistantDelta","total_count":1,"children":[]}]}]},{"name":"tasks","total_count":1,"children":[{"name":"TaskPrompts.astro","total_count":1,"children":[]}]},{"name":"ui","total_count":14,"children":[{"name":"badge.tsx","total_count":3,"children":[{"name":"Badge()","total_count":1,"children":[]},{"name":"BadgeProps","total_count":1,"children":[]},{"name":"badgeVariants","total_count":1,"children":[]}]},{"name":"button.tsx","total_count":5,"children":[{"name":"Button()","total_count":1,"children":[]},{"name":"ButtonLink()","total_count":1,"children":[]},{"name":"ButtonLinkProps","total_count":1,"children":[]},{"name":"ButtonProps","total_count":1,"children":[]},{"name":"buttonVariants","total_count":1,"children":[]}]},{"name":"card.tsx","total_count":6,"children":[{"name":"Card()","total_count":1,"children":[]},{"name":"CardContent()","total_count":1,"children":[]},{"name":"CardDescription()","total_count":1,"children":[]},{"name":"CardFooter()","total_count":1,"children":[]},{"name":"CardHeader()","total_count":1,"children":[]},{"name":"CardTitle()","total_count":1,"children":[]}]}]}]},{"name":"content.config.ts","total_count":1,"children":[{"name":"collections","total_count":1,"children":[]}]},{"name":"data","total_count":7,"children":[{"name":"site.ts","total_count":7,"children":[{"name":"GITHUB_PROFILE","total_count":1,"children":[]},{"name":"GITHUB_REPO","total_count":1,"children":[]},{"name":"HIGHLIGHTS","total_count":1,"children":[]},{"name":"KAGGLE_BENCHMARK","total_count":1,"children":[]},{"name":"PORTFOLIO_URL","total_count":1,"children":[]},{"name":"RAW_BASE","total_count":1,"children":[]},{"name":"shortModel()","total_count":1,"children":[]}]}]},{"name":"layouts","total_count":1,"children":[{"name":"LandingLayout.astro","total_count":1,"children":[]}]},{"name":"lib","total_count":1,"children":[{"name":"utils.ts","total_count":1,"children":[{"name":"cn()","total_count":1,"children":[]}]}]},{"name":"pages","total_count":2,"children":[{"name":"404.astro","total_count":1,"children":[]},{"name":"index.astro","total_count":1,"children":[]}]}]},{"name":"tsconfig.json","total_count":11,"children":[{"name":"**/*","total_count":1,"children":[]},{"name":".astro/types.d.ts","total_count":1,"children":[]},{"name":"astro/tsconfigs/strict","total_count":1,"children":[]},{"name":"compilerOptions","total_count":1,"children":[]},{"name":"dist","total_count":1,"children":[]},{"name":"exclude","total_count":1,"children":[]},{"name":"extends","total_count":1,"children":[]},{"name":"include","total_count":1,"children":[]},{"name":"jsx","total_count":1,"children":[]},{"name":"jsxImportSource","total_count":1,"children":[]},{"name":"paths","total_count":1,"children":[]}]},{"name":"astro.config.mjs","total_count":1,"children":[]}]},{"name":"node:fs","total_count":1,"children":[]},{"name":"node:path","total_count":1,"children":[]},{"name":"smol-toml","total_count":1,"children":[]}]};
+
+    function transformData(jsonData) {
+        // Helper function to recursively build the children structure
+        function processNode(node, parentL1StageName) {
+            let displayName = node.name;
+            // Append total_count if it exists and is not already in the name
+            if (node.total_count !== undefined) {
+                if (!/\(Total Count: \d+\)$/.test(displayName)) {
+                    displayName += ` (Total Count: ${node.total_count})`;
+                }
+            }
+
+            const newNode = { name: displayName };
+
+            if (parentL1StageName === "Root") {
+                 newNode.originalStageName = node.name;
+            } else {
+                newNode.originalStageName = parentL1StageName;
+            }
+
+            if (node.children && node.children.length > 0) {
+                const stageNameToPass = (parentL1StageName === "Root") ? node.name : parentL1StageName;
+                newNode.children = node.children.map(child => processNode(child, stageNameToPass));
+            }
+
+            return newNode;
+        }
+
+        let rootDisplayName = jsonData.name;
+        if (jsonData.total_count !== undefined && !/\(Total Count: \d+\)$/.test(rootDisplayName)) {
+            rootDisplayName += ` (Total Count: ${jsonData.total_count})`;
+        }
+
+        return {
+            name: rootDisplayName,
+            originalStageName: "Root",
+            children: (jsonData.children || []).map(child => processNode(child, "Root"))
+        };
+    }
+
+    const treeData = transformData(initialJsonData);
+
+    // Auto-populated phaseColors: every depth-1 child of the root gets
+    // a stable colour from a bigger palette so all top-level dirs are
+    // distinguishable.
+    const PALETTE = [
+      ["#3498DB","#2980B9","#AED6F1"], ["#2ECC71","#27AE60","#A9DFBF"],
+      ["#E74C3C","#C0392B","#F5B7B1"], ["#9B59B6","#8E44AD","#D7BDE2"],
+      ["#F39C12","#D68910","#FAD7A0"], ["#1ABC9C","#117864","#A2D9CE"],
+      ["#34495E","#1B2631","#ABB2B9"], ["#E67E22","#BA4A00","#F5CBA7"],
+      ["#16A085","#0E6655","#A2D9CE"], ["#D35400","#A04000","#EDBB99"],
+      ["#7F8C8D","#566573","#D5DBDB"], ["#C0392B","#7B241C","#F5B7B1"],
+      ["#2E86C1","#1B4F72","#A9CCE3"], ["#28B463","#196F3D","#A9DFBF"],
+      ["#AF7AC5","#6C3483","#D2B4DE"],
+    ];
+    const phaseColors = { "Root": { fill: "#4A4A4A", stroke: "#333333", collapsedFill: "#6C757D" },
+                          "Default": { fill: "#BDC3C7", stroke: "#95A5A6", collapsedFill: "#ECF0F1" } };
+    (initialJsonData.children || []).forEach((c, i) => {
+      const pal = PALETTE[i % PALETTE.length];
+      phaseColors[c.name] = { fill: pal[0], stroke: pal[1], collapsedFill: pal[2] };
+    });
+
+    const levelSpecificPalettes = {
+      0: { fill: "#4A4A4A", stroke: "#333333", collapsedFill: "#6C757D" },
+      2: { fill: "#6ab04c", stroke: "#508a38", collapsedFill: "#a3d391" },
+      3: { fill: "#f0932b", stroke: "#d0730f", collapsedFill: "#f6c07e" },
+      4: { fill: "#be2edd", stroke: "#a01cb3", collapsedFill: "#e08bf2" },
+      5: { fill: "#00a8ff", stroke: "#007ac1", collapsedFill: "#74d2ff" },
+      6: { fill: "#e55039", stroke: "#c23620", collapsedFill: "#f09a8d" },
+      default: { fill: "#747d8c", stroke: "#57606f", collapsedFill: "#a4b0be" }
+    };
+
+    const svgElement = d3.select("#tree-svg");
+    const initialSvgWidth = +svgElement.attr("width");
+    const initialSvgHeight = +svgElement.attr("height");
+    const margin = { top: 40, right: 120, bottom: 80, left: 450 };
+    let width = initialSvgWidth - margin.left - margin.right;
+    let height = initialSvgHeight - margin.top - margin.bottom;
+    const duration = 500;
+    let nodeCounter = 0;
+    const g = svgElement.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+    const treemap = d3.tree().nodeSize([40, 0]);
+    let rootNode = d3.hierarchy(treeData, d => d.children);
+    rootNode.x0 = 0;
+    rootNode.y0 = 0;
+
+    if (rootNode.children) {
+      rootNode.children.forEach(d_child => {
+        if (d_child.children) { collapseBranch(d_child); }
+      });
+    }
+    updateTree(rootNode);
+
+    function collapseBranch(d) { if (d.children) { d._children = d.children; d._children.forEach(collapseBranch); d.children = null; } }
+    function expandBranch(d) { if (d._children) { d.children = d._children; d._children = null; } if (d.children) { d.children.forEach(expandBranch); } }
+    window.expandAll = () => { expandBranch(rootNode); updateTree(rootNode); };
+    window.collapseAll = () => { if (rootNode.children) { rootNode.children.forEach(collapseBranch); } updateTree(rootNode); };
+    window.resetView = () => { if (rootNode.children) { rootNode.children.forEach(d_child => { if (d_child.children || d_child._children) { collapseBranch(d_child); } }); } if (rootNode._children && !rootNode.children) { rootNode.children = rootNode._children; rootNode._children = null; } updateTree(rootNode); };
+
+    function updateTree(source) {
+      const treeLayoutData = treemap(rootNode);
+      let nodes = treeLayoutData.descendants();
+      let links = treeLayoutData.descendants().slice(1);
+
+      let minX = 0;
+      let maxX = 0;
+      if (nodes.length > 0) {
+        minX = d3.min(nodes, d => d.x);
+        maxX = d3.max(nodes, d => d.x);
+      }
+
+      let neededHeight = Math.max(initialSvgHeight, maxX - minX + margin.top + margin.bottom + 100);
+      svgElement.transition().duration(duration / 2).attr("height", neededHeight);
+      g.transition().duration(duration / 2).attr("transform", `translate(${margin.left},${margin.top - minX + 40})`);
+
+      nodes.forEach(d => { d.y = d.depth * 400; }); // Adjust horizontal separation if needed
+
+      const node = g.selectAll('g.node').data(nodes, d => d.id || (d.id = ++nodeCounter));
+      const nodeEnter = node.enter().append('g')
+        .attr('class', d => "node" + (d.children || d._children ? " node--internal" : " node--leaf") + (d._children ? " _children" : ""))
+        .attr('transform', d => `translate(${source.y0},${source.x0})`)
+        .on('click', (event, d) => { if (d.children) { d._children = d.children; d.children = null; } else if (d._children) { d.children = d._children; d._children = null; } updateTree(d); })
+        .style('cursor', d => (d.children || d._children) ? 'pointer' : 'default');
+
+      nodeEnter.append('circle').attr('r', 1e-6);
+
+      nodeEnter.append('text')
+        .attr('dy', '.35em')
+        .attr('x', d => d.children || d._children ? -14 : 14)
+        .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
+        .style("fill-opacity", 1e-6)
+        .call(wrapText, 380);
+
+      const nodeUpdate = nodeEnter.merge(node);
+      nodeUpdate.transition().duration(duration)
+        .attr('transform', d => `translate(${d.y},${d.x})`)
+        .attr('class', d => "node" + (d.children ? " node--internal" : " node--leaf") + (d._children ? " node--internal _children" : ""));
+
+      nodeUpdate.select('circle').attr('r', 8.5)
+        .style('fill', d => {
+            let palette;
+            if (d.depth === 0) {
+                palette = levelSpecificPalettes[0];
+            } else if (d.depth === 1) {
+                palette = phaseColors[d.data.originalStageName] || phaseColors.Default;
+            } else {
+                palette = levelSpecificPalettes[d.depth] || levelSpecificPalettes.default;
+            }
+            if (d._children) return palette.collapsedFill;
+            if (d.children) return palette.fill;
+            return "#fff";
+        })
+        .style('stroke', d => {
+            let palette;
+            if (d.depth === 0) {
+                palette = levelSpecificPalettes[0];
+            } else if (d.depth === 1) {
+                palette = phaseColors[d.data.originalStageName] || phaseColors.Default;
+            } else {
+                palette = levelSpecificPalettes[d.depth] || levelSpecificPalettes.default;
+            }
+            return palette.stroke;
+        });
+      nodeUpdate.select('text').style("fill-opacity", 1).call(wrapText, 380);
+
+      const nodeExit = node.exit().transition().duration(duration).attr('transform', d => `translate(${source.y},${source.x})`).remove();
+      nodeExit.select('circle').attr('r', 1e-6);
+      nodeExit.select('text').style('fill-opacity', 1e-6);
+
+      const link = g.selectAll('path.link').data(links, d => d.id);
+      const linkEnter = link.enter().insert('path', "g").attr('class', 'link').attr('d', d => { const o = { x: source.x0, y: source.y0 }; return diagonal(o, o); });
+
+      linkEnter.merge(link).transition().duration(duration).attr('d', d => diagonal(d, d.parent))
+        .style('stroke', d => {
+            const sourceNode = d.parent;
+            if (!sourceNode) return phaseColors.Default.stroke;
+            const l1AncestorName = sourceNode.data.originalStageName;
+            const colorPalette = phaseColors[l1AncestorName] || phaseColors.Default;
+            return colorPalette.stroke;
+        });
+      link.exit().transition().duration(duration).attr('d', d => { const o = { x: source.x, y: source.y }; return diagonal(o, o); }).remove();
+      nodes.forEach(d => { d.x0 = d.x; d.y0 = d.y; });
+    }
+
+    function diagonal(s, d) { return `M ${s.y} ${s.x} C ${(s.y + d.y) / 2} ${s.x}, ${(s.y + d.y) / 2} ${d.x}, ${d.y} ${d.x}`; }
+
+    function wrapText(textElements, maxWidth) {
+        const textPartColors = {
+            name: '#343a40',
+            count: '#0056b3'
+        };
+        const countRegex = /(\s\(Total Count: \d+\))$/;
+
+        textElements.each(function () {
+            const textD3 = d3.select(this);
+            const originalNodeText = textD3.datum().data.name;
+            const x = parseFloat(textD3.attr("x") || 0);
+            const initialDy = textD3.attr("dy");
+            const textAnchor = textD3.attr("text-anchor");
+            const lineHeight = 1.1;
+
+            textD3.text(null);
+
+            let namePart = originalNodeText;
+            let countPartText = "";
+
+            const countMatch = originalNodeText.match(countRegex);
+            if (countMatch && originalNodeText.endsWith(countMatch[0])) {
+                namePart = originalNodeText.substring(0, originalNodeText.length - countMatch[0].length).trim();
+                countPartText = countMatch[0].trim();
+            }
+
+            const tokens = [];
+            namePart.split(/\s+/).filter(Boolean).forEach(word => {
+                tokens.push({ text: word, type: 'name' });
+            });
+            if (countPartText) {
+                tokens.push({ text: countPartText, type: 'count' });
+            }
+
+            if (tokens.length === 0 && originalNodeText) {
+                tokens.push({ text: originalNodeText, type: 'name' });
+            }
+
+            let currentTspan = textD3.append("tspan").attr("x", x).attr("dy", initialDy);
+            if (textAnchor === "end") currentTspan.attr("text-anchor", "end");
+
+            let lineTokens = [];
+
+            for (let i = 0; i < tokens.length; i++) {
+                const tokenObj = tokens[i];
+
+                lineTokens.push(tokenObj);
+                currentTspan.text(lineTokens.map(t => t.text).join(" "));
+
+                if (currentTspan.node().getComputedTextLength() > maxWidth && lineTokens.length > 1) {
+                    lineTokens.pop();
+
+                    currentTspan.text(null);
+                    lineTokens.forEach((prevToken, idx) => {
+                        currentTspan.append("tspan")
+                            .text((idx > 0 ? " " : "") + prevToken.text)
+                            .style("fill", textPartColors[prevToken.type] || textPartColors.name)
+                            .style("font-weight", prevToken.type === 'count' ? "bold" : "normal");
+                    });
+
+                    lineTokens = [tokenObj];
+                    currentTspan = textD3.append("tspan").attr("x", x).attr("dy", lineHeight + "em");
+                    if (textAnchor === "end") currentTspan.attr("text-anchor", "end");
+                }
+            }
+
+            currentTspan.text(null);
+            lineTokens.forEach((token, idx) => {
+                currentTspan.append("tspan")
+                    .text((idx > 0 ? " " : "") + token.text)
+                    .style("fill", textPartColors[token.type] || textPartColors.name)
+                    .style("font-weight", token.type === 'count' ? "bold" : "normal");
+            });
+
+            if (textD3.selectAll("tspan > tspan").empty() && textD3.select("tspan").text().length === 0 && originalNodeText) {
+                let t = textD3.select("tspan");
+                let displayText = originalNodeText;
+                t.text(displayText).style("fill", textPartColors.name);
+                if (t.node() && t.node().getComputedTextLength() > maxWidth && displayText.length > 20) {
+                    let estimatedChars = Math.floor(maxWidth / (t.node().getComputedTextLength()/displayText.length) );
+                    displayText = displayText.substring(0, Math.max(0, estimatedChars - 3)) + "...";
+                    t.text(displayText);
+                }
+            }
+        });
+    }
+  </script>
+</body>
+</html>

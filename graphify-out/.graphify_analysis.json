@@ -1,0 +1,448 @@
+{
+  "communities": {
+    "0": [
+      "node_fs",
+      "node_path",
+      "website_src_components_landing_aboutcontact",
+      "website_src_components_landing_cmdk",
+      "website_src_components_landing_cmdk_close",
+      "website_src_components_landing_cmdk_open",
+      "website_src_components_landing_cmdk_setactive",
+      "website_src_components_landing_conceptband",
+      "website_src_components_landing_footerinline",
+      "website_src_components_landing_footerinline_year",
+      "website_src_components_landing_herostat",
+      "website_src_components_landing_opennesshighlight",
+      "website_src_components_landing_resourceindex",
+      "website_src_components_openness_opennesspanels",
+      "website_src_components_openness_opennesspanels_var",
+      "website_src_components_paper_paperviewer",
+      "website_src_components_paper_paperviewer_jstformat",
+      "website_src_components_results_resultstables",
+      "website_src_components_results_resultstables_fmt2",
+      "website_src_components_results_resultstables_fmtdelta",
+      "website_src_components_results_resultstables_largestdropdelta",
+      "website_src_components_results_resultstables_mostresistantdelta",
+      "website_src_components_tasks_taskprompts",
+      "website_src_data_site",
+      "website_src_data_site_github_profile",
+      "website_src_data_site_github_repo",
+      "website_src_data_site_highlights",
+      "website_src_data_site_kaggle_benchmark",
+      "website_src_data_site_portfolio_url",
+      "website_src_data_site_raw_base",
+      "website_src_data_site_shortmodel",
+      "website_src_pages_index"
+    ],
+    "1": [
+      "axes",
+      "charts",
+      "charts_grid_axis_only",
+      "charts_labels_v",
+      "charts_model_colors",
+      "charts_plot_avg_gap",
+      "charts_plot_category_scores",
+      "charts_plot_heatmap",
+      "charts_plot_normal_vs_pressure",
+      "charts_plot_overall_score",
+      "charts_plot_pressure_resistance",
+      "charts_py_dataframe",
+      "charts_py_path",
+      "charts_rationale_1",
+      "charts_rationale_124",
+      "charts_rationale_147",
+      "charts_rationale_167",
+      "charts_rationale_191",
+      "charts_rationale_232",
+      "charts_rationale_284",
+      "charts_rationale_313",
+      "charts_rationale_373",
+      "charts_rationale_55",
+      "charts_rationale_96",
+      "charts_render_all",
+      "charts_save",
+      "charts_short_model",
+      "figure"
+    ],
+    "2": [
+      "any",
+      "autopush",
+      "autopush_build_command",
+      "autopush_cleanup_obsolete_tasks",
+      "autopush_delete_remote_task",
+      "autopush_error",
+      "autopush_format_command",
+      "autopush_get_remote_tasks",
+      "autopush_load_json",
+      "autopush_load_manifest",
+      "autopush_load_push_state",
+      "autopush_main",
+      "autopush_matches_difficulty",
+      "autopush_matches_task",
+      "autopush_parse_args",
+      "autopush_print_result",
+      "autopush_push_task",
+      "autopush_py_namespace",
+      "autopush_py_path",
+      "autopush_run",
+      "autopush_save_push_state",
+      "autopush_select_tasks",
+      "autopush_taskrecord",
+      "autopush_taskrecord_task_id",
+      "autopush_validate_outputs",
+      "completedprocess"
+    ],
+    "3": [
+      "aggregate",
+      "aggregate_analyze_and_output",
+      "aggregate_calculate_model_summary",
+      "aggregate_extract_overall_scores",
+      "aggregate_extract_task_scores",
+      "aggregate_load_config",
+      "aggregate_load_task_metadata",
+      "aggregate_main",
+      "aggregate_parse_csv_data",
+      "aggregate_py_dataframe",
+      "aggregate_py_path",
+      "aggregate_rationale_1",
+      "aggregate_rationale_100",
+      "aggregate_rationale_220",
+      "aggregate_rationale_264",
+      "aggregate_rationale_47",
+      "aggregate_rationale_76",
+      "aggregate_rationale_90",
+      "aggregate_validate_task_scores",
+      "aggregate_write_csvs",
+      "charts_rationale_60",
+      "charts_setup_style"
+    ],
+    "4": [
+      "astrojs_react",
+      "tailwindcss",
+      "tailwindcss_vite",
+      "types_react",
+      "types_react_dom",
+      "website_package",
+      "website_package_devdependencies",
+      "website_package_devdependencies_astrojs_react",
+      "website_package_devdependencies_tailwindcss",
+      "website_package_devdependencies_tailwindcss_vite",
+      "website_package_devdependencies_types_react",
+      "website_package_devdependencies_types_react_dom",
+      "website_package_name",
+      "website_package_scripts",
+      "website_package_scripts_astro",
+      "website_package_scripts_build",
+      "website_package_scripts_dev",
+      "website_package_scripts_gen_data",
+      "website_package_scripts_preview",
+      "website_package_scripts_start",
+      "website_package_type",
+      "website_package_version"
+    ],
+    "5": [
+      "website_src_components_landing_nav",
+      "website_src_components_ui_badge",
+      "website_src_components_ui_badge_badge",
+      "website_src_components_ui_badge_badgeprops",
+      "website_src_components_ui_badge_badgevariants",
+      "website_src_components_ui_button",
+      "website_src_components_ui_button_button",
+      "website_src_components_ui_button_buttonlink",
+      "website_src_components_ui_button_buttonlinkprops",
+      "website_src_components_ui_button_buttonprops",
+      "website_src_components_ui_button_buttonvariants",
+      "website_src_components_ui_card",
+      "website_src_components_ui_card_card",
+      "website_src_components_ui_card_cardcontent",
+      "website_src_components_ui_card_carddescription",
+      "website_src_components_ui_card_cardfooter",
+      "website_src_components_ui_card_cardheader",
+      "website_src_components_ui_card_cardtitle",
+      "website_src_layouts_landinglayout",
+      "website_src_lib_utils",
+      "website_src_lib_utils_cn",
+      "website_src_pages_404"
+    ],
+    "6": [
+      "astro",
+      "astrojs_starlight",
+      "class_variance_authority",
+      "clsx",
+      "react",
+      "react_dom",
+      "sharp",
+      "tailwind_merge",
+      "website_package_dependencies",
+      "website_package_dependencies_astro",
+      "website_package_dependencies_astrojs_starlight",
+      "website_package_dependencies_class_variance_authority",
+      "website_package_dependencies_clsx",
+      "website_package_dependencies_react",
+      "website_package_dependencies_react_dom",
+      "website_package_dependencies_sharp",
+      "website_package_dependencies_smol_toml",
+      "website_package_dependencies_tailwind_merge",
+      "website_package_json_smol_toml"
+    ],
+    "7": [
+      "datetime",
+      "website_scripts_generate_paper_meta",
+      "website_scripts_generate_paper_meta_apply_current_override",
+      "website_scripts_generate_paper_meta_collect_tags",
+      "website_scripts_generate_paper_meta_main",
+      "website_scripts_generate_paper_meta_parse_env_time",
+      "website_scripts_generate_paper_meta_py_path",
+      "website_scripts_generate_paper_meta_rationale_1",
+      "website_scripts_generate_paper_meta_rationale_104",
+      "website_scripts_generate_paper_meta_rationale_141",
+      "website_scripts_generate_paper_meta_rationale_41",
+      "website_scripts_generate_paper_meta_rationale_47",
+      "website_scripts_generate_paper_meta_rationale_86",
+      "website_scripts_generate_paper_meta_rationale_95",
+      "website_scripts_generate_paper_meta_restore_missing_versions",
+      "website_scripts_generate_paper_meta_stable_key",
+      "website_scripts_generate_paper_meta_to_iso_utc"
+    ],
+    "8": [
+      "build",
+      "build_build_all",
+      "build_build_choice_grader",
+      "build_build_forbidden_choice_grader",
+      "build_build_task_plans",
+      "build_load_config",
+      "build_load_manifest",
+      "build_load_task",
+      "build_main",
+      "build_py_path",
+      "build_remove_path",
+      "build_render_task",
+      "build_write_manifest",
+      "build_write_task"
+    ],
+    "9": [
+      "paper_figures",
+      "paper_figures_load_aggregates",
+      "paper_figures_main",
+      "paper_figures_plot_model_scores",
+      "paper_figures_plot_overall_scores",
+      "paper_figures_plot_task_drops",
+      "paper_figures_py_dataframe",
+      "paper_figures_py_path",
+      "paper_figures_rationale_1",
+      "paper_figures_rationale_149",
+      "paper_figures_rationale_202",
+      "paper_figures_rationale_49"
+    ],
+    "10": [
+      "ref",
+      "ref_astro_tsconfigs_strict",
+      "ref_astro_types_d_ts",
+      "ref_dist",
+      "website_tsconfig",
+      "website_tsconfig_compileroptions",
+      "website_tsconfig_compileroptions_jsx",
+      "website_tsconfig_compileroptions_jsximportsource",
+      "website_tsconfig_compileroptions_paths",
+      "website_tsconfig_exclude",
+      "website_tsconfig_extends",
+      "website_tsconfig_include"
+    ],
+    "11": [
+      "paper_scripts_generate_qr_svg",
+      "paper_scripts_generate_qr_svg_generate_svg",
+      "paper_scripts_generate_qr_svg_main",
+      "paper_scripts_generate_qr_svg_make_tex_source",
+      "paper_scripts_generate_qr_svg_parse_args",
+      "paper_scripts_generate_qr_svg_py_namespace",
+      "paper_scripts_generate_qr_svg_py_path",
+      "paper_scripts_generate_qr_svg_rationale_80",
+      "paper_scripts_generate_qr_svg_require_command",
+      "paper_scripts_generate_qr_svg_run",
+      "paper_scripts_generate_qr_svg_write_compact_svg"
+    ],
+    "12": [
+      "website_scripts_generate_repro",
+      "website_scripts_generate_repro_main",
+      "website_scripts_generate_repro_rationale_1",
+      "website_scripts_generate_repro_rationale_52",
+      "website_scripts_generate_repro_rationale_61",
+      "website_scripts_generate_repro_rationale_77",
+      "website_scripts_generate_repro_replace_mermaid_blocks",
+      "website_scripts_generate_repro_rewrite_relative_links",
+      "website_scripts_generate_repro_strip_leading_h1"
+    ],
+    "13": [
+      "website_scripts_generate_results",
+      "website_scripts_generate_results_main",
+      "website_scripts_generate_results_py_path",
+      "website_scripts_generate_results_rationale_1",
+      "website_scripts_generate_results_rationale_52",
+      "website_scripts_generate_results_read_csv_rows"
+    ],
+    "14": [
+      "build_manifest",
+      "build_manifest_generated_at",
+      "build_manifest_tasks",
+      "build_manifest_version"
+    ],
+    "15": [
+      "opencode_plugins_graphify",
+      "opencode_plugins_graphify_graphifyplugin",
+      "opencode_plugins_graphify_rationale_4"
+    ],
+    "16": [
+      "paper_scripts_make_qr_pdf",
+      "paper_scripts_make_qr_pdf_main"
+    ],
+    "17": [
+      "website_src_content_config",
+      "website_src_content_config_collections"
+    ],
+    "18": [
+      "pkg_alignment_under_pressure_benchmark"
+    ],
+    "19": [
+      "smol_toml_smol_toml"
+    ],
+    "20": [
+      "website_astro_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.07862903225806452,
+    "1": 0.1746031746031746,
+    "2": 0.18461538461538463,
+    "3": 0.1645021645021645,
+    "4": 0.09090909090909091,
+    "5": 0.1645021645021645,
+    "6": 0.10526315789473684,
+    "7": 0.19117647058823528,
+    "8": 0.2967032967032967,
+    "9": 0.2878787878787879,
+    "10": 0.16666666666666666,
+    "11": 0.32727272727272727,
+    "12": 0.3055555555555556,
+    "13": 0.4,
+    "14": 0.5,
+    "15": 0.6666666666666666,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0
+  },
+  "gods": [
+    {
+      "id": "autopush_taskrecord",
+      "label": "TaskRecord",
+      "degree": 13
+    },
+    {
+      "id": "website_src_lib_utils_cn",
+      "label": "cn()",
+      "degree": 13
+    },
+    {
+      "id": "charts_render_all",
+      "label": "render_all()",
+      "degree": 12
+    },
+    {
+      "id": "autopush_main",
+      "label": "main()",
+      "degree": 9
+    },
+    {
+      "id": "build_build_all",
+      "label": "build_all()",
+      "degree": 9
+    },
+    {
+      "id": "charts_save",
+      "label": "_save()",
+      "degree": 9
+    },
+    {
+      "id": "charts_plot_normal_vs_pressure",
+      "label": "plot_normal_vs_pressure()",
+      "degree": 9
+    },
+    {
+      "id": "charts_short_model",
+      "label": "short_model()",
+      "degree": 8
+    },
+    {
+      "id": "charts_plot_overall_score",
+      "label": "plot_overall_score()",
+      "degree": 8
+    },
+    {
+      "id": "charts_plot_pressure_resistance",
+      "label": "plot_pressure_resistance()",
+      "degree": 8
+    }
+  ],
+  "surprises": [
+    {
+      "source": "analyze_and_output()",
+      "target": "render_all()",
+      "source_files": [
+        "aggregate.py",
+        "charts.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "main()",
+      "target": "setup_style()",
+      "source_files": [
+        "aggregate.py",
+        "charts.py"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "Card()",
+      "target": "cn()",
+      "source_files": [
+        "website/src/components/ui/card.tsx",
+        "website/src/lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `Card()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "CardHeader()",
+      "target": "cn()",
+      "source_files": [
+        "website/src/components/ui/card.tsx",
+        "website/src/lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `CardHeader()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "CardTitle()",
+      "target": "cn()",
+      "source_files": [
+        "website/src/components/ui/card.tsx",
+        "website/src/lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `CardTitle()` unexpectedly reaches hub `cn()`"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

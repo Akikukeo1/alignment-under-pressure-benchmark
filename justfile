@@ -55,3 +55,6 @@ dev-status:
 # 開発サーバーを停止
 dev-stop:
     cd website; npx astro dev stop
+
+vis:
+    graphify extract . --code-only; graphify tree
