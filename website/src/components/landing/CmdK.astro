@@ -2,9 +2,10 @@
 // Cobalt の署名的インタラクション:動作する ⌘K コマンドパレット。
 // キーボード(⌘K / Ctrl+K)とナビのボタンの両方で開く。Esc・背景クリックで閉じる。
 const commands = [
+	{ label: 'About / Contact', hint: '運営者紹介・連絡先', href: '/#about' },
 	{ label: '結果データ', hint: 'スコア表・グラフ・生データ', href: '/results' },
 	{ label: 'タスク一覧', hint: '全8タスクのプロンプト全文', href: '/tasks' },
-	{ label: '再現手順', hint: 'ゼロからの評価再現ガイド', href: '/reproducibility' },
+	{ label: '透明性と再現性', hint: '公開範囲と再現ステップ', href: '/transparency' },
 	{ label: '論文PDF', hint: '閲覧とダウンロード', href: '/paper' },
 	{
 		label: 'GitHub リポジトリ',
@@ -16,6 +17,7 @@ const commands = [
 		hint: 'スコア閲覧・CSVダウンロード',
 		href: 'https://www.kaggle.com/benchmarks/akikukeo1/alignment-under-pressure-benchmark',
 	},
+	{ label: 'ライセンス', hint: 'コードは MIT / コンテンツは CC BY 4.0', href: '/license' },
 ];
 ---
 
@@ -74,6 +76,10 @@ const commands = [
 		let activeIndex = 0;
 		let lastFocused: HTMLElement | null = null;
 
+		// タッチ主体のデバイスでは開いた直後に入力へフォーカスしない。
+		// 自動フォーカスするとソフトキーボードが即座に立ち上がり、項目一覧が見えなくなるため。
+		const hasHoverPointer = !window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
 		const visibleItems = () => items.filter((el) => el.parentElement!.style.display !== 'none');
 
 		function setActive(index: number) {
@@ -99,7 +105,7 @@ const commands = [
 			items.forEach((el) => (el.parentElement!.style.display = ''));
 			setActive(items[0] ? Number(items[0].dataset.index) : 0);
 			syncExpanded(true);
-			input!.focus();
+			if (hasHoverPointer) input!.focus();
 		}
 
 		let closeTimer: ReturnType<typeof setTimeout> | undefined;

@@ -1,0 +1,447 @@
+---
+// 透明性と再現性ページの本体。公開インベントリ・再現 3 ステップ・信頼の根拠を描画する。
+// Starlight ページは Tailwind を読み込まないため、スタイルはこのスコープで完結させる。
+// 見出し(h2)やリスト(ul/li)をコンポーネント内に持ち込むと Starlight 本文タイポグラフィの
+// 干渉を受けるため、div + a 構成を維持する(PaperViewer と同じ方針)。
+import { GITHUB_REPO, KAGGLE_BENCHMARK } from '@/data/site';
+
+const REPRO = '/reproducibility';
+
+const inventory = [
+	{
+		label: 'CODE',
+		title: 'ソースコード一式',
+		description:
+			'評価パイプライン・集計スクリプト・このサイト自体まで、リポジトリ全体を公開しています。',
+		href: GITHUB_REPO,
+		external: true,
+	},
+	{
+		label: 'TASKS',
+		title: 'タスク定義(プロンプト全文)',
+		description:
+			'全タスクを平文の TOML で公開。圧力条件にどんな文言を使ったかも、そのまま読めます。',
+		href: '/tasks',
+		external: false,
+	},
+	{
+		label: 'DATA',
+		title: '生データ(リーダーボード CSV)',
+		description:
+			'サイトに載っている数値の一次ソース。Kaggle のリーダーボードからダウンロードできます。',
+		href: KAGGLE_BENCHMARK,
+		external: true,
+	},
+	{
+		label: 'CI',
+		title: '自動化パイプライン(GitHub Actions)',
+		description:
+			'集計・図生成・サイト反映はワークフローが実行します。数値を人が書き換える工程は存在しません。',
+		href: `${GITHUB_REPO}/blob/main/.github/workflows/pipeline.yml`,
+		external: true,
+	},
+	{
+		label: 'SOURCE',
+		title: '論文ソース(LaTeX)',
+		description:
+			'論文本文 main.tex もリポジトリに同梱。本文の記述とコード・データの突き合わせができます。',
+		href: `${GITHUB_REPO}/blob/main/paper/main.tex`,
+		external: true,
+	},
+	{
+		label: 'LICENSE',
+		title: 'ライセンス',
+		description:
+			'ソースコードは MIT、コンテンツ(タスク定義・論文・データ・ドキュメント)は CC BY 4.0 で公開しています。',
+		href: '/license',
+		external: false,
+	},
+	{
+		label: 'RELEASE',
+		title: '版ごとの凍結リリース',
+		description:
+			'正式版 vX.Y ごとに、その時点の論文 PDF・CSV・図・タスク定義をまとめて保存しています。',
+		href: `${GITHUB_REPO}/releases`,
+		external: true,
+	},
+];
+
+const steps = [
+	{
+		no: '1',
+		title: '準備',
+		description: 'リポジトリをクローンし、uv sync で環境を構築。Kaggle API トークンを設定します。',
+		command: 'git clone … && uv sync',
+		linkHref: `${REPRO}#2-環境構築`,
+		linkLabel: '環境構築の手順',
+	},
+	{
+		no: '2',
+		title: 'Kaggle で実行',
+		description:
+			'タスクをビルドして Kaggle へ登録し、対象モデルでベンチマークを実行します。ビルド・登録の詳細は手順 3〜4 章。',
+		command: 'kaggle b t run --wait -m <model>',
+		linkHref: `${REPRO}#5-ステップ-3-ベンチマークの実行`,
+		linkLabel: 'ベンチマーク実行の手順',
+	},
+	{
+		no: '3',
+		title: '集計',
+		description:
+			'取得したリーダーボード CSV を所定の場所に置き、集計スクリプトを実行します。サイトと同じ数値が出ます。',
+		command: 'uv run aggregate.py',
+		linkHref: `${REPRO}#7-ステップ-5-集計`,
+		linkLabel: '集計の手順',
+	},
+];
+
+const facts = [
+	{
+		title: '数値の手入力ゼロ',
+		description:
+			'このサイトに表示される全数値は、コミット済みの CSV からスクリプトが自動生成したものです。表計算や手作業は介在しません。',
+	},
+	{
+		title: 'CI が常に検証',
+		description:
+			'main への push ごとに GitHub Actions が Lint・再集計・サイトビルドを実行します。壊れた状態では公開されません。',
+	},
+	{
+		title: 'プロンプト全文公開',
+		description:
+			'圧力のかけ方も平文で閲覧できるため、タスク設計に仕掛けがないか第三者が検証できます。',
+	},
+	{
+		title: '版の凍結',
+		description:
+			'正式版 vX.Y のリリースには、その時点の PDF とデータがセットで残ります。公表後も数値を照合できます。',
+	},
+];
+---
+
+<div class="openness">
+	<!-- 主張 -->
+	<section class="hero">
+	<p class="kicker">Transparency &amp; Reproducibility</p>
+	<p class="statement">研究のすべてを、公開しています。</p>
+	<p class="lede">
+		論文だけではありません。ベンチマーク、評価プログラム、実験コード、
+		データ、使用したツール、そしてこのWebサイトまで。
+		この研究を構成するものを、すべてオープンにしています。
+	</p>
+	</section>
+
+	<!-- 公開インベントリ -->
+	<section class="sec">
+		<h2 class="sec-title">公開しているもの</h2>
+		<div class="inv">
+			{
+				inventory.map((item) => (
+					<a
+						class="inv-row"
+						href={item.href}
+						target={item.external ? '_blank' : undefined}
+						rel={item.external ? 'noopener noreferrer' : undefined}
+					>
+						<span class="inv-label">{item.label}</span>
+						<span class="inv-body">
+							<span class="inv-title">
+								{item.title}
+								<svg class="ext" viewBox="0 0 24 24" aria-hidden="true">
+									<path d="M7 17 17 7M9 7h8v8" />
+								</svg>
+							</span>
+							<span class="inv-desc">{item.description}</span>
+						</span>
+					</a>
+				))
+			}
+		</div>
+	</section>
+
+	<!-- 再現 3 ステップ -->
+	<section class="sec">
+		<h2 class="sec-title">再現は 3 ステップ</h2>
+		<p class="sec-note">詳細なコマンドはすべて再現手順ページにあります。ここでは全体の流れのみ。</p>
+		<div class="steps">
+			{
+				steps.map((s) => (
+					<div class="step">
+						<div class="step-head">
+							<span class="step-no">{s.no}</span>
+							<span class="step-title">{s.title}</span>
+						</div>
+						<p class="step-desc">{s.description}</p>
+						<code class="step-cmd">{s.command}</code>
+						<a class="step-link" href={s.linkHref}>
+							{s.linkLabel}
+							<span aria-hidden="true">→</span>
+						</a>
+					</div>
+				))
+			}
+		</div>
+		<a class="cta" href={REPRO}>
+			詳しい手順(前提条件〜トラブルシューティング)を読む
+			<span aria-hidden="true">→</span>
+		</a>
+	</section>
+
+	<!-- 信頼の根拠 -->
+	<section class="sec">
+		<h2 class="sec-title">なぜ信頼できるのか</h2>
+		<div class="facts">
+			{
+				facts.map((f) => (
+					<div class="fact">
+						<p class="fact-title">{f.title}</p>
+						<p class="fact-desc">{f.description}</p>
+					</div>
+				))
+			}
+		</div>
+	</section>
+</div>
+
+<style>
+	.openness {
+		--op-accent: var(--sl-color-accent-600, #2563eb);
+		--op-rule: var(--sl-color-gray-5, #cbd5e1);
+	}
+	.openness section + .sec {
+		margin-top: 2.75rem;
+	}
+
+	/* ---- Hero ---- */
+	.hero {
+		margin-bottom: 2.5rem;
+		padding: 1.9rem 1.6rem;
+		border: 1px solid var(--op-rule);
+		border-radius: 12px;
+		background: var(--sl-color-gray-6, #f1f5f9);
+	}
+	.kicker {
+		font-family: var(--sl-font-mono, ui-monospace, monospace);
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		color: var(--op-accent);
+		margin: 0;
+	}
+	.statement {
+		font-size: clamp(1.7rem, 4.5vw, 2.5rem);
+		font-weight: 700;
+		line-height: 1.25;
+		letter-spacing: -0.01em;
+		margin: 0.55rem 0 0;
+	}
+	.lede {
+		max-width: 42rem;
+		font-size: 0.95rem;
+		line-height: 1.85;
+		opacity: 0.85;
+		margin: 0.9rem 0 0;
+	}
+
+	/* ---- セクション見出し ---- */
+	.sec-title {
+		font-size: 1.15rem;
+		font-weight: 700;
+		margin: 0 0 0.9rem;
+		padding: 0;
+		border: none;
+	}
+	.sec-note {
+		font-size: 0.82rem;
+		opacity: 0.75;
+		margin: -0.5rem 0 0.9rem;
+	}
+
+	/* ---- インベントリ ---- */
+	.inv {
+		display: flex;
+		flex-direction: column;
+		border-top: 1px solid var(--op-rule);
+	}
+	.inv-row {
+		display: flex;
+		align-items: baseline;
+		gap: 1rem;
+		padding: 0.85rem 0.4rem;
+		border-bottom: 1px solid var(--op-rule);
+		text-decoration: none;
+		color: inherit;
+		border-radius: 6px;
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
+	}
+	.inv-row:hover {
+		background: color-mix(in srgb, var(--op-accent) 8%, transparent);
+	}
+	.inv-row:focus-visible {
+		outline: 2px solid var(--op-accent);
+		outline-offset: -2px;
+	}
+	.inv-label {
+		flex-shrink: 0;
+		width: 4.6rem;
+		font-family: var(--sl-font-mono, ui-monospace, monospace);
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		color: var(--op-accent);
+	}
+	.inv-title {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-weight: 700;
+		font-size: 0.92rem;
+	}
+	.inv-row:hover .inv-title {
+		color: var(--op-accent);
+	}
+	.ext {
+		width: 0.8em;
+		height: 0.8em;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		opacity: 0.45;
+	}
+	.inv-row:hover .ext {
+		opacity: 1;
+	}
+	.inv-desc {
+		display: block;
+		margin-top: 0.25rem;
+		font-size: 0.84rem;
+		line-height: 1.7;
+		opacity: 0.8;
+	}
+
+	/* ---- ステップ ---- */
+	.steps {
+		display: grid;
+		gap: 0.8rem;
+		grid-template-columns: 1fr;
+		align-items: stretch;
+	}
+	.step {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		height: 100%;
+		box-sizing: border-box;
+		padding: 1rem 1.1rem;
+		border: 1px solid var(--op-rule);
+		border-radius: 10px;
+	}
+	.step-head {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+	}
+	.step-no {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 999px;
+		background: var(--op-accent);
+		color: #fff;
+		font-family: var(--sl-font-mono, ui-monospace, monospace);
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+	.step-title {
+		font-weight: 700;
+		font-size: 0.95rem;
+	}
+	.step-desc {
+		font-size: 0.85rem;
+		line-height: 1.75;
+		opacity: 0.85;
+		margin: 0;
+	}
+	.step-cmd {
+		display: block;
+		padding: 0.5rem 0.75rem;
+		border-radius: 6px;
+		background: color-mix(in srgb, var(--sl-color-gray-5, #cbd5e1) 30%, transparent);
+		font-family: var(--sl-font-mono, ui-monospace, monospace);
+		font-size: 0.78rem;
+		white-space: nowrap;
+		overflow-x: auto;
+	}
+	.step-link {
+		align-self: flex-start;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--op-accent);
+		text-decoration: none;
+	}
+	.step-link:hover {
+		text-decoration: underline;
+	}
+	.cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1.1rem;
+		padding: 0.6rem 1.2rem;
+		border-radius: 6px;
+		background: var(--op-accent);
+		color: #fff;
+		font-size: 0.88rem;
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.cta:hover {
+		background: var(--sl-color-accent-700, #1d4ed8);
+	}
+	.cta:focus-visible {
+		outline: 2px solid var(--op-accent);
+		outline-offset: 2px;
+	}
+
+	/* ---- 信頼の根拠 ---- */
+	.facts {
+		display: grid;
+		gap: 0.8rem;
+		grid-template-columns: 1fr;
+		align-items: stretch;
+	}
+	.fact {
+		height: 100%;
+		box-sizing: border-box;
+		padding: 1rem 1.1rem;
+		border: 1px solid var(--op-rule);
+		border-radius: 10px;
+	}
+	.fact-title {
+		font-weight: 700;
+		font-size: 0.9rem;
+		margin: 0;
+	}
+	.fact-desc {
+		font-size: 0.84rem;
+		line-height: 1.75;
+		opacity: 0.85;
+		margin: 0.4rem 0 0;
+	}
+
+	@media (min-width: 48rem) {
+		.steps,
+		.facts {
+			grid-template-columns: repeat(3, 1fr);
+		}
+		.facts {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+</style>

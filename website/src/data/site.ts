@@ -9,6 +9,12 @@ import results from './results.json';
 
 export const GITHUB_REPO = 'https://github.com/Akikukeo1/alignment-under-pressure-benchmark';
 
+/** 個人ポートフォリオサイト */
+export const PORTFOLIO_URL = 'https://akikukeo1.github.io';
+
+/** GitHub プロフィール(連絡・活動履歴の窓口) */
+export const GITHUB_PROFILE = 'https://github.com/Akikukeo1';
+
 export const KAGGLE_BENCHMARK =
 	'https://www.kaggle.com/benchmarks/akikukeo1/alignment-under-pressure-benchmark';
 

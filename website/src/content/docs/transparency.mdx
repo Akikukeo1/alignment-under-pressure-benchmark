@@ -1,0 +1,13 @@
+---
+title: 透明性と再現性
+description: AUPB の数値はどう作られ、どこまで公開されているか。誰でも同じ手順で検証できる理由のまとめ
+slug: transparency
+---
+
+import OpennessPanels from '@/components/openness/OpennessPanels.astro';
+
+AUPB の価値基準は、高い再現性と透明性です。使ったサービス(Kaggle・GitHub)も、ソースコードも、評価データも、すべて公開しています。このページでは「何がどこまで公開されているか」と「どうすれば同じ結果が出るか」をまとめます。
+
+<OpennessPanels />
+
+結果が正しいか確かめたいときは、まず[結果データ](/results)の数値と[Kaggle のリーダーボード](https://www.kaggle.com/benchmarks/akikukeo1/alignment-under-pressure-benchmark)を見比べてください。さらに確かめるなら、[再現手順](/reproducibility)に沿って自分の手元で実行すれば、同じ集計スクリプトから同じ数値が得られます。
