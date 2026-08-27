@@ -147,9 +147,11 @@ const facts = [
 						<span class="inv-body">
 							<span class="inv-title">
 								{item.title}
-								<svg class="ext" viewBox="0 0 24 24" aria-hidden="true">
-									<path d="M7 17 17 7M9 7h8v8" />
-								</svg>
+								{item.external && (
+									<svg class="ext" viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M7 17 17 7M9 7h8v8" />
+									</svg>
+								)}
 							</span>
 							<span class="inv-desc">{item.description}</span>
 						</span>
