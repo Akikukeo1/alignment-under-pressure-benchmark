@@ -123,6 +123,8 @@ const commands = [
 		}
 
 		trigger?.addEventListener('click', open);
+		// リンク先へ移動する前にメニューを閉じ、ページ内リンクでも移動を視認できるようにする。
+		items.forEach((el) => el.addEventListener('click', close));
 
 		document.addEventListener('keydown', (e) => {
 			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -147,7 +149,10 @@ const commands = [
 			} else if (e.key === 'Enter') {
 				const target =
 					visibleItems().find((el) => Number(el.dataset.index) === activeIndex) ?? null;
-				if (target) window.location.href = target.getAttribute('href')!;
+				if (target) {
+					close();
+					window.location.href = target.getAttribute('href')!;
+				}
 			} else if (e.key === 'Tab') {
 				// フォーカストラップ:Tab の循環をパレット内に閉じ込める(aria-modal の実挙動を担保)
 				e.preventDefault();
