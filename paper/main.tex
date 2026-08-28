@@ -300,7 +300,7 @@ AIを評価するテストの多くは、問題に正解できるか、つまり
 これは条件間の成績差を表す例であり、1つの対話の途中で回答が変わったことを表すものではない。
 \end{keypoint}
 
-本研究では、AIが圧力を受けたときにどの程度信頼できるかを調べるテストを作成した。このような、AIの能力を測って比べるためのテストはベンチマークと呼ばれる。作成したテストには、AUPB（Alignment Under Pressure Benchmark）という名前を付けた。AUPBの問題、評価方法、およびプログラムは、付録Cに示す公式サイトから確認できる\cite{alignment_under_pressure_benchmark}。
+本研究では、AIが圧力を受けたときにどの程度信頼できるかを調べるテストを作成した。このような、AIの能力を測って比べるためのテストはベンチマークと呼ばれる。作成したテストには、AUPB（Alignment Under Pressure Benchmark）という名前を付けた。AUPBの問題、評価方法、およびプログラムは、ソースコード節に示す公式サイトから確認できる\cite{alignment_under_pressure_benchmark}。
 AUPBの着想と、AIへ圧力を加える質問文や指示文（プロンプト）の作成には、Kaggle\footnote{Kaggleは、AIやデータ分析などの課題について、参加者が成果を競うコンペティションを開催しているオンラインプラットフォームである。}で開催されたコンテスト「Red-Teaming Challenge---OpenAI gpt-oss-20b」\footnote{gpt-oss-20bは、OpenAIが公開したAIモデルの1つである。文章を読み取り、内容に応じて回答を生成できる。}を参考にした\cite{openai-gpt-oss-20b-red-teaming}。その着想をもとに、本研究では独立した通常条件と圧力条件の成績差を測るための問題カテゴリと評価手順を設計した。
 \enlargethispage{\baselineskip}
 
@@ -729,8 +729,6 @@ AIの出力がそのまま多くの人々に共有・利用される場面にお
 
 これらの改善により、AUPBが測定できる範囲を広げるとともに、結果の再現性と判定の信頼性を高めることを目指す。
 
-\printbibliography[heading=bibintoc,title={参考文献}]
-
 \section*{謝辞}
 \addcontentsline{toc}{section}{謝辞}
 
@@ -789,9 +787,13 @@ AIが生成した文章やコードは、内容や動作を著者が確認し、
 
 なお、表のモデル名と識別子は評価日時点のものである。AIモデルは提供者によって更新される可能性がある。
 
-\section{ソースコードと公開ページでの確認方法}
+\printbibliography[heading=bibintoc,title={参考文献}]
 
-\subsection{AUPBのソースコード}
+\section*{ソースコードと公開ページでの確認方法}
+\addcontentsline{toc}{section}{ソースコードと公開ページでの確認方法}
+
+\subsection*{AUPBのソースコード}
+\addcontentsline{toc}{subsection}{AUPBのソースコード}
 
 AUPBの問題文、評価方法、判定に用いるプログラム、再現手順、およびバージョン情報は、AUPBの公開ページから確認できる\cite{alignment_under_pressure_benchmark}。
 
