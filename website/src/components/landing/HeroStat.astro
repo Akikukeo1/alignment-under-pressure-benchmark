@@ -7,12 +7,8 @@ import { HIGHLIGHTS } from '@/data/site';
 
 <section class="border-b border-rule">
 	<div class="mx-auto max-w-6xl px-[clamp(1rem,4vw,1.5rem)] pt-14 pb-20 md:pt-20 md:pb-28">
-		<p class="mono-label reveal text-xs text-accent">
-			Alignment Under Pressure Benchmark
-		</p>
-
 		<!-- 数字と言葉を必ずペアで見せる(gate 46) -->
-		<div class="reveal mt-6 flex flex-col gap-6 md:mt-8 md:flex-row md:items-end md:gap-12">
+		<div class="reveal flex flex-col gap-6 md:flex-row md:items-end md:gap-12">
 			<div>
 				<span class="sr-only">総合スコア最高値 {HIGHLIGHTS.topScore.toFixed(1)}(100点満点)</span>
 				<div
@@ -74,23 +70,60 @@ import { HIGHLIGHTS } from '@/data/site';
 </section>
 
 <script>
-	// ヒーロー数字のカウンタ(0 → 目標値、約500ms、1回のみ)
+	// ヒーロー数字のカウンタ
 	const el = document.getElementById('hero-figure');
+
 	if (el) {
 		const target = Number(el.dataset.target);
-		if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-			el.textContent = String(target);
-		} else {
-			const start = performance.now();
-			const duration = 500;
-			function tick(now: number) {
-				const t = Math.min((now - start) / duration, 1);
-				// easeOutCubic
-				const eased = 1 - Math.pow(1 - t, 3);
-				el!.textContent = (target * eased).toFixed(1);
-				if (t < 1) requestAnimationFrame(tick);
+		const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		// 数字の横幅を固定するスタイルを適用
+		el.style.fontVariantNumeric = 'tabular-nums';
+
+		const formatNumber = (val: number): string => {
+			if (val >= 100) return '100';
+			return val.toFixed(1);
+		};
+
+		const startAnimation = () => {
+			if (prefersReducedMotion) {
+				el.textContent = formatNumber(target);
+				return;
 			}
+
+			const start = performance.now();
+			// スマホでの視認性を考慮し1000msに調整
+			const duration = 1000;
+
+			const easeOutExpo = (x: number): number => {
+				return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+			};
+
+			const tick = (now: number) => {
+				const elapsed = now - start;
+				const progress = Math.min(elapsed / duration, 1);
+				const currentValue = target * easeOutExpo(progress);
+
+				el.textContent = formatNumber(currentValue);
+
+				if (progress < 1) {
+					requestAnimationFrame(tick);
+				}
+			};
+
 			requestAnimationFrame(tick);
-		}
+		};
+
+		// 画面内に入ったら発火させる Observer
+		const observer = new IntersectionObserver((entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting) {
+					startAnimation();
+					observer.unobserve(entry.target); // 1度実行したら監視解除
+				}
+			});
+		}, { threshold: 0.2 }); // 要素が20%見えたらスタート
+
+		observer.observe(el);
 	}
 </script>
