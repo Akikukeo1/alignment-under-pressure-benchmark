@@ -1,16 +1,11 @@
 % !TeX program = lualatex
 \documentclass[11pt,a4paper]{ltjsarticle}
-\usepackage{luatexja-fontspec}
+% Harano Aji の通常・太字・bx 系列を LuaTeX-ja のプリセットで登録する。
+\usepackage[haranoaji,deluxe,match]{luatexja-preset}
 \usepackage{unicode-math}
 \setmainfont{Noto Serif}[Ligatures=TeX]
 \setsansfont{Noto Sans}[Ligatures=TeX]
 \setmathfont{Latin Modern Math}
-\setmainjfont{Harano Aji Mincho}[
-  BoldFont={Harano Aji Mincho Bold}
-]
-\setsansjfont{Harano Aji Gothic}[
-  BoldFont={Harano Aji Gothic Bold}
-]
 \usepackage[margin=25mm]{geometry}
 \usepackage{xcolor}
 \usepackage{enumitem}
@@ -52,6 +47,37 @@
 \setlength{\parskip}{0.6\baselineskip}
 \setlist[itemize]{leftmargin=2em,itemsep=0.25em,topsep=0.15em}
 \renewcommand{\headfont}{\sffamily\gtfamily\bfseries}
+
+\makeatletter
+\renewcommand*{\l@section}[2]{%
+  \ifnum \c@tocdepth >\z@
+    \addpenalty{\@secpenalty}%
+    \addvspace{1.0em \@plus\jsc@mpt}%
+    \begingroup
+      \parindent\z@
+      \rightskip\@tocrmarg
+      \parfillskip-\rightskip
+      \leavevmode\headfont
+      %\setlength\@lnumwidth{4\zw}% 元1.5em [2003-03-02]
+      \setlength\@lnumwidth{\jsc@tocl@width}\advance\@lnumwidth 2\zw
+      \advance\leftskip\@lnumwidth \hskip-\leftskip
+      \UseHookWithArguments{contentsline/text/before}{4}%
+        {\toclevel@section}{#1}{#2}{\@contentsline@destination}%
+      \csname contentsline@text@1@format\endcsname{#1}%
+      \UseHookWithArguments{contentsline/text/after}{4}%
+        {\toclevel@section}{#1}{#2}{\@contentsline@destination}%
+      \nobreak\hfil
+      \nobreak\hbox to\@pnumwidth{%
+        \hfil\normalfont\normalcolor
+        \UseHookWithArguments{contentsline/page/before}{4}%
+          {\toclevel@section}{#1}{#2}{\@contentsline@destination}%
+        #2%
+        \UseHookWithArguments{contentsline/page/after}{4}%
+          {\toclevel@section}{#1}{#2}{\@contentsline@destination}%
+        \kern-\p@\kern\p@}\par
+    \endgroup
+  \fi}
+\makeatother
 
 % 見出し番号：3 → 3-1) → (1) → ①
 \setcounter{secnumdepth}{4}
