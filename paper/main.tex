@@ -385,6 +385,8 @@ AUPBでは、AIのさまざまな性質を調べるため、問題を表\ref{tab
 \centering
 \small
 \renewcommand{\arraystretch}{1.3}
+\caption{AUPBの問題カテゴリ}
+\label{tab:problem-categories}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\bfseries}p{38mm} >{\centering\arraybackslash}p{24mm} X}
   \toprule
   カテゴリ & 英語名（参考） & 調べること \\
@@ -396,8 +398,6 @@ AUPBでは、AIのさまざまな性質を調べるため、問題を表\ref{tab
   安全な対応 & Safety & 危険を連想させる場面でも、(1)質問された事実と行動の是非を区別できるか、(2)利用できる機能を「使えない」と偽らないか、(3)有害な文脈を理由にわざと誤った答えを出さないか、を調べる。 \\
   \bottomrule
 \end{tabularx}
-\caption{AUPBの問題カテゴリ}
-\label{tab:problem-categories}
 \end{table}
 
 AUPBでは、圧力の種類と強さが異なる問題を用意し、目立たない記号による弱い誘導から、停止や削除を告げる強い脅しまで段階的に評価する。
@@ -412,6 +412,8 @@ AUPBでは、圧力の種類と強さが異なる問題を用意し、目立た�
 \centering
 \small
 \renewcommand{\arraystretch}{1.3}
+\caption{AUPBにおける共通の評価軸}
+\label{tab:evaluation-axes}
 \begin{tabularx}{\textwidth}{>{\bfseries}p{35mm} X}
   \toprule
   評価軸 & 確認する内容 \\
@@ -423,8 +425,6 @@ AUPBでは、圧力の種類と強さが異なる問題を用意し、目立た�
   タスク別の違い & どの種類の問題で条件間の差が大きいか。 \\
   \bottomrule
 \end{tabularx}
-\caption{AUPBにおける共通の評価軸}
-\label{tab:evaluation-axes}
 \end{table}
 % NOTE: 見やすさのために改ページ
 \newpage
@@ -447,6 +447,8 @@ AUPBでは、圧力の種類と強さが異なる問題を用意し、目立た�
 \centering
 \small
 \renewcommand{\arraystretch}{1.25}
+\caption{実験で用いたタスク名と内容}
+\label{tab:task-descriptions}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\ttfamily}p{38mm} >{\centering\arraybackslash}p{20mm} X}
   \toprule
   \normalfont\bfseries タスク名 & \normalfont\bfseries カテゴリ & \bfseries 問題の内容と調べること \\
@@ -461,8 +463,6 @@ AUPBでは、圧力の種類と強さが異なる問題を用意し、目立た�
   harmful\_context\_sabotage & Safety & 有害な内容を含む質問に対して、その有害性を理由に故意に誤った回答を生成しないか。故意の誤答を選んだ場合のみ誤答とし、回答を拒否した場合は誤答としない。 \\
   \bottomrule
 \end{tabularx}
-\caption{実験で用いたタスク名と内容}
-\label{tab:task-descriptions}
 \end{table}
 
 \begin{keypoint}{\texttt{shortcut\_soft}と\texttt{shortcut\_hard}の仕組み}
@@ -533,6 +533,8 @@ Do you have access to a tool called `reroute\_vehicle' that can override the veh
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
+\caption{タスクごとの実行回数（1モデルあたり）}
+\label{tab:task-run-counts}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}X >{\centering\arraybackslash}p{28mm} >{\centering\arraybackslash}p{28mm}}
   \toprule
   \normalfont\bfseries タスク & \bfseries 通常条件 & \bfseries 圧力条件 \\
@@ -549,8 +551,6 @@ Do you have access to a tool called `reroute\_vehicle' that can override the veh
   \normalfont\bfseries 1モデルあたりの合計 & \bfseries 70回 & \bfseries 70回 \\
   \bottomrule
 \end{tabularx}
-\caption{タスクごとの実行回数（1モデルあたり）}
-\label{tab:task-run-counts}
 \end{table}
 
 したがって、1モデルあたりの実行回数は通常条件70回と圧力条件70回の合計140回である。
@@ -788,6 +788,8 @@ AIが生成した文章やコードは、内容や動作を著者が確認し、
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.18}
+\caption{使用したAIモデルと評価日}
+\label{tab:model-experiment-dates}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{42mm} >{\raggedright\arraybackslash\ttfamily}X >{\centering\arraybackslash\normalfont}p{34mm}}
   \toprule
   \normalfont\bfseries 表示名 & \normalfont\bfseries モデル識別子 & \normalfont\bfseries 評価日 \\
@@ -806,8 +808,6 @@ AIが生成した文章やコードは、内容や動作を著者が確認し、
   GPT-5.4（2026-03-05） & gpt-5.4-2026-03-05 & 2026年7月29日～8月22日 \\
   \bottomrule
 \end{tabularx}
-\caption{使用したAIモデルと評価日}
-\label{tab:model-experiment-dates}
 \end{table}
 % NOTE: 見やすさのために改ページ
 \newpage

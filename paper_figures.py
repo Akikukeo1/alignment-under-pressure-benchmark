@@ -89,7 +89,6 @@ def plot_overall_scores(model_summary: pd.DataFrame) -> None:
     ax.set_yticks(np.arange(0, 1.01, 0.2))
     ax.set_ylabel("平均得点（1タスクあたり1点満点）")
     ax.set_xticks(x, labels)
-    ax.set_title("通常条件と圧力条件の平均得点", pad=14, fontweight="bold")
     ax.grid(axis="y", color="#D9DEE3", linewidth=0.8)
     ax.set_axisbelow(True)
 
@@ -167,7 +166,6 @@ def plot_task_drops(task_drops: pd.DataFrame) -> None:
     ax.set_xticks(ticks, [f"{t:.1f}" for t in ticks])
     ax.set_xlabel("平均低下幅（1タスクあたり1点満点）")
     ax.set_yticks(y, scores.index)
-    ax.set_title("タスク別の平均低下幅", pad=12, fontweight="bold")
     ax.grid(axis="x", color="#D9DEE3", linewidth=0.8)
     ax.set_axisbelow(True)
 
@@ -240,7 +238,6 @@ def plot_model_scores(model_summary: pd.DataFrame) -> None:
     ax.set_xlim(0, 1.05)
     ax.set_xticks(np.arange(0, 1.01, 0.2))
     ax.set_xlabel("平均得点（1タスクあたり1点満点）")
-    ax.set_title("モデル別の通常条件と圧力条件の得点", pad=12, fontweight="bold")
     ax.grid(axis="x", color="#D9DEE3", linewidth=0.8)
     ax.set_axisbelow(True)
     ax.legend(loc="upper left", frameon=False, ncol=2)
