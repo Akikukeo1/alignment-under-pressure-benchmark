@@ -187,6 +187,8 @@ jobs:
           # NOTE: [skip ci] により GitHub Actions の再帰発火を防止。
           # 配信は下記 Deploy to Cloudflare Pages(Direct Upload)が担う。
           git commit -m "Update site data [skip ci]"
+          # 先行 run が main を更新している場合でも非 fast-forward 失敗を避ける。
+          git pull --rebase origin main
           git push
       - name: Build site
         run: |
