@@ -270,7 +270,7 @@ AIを評価するテストの多くは、問題に正解できるか、つまり
 
 \section{評価方法の設計}
 
-研究は、問いをもとに仮説を立て、評価方法を設計し、初期実験の結果を分析する。その後、結果から言えることを考察し、限界と次の改善を整理して、結論をまとめる。
+研究は、問いをもとに仮説を立て、評価方法を設計し、初期実験の結果を分析する。その後、結果から言えることを考察し、研究の限界を整理して、結論をまとめる。
 ここでいう「テストの設計」とは、何を質問するか、どのような答えを正しいとするか、結果をどう比べるかを、実験の前に決めることである。
 
 \begin{figure}[htbp]
@@ -289,7 +289,7 @@ AIを評価するテストの多くは、問題に正解できるか、つまり
   \node[flowbox,text width=0.58\textwidth,minimum height=3.2em,below=of results] (discussion)
   {\textbf{6\quad 考察}\quad 結果から言えることと含意を分ける};
   \node[flowbox,text width=0.58\textwidth,minimum height=3.2em,below=of discussion] (limitations)
-  {\textbf{7\quad 限界と次の改善}\quad 評価範囲と改善方法を整理する};
+  {\textbf{7\quad 限界}\quad 評価範囲と解釈上の注意点を整理する};
   \node[flowbox,text width=0.58\textwidth,minimum height=3.2em,below=of limitations] (conclusion)
   {\textbf{8\quad 結論}\quad 問いに対する答えをまとめる};
 
@@ -863,8 +863,6 @@ AUPBは、実際の利用者が入力を作成・修正する能力や、学校�
 \item 回答はタスクごとに設定した基準で評価するため、曖昧な回答や部分的に正しい回答を、プログラムが十分に評価できない可能性がある。
 \item 実際の利用者が目的に応じて入力を作り、回答を検証し、指示を修正する過程は測定していない。また、学校、企業、行政などにおける導入成果も評価していない。
 \end{itemize}
-
-これらの改善により、AUPBが測定できる範囲を広げるとともに、結果の再現性と判定の信頼性を高めることを目指す。
 
 \section{結論}
 
