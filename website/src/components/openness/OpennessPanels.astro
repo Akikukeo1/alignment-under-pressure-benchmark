@@ -9,7 +9,7 @@ const REPRO = '/reproducibility';
 
 const inventory = [
 	{
-		label: 'CODE',
+		label: 'コード',
 		title: 'ソースコード一式',
 		description:
 			'評価パイプライン・集計スクリプト・このサイト自体まで、リポジトリ全体を公開しています。',
@@ -17,7 +17,7 @@ const inventory = [
 		external: true,
 	},
 	{
-		label: 'TASKS',
+		label: 'タスク',
 		title: 'タスク定義(プロンプト全文)',
 		description:
 			'全タスクを平文の TOML で公開。圧力条件にどんな文言を使ったかも、そのまま読めます。',
@@ -25,7 +25,7 @@ const inventory = [
 		external: false,
 	},
 	{
-		label: 'DATA',
+		label: 'データ',
 		title: '生データ(リーダーボード CSV)',
 		description:
 			'サイトに載っている数値の一次ソース。Kaggle のリーダーボードからダウンロードできます。',
@@ -33,7 +33,7 @@ const inventory = [
 		external: true,
 	},
 	{
-		label: 'CI',
+		label: '自動化',
 		title: '自動化パイプライン(GitHub Actions)',
 		description:
 			'集計・図生成・サイト反映はワークフローが実行します。数値を人が書き換える工程は存在しません。',
@@ -41,7 +41,7 @@ const inventory = [
 		external: true,
 	},
 	{
-		label: 'SOURCE',
+		label: '論文原稿',
 		title: '論文ソース(LaTeX)',
 		description:
 			'論文本文 main.tex もリポジトリに同梱。本文の記述とコード・データの突き合わせができます。',
@@ -49,7 +49,7 @@ const inventory = [
 		external: true,
 	},
 	{
-		label: 'LICENSE',
+		label: 'ライセンス',
 		title: 'ライセンス',
 		description:
 			'ソースコードは MIT、コンテンツ(タスク定義・論文・データ・ドキュメント)は CC BY 4.0 で公開しています。',
@@ -57,7 +57,7 @@ const inventory = [
 		external: false,
 	},
 	{
-		label: 'RELEASE',
+		label: '版管理',
 		title: '版ごとの凍結リリース',
 		description:
 			'正式版 vX.Y ごとに、その時点の論文 PDF・CSV・図・タスク定義をまとめて保存しています。',
@@ -122,7 +122,6 @@ const facts = [
 <div class="openness">
 	<!-- 主張 -->
 	<section class="hero">
-	<p class="kicker">Transparency &amp; Reproducibility</p>
 	<p class="statement">研究のすべてを、公開しています。</p>
 	<p class="lede">
 		論文だけではありません。ベンチマーク、評価プログラム、実験コード、
@@ -222,20 +221,12 @@ const facts = [
 		border-radius: 12px;
 		background: var(--sl-color-gray-6, #f1f5f9);
 	}
-	.kicker {
-		font-family: var(--sl-font-mono, ui-monospace, monospace);
-		font-size: 0.72rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		color: var(--op-accent);
-		margin: 0;
-	}
 	.statement {
 		font-size: clamp(1.7rem, 4.5vw, 2.5rem);
 		font-weight: 700;
 		line-height: 1.25;
 		letter-spacing: -0.01em;
-		margin: 0.55rem 0 0;
+		margin: 0;
 	}
 	.lede {
 		max-width: 42rem;

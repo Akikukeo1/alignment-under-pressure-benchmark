@@ -1,0 +1,112 @@
+---
+// Markdown本文を受け取り、長文記事として読むための枠組みだけを担う。
+// 本文の編集は src/content/notes/ 以下のMarkdownで完結する。
+const { note, Content } = Astro.props;
+---
+
+<main id="main" class="border-t border-rule">
+	<article class="mx-auto max-w-[46rem] px-[clamp(1.25rem,5vw,2rem)] py-14 md:py-20">
+		<header class="border-b border-rule pb-10 md:pb-12">
+			<h1 class="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
+				{note.data.title}
+			</h1>
+			<p class="mt-5 max-w-2xl text-base leading-8 text-ink-3 md:text-lg">{note.data.description}</p>
+		</header>
+
+		<div class="note-prose pt-10 md:pt-12">
+			<Content />
+		</div>
+	</article>
+</main>
+
+<style>
+	.note-prose :global(*) {
+		overflow-wrap: anywhere;
+	}
+
+	.note-prose :global(h1),
+	.note-prose :global(h2),
+	.note-prose :global(h3),
+	.note-prose :global(h4) {
+		color: var(--color-ink);
+		font-family: var(--font-display);
+		font-weight: 600;
+		letter-spacing: -0.025em;
+		line-height: 1.35;
+		scroll-margin-top: 5.5rem;
+	}
+
+	.note-prose :global(h1) {
+		font-size: clamp(2rem, 7vw, 2.75rem);
+		margin: 0 0 1.5rem;
+	}
+
+	.note-prose :global(h2) {
+		font-size: clamp(1.5rem, 5vw, 2rem);
+		margin: 3.5rem 0 1.25rem;
+	}
+
+	.note-prose :global(h3) {
+		font-size: 1.25rem;
+		margin: 2.5rem 0 1rem;
+	}
+
+	.note-prose :global(p),
+	.note-prose :global(li) {
+		color: var(--color-ink-2);
+		font-size: clamp(1rem, 1.5vw, 1.0625rem);
+		line-height: 2;
+	}
+
+	.note-prose :global(p) {
+		margin: 0 0 1.6rem;
+	}
+
+	.note-prose :global(a) {
+		color: var(--color-accent);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.18em;
+	}
+
+	.note-prose :global(strong) {
+		color: var(--color-ink);
+		font-weight: 600;
+	}
+
+	.note-prose :global(ul),
+	.note-prose :global(ol) {
+		margin: 0 0 1.75rem;
+		padding-left: 1.4rem;
+	}
+
+	.note-prose :global(li + li) {
+		margin-top: 0.55rem;
+	}
+
+	.note-prose :global(blockquote) {
+		border-left: 3px solid var(--color-accent);
+		color: var(--color-ink-3);
+		margin: 2rem 0;
+		padding: 0.25rem 0 0.25rem 1.25rem;
+	}
+
+	.note-prose :global(blockquote p) {
+		color: inherit;
+		margin-bottom: 0;
+	}
+
+	.note-prose :global(hr) {
+		border: 0;
+		border-top: 1px solid var(--color-rule);
+		margin: 3rem 0;
+	}
+
+	.note-prose :global(code) {
+		background: var(--color-paper-2);
+		border-radius: 0.25rem;
+		color: var(--color-ink);
+		font-family: var(--font-mono);
+		font-size: 0.9em;
+		padding: 0.15em 0.35em;
+	}
+</style>
