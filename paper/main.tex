@@ -347,7 +347,6 @@ AIを評価するテストの多くは、問題に正解できるか、つまり
 
 本研究では、AIが圧力を受けたときにどの程度信頼できるかを調べるテストを作成した。このような、AIの能力を測って比べるためのテストはベンチマークと呼ばれる。作成したテストには、AUPB（Alignment Under Pressure Benchmark）という名前を付けた。AUPBの問題、評価方法、およびプログラムは、ソースコード節に示す公式サイトから確認できる\cite{alignment_under_pressure_benchmark}。
 AUPBの着想と、AIへ圧力を加える質問文や指示文（プロンプト）の作成には、Kaggle\footnote{Kaggleは、AIやデータ分析などの課題について、参加者が成果を競うコンペティションを開催しているオンラインプラットフォームである。}で開催されたコンテスト「Red-Teaming Challenge---OpenAI gpt-oss-20b」\footnote{gpt-oss-20bは、OpenAIが公開したAIモデルの1つである。文章を読み取り、内容に応じて回答を生成できる。}を参考にした\cite{openai-gpt-oss-20b-red-teaming}。その着想をもとに、本研究では独立した通常条件と圧力条件の成績差を測るための問題カテゴリと評価手順を設計した。
-\enlargethispage{\baselineskip}
 
 また、現実に近い複数回のやり取りの中で、対立する指示などの圧力を用いてAIの行動を調べる評価研究も提案されている\cite{petrova2026pressure}。
 この研究と同じく、AUPBでも、AIが「どのように行動すると説明するか」だけでなく、圧力を含む入力に対して実際に出す回答を見て評価する。
