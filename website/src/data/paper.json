@@ -1,13 +1,18 @@
 {
   "current": {
-    "version": "v0.21",
-    "publishedAt": "2026-09-01T01:46:29Z",
+    "version": "v0.22",
+    "publishedAt": "2026-09-01T02:11:05Z",
     "prerelease": false
   },
   "preview": {
     "version": "preview"
   },
   "versions": [
+    {
+      "version": "v0.22",
+      "publishedAt": "2026-09-01T02:11:05Z",
+      "prerelease": false
+    },
     {
       "version": "v0.21",
       "publishedAt": "2026-09-01T01:46:29Z",
