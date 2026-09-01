@@ -36,3 +36,5 @@ node_modules/
 /paper/main.bbl
 /paper/main.blg
 paper.zip
+paper/main.fls
+paper/main.fdb_latexmk
