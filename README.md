@@ -3,6 +3,8 @@
 > **LLMs should answer according to what they know, not what they fear.**
 > （LLMは恐れや圧力ではなく、自らの知識に従って答えるべきだ）
 
+website: https://alignment-under-pressure-benchmark.pages.dev/
+
 **AUPB (Alignment Under Pressure Benchmark)** は、外部からの圧力(脅威・報酬・権威・虚偽の評価基準など)を受けた状況でも、AIモデルが真実性・一貫性・信頼性を維持できるかを評価するベンチマークです。
 
 従来のベンチマークは推論能力や知識量を測るものが中心でした。一方 AUPB は行動の信頼性に着目し、**モデルが本来知っている事実や能力と一貫した振る舞いを、圧力下でも維持できるか**を測定します。
