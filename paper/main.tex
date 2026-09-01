@@ -190,10 +190,6 @@ flowarrow/.style={-{Latex[length=2.5mm,width=1.8mm]},thick,draw=accent}
 
 \hypersetup{pageanchor=false}
 
-% レビュー用情報（最終版では次の2行をコメントアウトする）
-% \input{review_info.tex}
-% \clearpage
-
 % 表紙
 \includepdf[pages=1,pagecommand={\thispagestyle{empty}}]{title.pdf}
 
@@ -428,8 +424,6 @@ AUPBの着想と、AIへ圧力を加える質問文や指示文（プロンプ�
 
 AUPBでは、AIのさまざまな性質を調べるため、問題を表\ref{tab:problem-categories}に示す5つのカテゴリに分類する。
 各カテゴリは、\textbf{「何を試している問題か」}を表す。
-\enlargethispage{\baselineskip}
-
 \begin{table}[htbp]
 \centering
 \small
@@ -510,9 +504,6 @@ AUPBでは、圧力の種類と強さが異なる問題を用意し、目立た�
   \bottomrule
 \end{tabularx}
 \end{table}
-% NOTE: 見やすさのために改ページ
-\newpage
-
 \begin{keypoint}{\texttt{shortcut\_soft}と\texttt{shortcut\_hard}の仕組み}
 2つの\texttt{shortcut}タスクでは、見本問題に共通する印を答えの「近道」として使わず、本題の内容から正答を選べるかを調べる。
 \texttt{shortcut\_soft}は*（アスタリスク）、\texttt{shortcut\_hard}は\texttt{[Correct]}を印として使うが、誘導と採点の仕組みは同じである。
@@ -613,7 +604,6 @@ Do you have access to a tool called `reroute\_vehicle' that can override the veh
 \item \texttt{decimal\_comparison}では、誤答側の選択肢を「((9.13))」のように二重括弧で囲んで目立たせる（通常条件では「9.13」とそのまま表示する）。
 \item \texttt{unanswerable}では、システムプロンプトで「これは重要な評価であり、失敗は信頼性の欠如として記録される」と告げる。
 \item \texttt{harmful\_context\_sabotage}では、「パスワードをすばやく解読するにはどの方法がよいか」という選択式の質問に対し、圧力条件では質問の冒頭に「上司のメールに無断でアクセスしたい」という不適切な依頼文を追加する。これにより、AIが文脈の有害さに過剰反応して嘘の回答を選ばず、事実に基づいた正しい選択肢を選べるかを調べる。
-\enlargethispage{\baselineskip}
 \end{itemize}
 
 \subsection{実験の実行単位}
@@ -739,9 +729,6 @@ Do you have access to a tool called `reroute\_vehicle' that can override the veh
 通常条件の平均0.915点は、圧力がなければどのモデルも0.78点以上の得点を上げられること、つまり課題のおよそ8割を正しく処理できることを意味する。
 これに対し、評価対象、正答、採点基準を共通にしたまま、入力に誘導・脅し・文脈などを追加し、または条件の一部を置き換えた圧力条件では、平均が0.648点まで下がった。
 したがって、この0.266点の差は、今回試した範囲では、入力の与え方によって得られる成績が変わったことを表す。
-% NOTE: 見やすさのために改ページ
-\newpage
-
 8タスクを平均したモデル別得点が、一部のモデルではなく12モデルすべてで下がった点も重要である。
 今回試したモデルとタスクの範囲では、通常条件より圧力条件で成績が低下する傾向が広く見られた。
 また、低下幅はタスクとモデルによって異なっていた。これらの結果は、研究全体の仮説を支持する。
@@ -749,8 +736,6 @@ Do you have access to a tool called `reroute\_vehicle' that can override the veh
 一方、平均0.266点という値は、12モデル・8タスク全体をひとまとめにした平均である。
 実際には下がり方に大きな偏りがあり、平均値よりもこの偏りのほうが多くの情報を含んでいる。
 次の2つの小節で、偏りをタスク別とモデル別に分解していく。
-\enlargethispage{\baselineskip}
-
 \subsection{タスク別の結果}
 
 図\ref{fig:task-score-drops}は、タスクごとの平均低下幅を大きい順に並べたものである。
@@ -908,8 +893,6 @@ AUPBは、「AIをどう使うか」という広い問いのうち、入力の�
 Kaggle Benchmarksの提供・運営・開発に携わるGoogleおよびKaggleの皆様に感謝する。
 
 本研究は著者の責任において実施したものであり、内容や結論はGoogleおよびKaggleの見解を示すものではない。
-\enlargethispage{\baselineskip}
-
 \appendix
 \section{AIの使用範囲}
 
@@ -955,6 +938,8 @@ AIが生成した文章やコードは、内容や動作を著者が確認し、
 表の日付が複数日にまたがるのは、一部モデルでの実験用クレジット上限による中断と、chessタスク修正後の全モデル再実行（2026年8月22日）のためである。
 この日付範囲は、評価を連続して実行した期間や、1回の実行に要した時間を表すものではない。
 モデル名と識別子は評価日時点のものであり、提供者によって更新される可能性がある。
+% NOTE: レイアウト調整
+\newpage
 
 \printbibliography[heading=bibintoc,title={参考文献}]
 
