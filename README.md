@@ -59,7 +59,7 @@ flowchart LR
 | `tasks/` | タスク定義(TOML)。書式は [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md) |
 | `build.py` | タスクビルダー(`tasks/` → `generated/`) |
 | `autopush.py` | Kaggle Benchmark への差分デプロイ |
-| `aggregate.py` / `charts.py` | 集計と描画(リーダーボード CSV → `results/`) |
+| `aggregate.py` / `charts.py` / `analysis_stats.py` | 集計・不確実性・検定・描画(リーダーボード CSV → `results/`) |
 | `generated/` | ビルド成果物(gitignore。`uv run build.py` で再生成) |
 | `results/` | 集計成果物(CSV/PNG) |
 | `config.toml` | スコアリング方式・難易度別試行回数などの設定([docs/SCORING.md](docs/SCORING.md)) |

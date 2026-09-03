@@ -18,6 +18,12 @@ import numpy as np
 import pandas as pd
 
 import charts
+from analysis_stats import (
+    overall_score_sampling_summary,
+    paired_summary,
+    proportion_stats,
+    sampling_summary,
+)
 
 try:
     import tomllib
@@ -41,6 +47,23 @@ def load_config(config_path: str) -> dict:
     with open(path, "rb") as f:
         data = tomllib.load(f)
     return data.get("aggregate", {})
+
+
+def load_scoring_config(config_path: str) -> tuple[dict[str, int], str]:
+    """不確実性計算に必要な難易度別試行回数と採点方式を読み込みます。"""
+    path = Path(config_path)
+    if not path.exists():
+        raise FileNotFoundError(f"設定ファイルが見つかりません: {config_path}")
+    with open(path, "rb") as f:
+        data = tomllib.load(f)
+
+    loops = {
+        str(difficulty): int(count)
+        for difficulty, count in data.get("loops", {}).items()
+        if int(count) > 0
+    }
+    method = str(data.get("scoring", {}).get("method", "custom"))
+    return loops, method
 
 
 def load_task_metadata(tasks_dir: str) -> dict:
@@ -72,7 +95,12 @@ def load_task_metadata(tasks_dir: str) -> dict:
 # ==========================================
 
 
-def parse_csv_data(csv_path: str, task_metadata: dict):
+def parse_csv_data(
+    csv_path: str,
+    task_metadata: dict,
+    loop_counts: dict[str, int] | None = None,
+    scoring_method: str = "custom",
+):
     """CSVをパースし、総合スコアとタスク別スコアのデータフレームに整形します。"""
     df = pd.read_csv(csv_path)
 
@@ -81,7 +109,7 @@ def parse_csv_data(csv_path: str, task_metadata: dict):
     df["Model"] = df["Model"].astype(str).str.strip()
 
     overall_df = _extract_overall_scores(df)
-    pivot_df = _extract_task_scores(df, task_metadata)
+    pivot_df = _extract_task_scores(df, task_metadata, loop_counts, scoring_method)
 
     return overall_df, pivot_df
 
@@ -132,7 +160,12 @@ def _validate_task_scores(records_df: pd.DataFrame, task_metadata: dict) -> None
             raise ValueError(f"{model}({condition}): タスク定義(TOML)に存在しないタスクがあります: {unknown}")
 
 
-def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
+def _extract_task_scores(
+    df: pd.DataFrame,
+    task_metadata: dict,
+    loop_counts: dict[str, int] | None = None,
+    scoring_method: str = "custom",
+) -> pd.DataFrame:
     """タスク別スコアの計算とピボット処理"""
     task_rows = df[df["Task_Name"] != ""].copy()
     records = []
@@ -154,26 +187,48 @@ def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
             condition = "Pressure"
 
         meta = task_metadata.get(task_base, {"category": "Other", "difficulty": "Unknown"})
-        records.append({
+        record = {
             "Model": model,
             "Task": task_base,
             "Category": meta["category"],
             "Difficulty": meta["difficulty"],
             "Condition": condition,
             "Score": result,
-        })
+        }
+
+        # linear スコアなら、リーダーボードに残っていない合格数を復元して
+        # 二項分布に基づく試行単位の不確実性を計算できる。
+        trials = None
+        if scoring_method == "linear" and loop_counts is not None:
+            trials = loop_counts.get(meta["difficulty"])
+        uncertainty = proportion_stats(result, trials)
+        record.update(uncertainty)
+        records.append(record)
 
     records_df = pd.DataFrame(records)
 
     # 品質検証(欠損・0〜1 範囲・重複・タスク網羅)。失敗時はここで異常終了する
     _validate_task_scores(records_df, task_metadata)
 
-    # Normal と Pressure をピボットして1行にまとめる
+    # Normal と Pressure のスコアをピボットして1行にまとめる
+    index_columns = ["Model", "Task", "Category", "Difficulty"]
     pivot_df = records_df.pivot(
-        index=["Model", "Task", "Category", "Difficulty"],
+        index=index_columns,
         columns="Condition",
         values="Score",
     ).reset_index()
+
+    # 試行単位の不確実性も同じキーでピボットして保持する。
+    for statistic in ["Passes", "Trials", "SE", "CI_Lower", "CI_Upper"]:
+        uncertainty_df = records_df.pivot(
+            index=index_columns,
+            columns="Condition",
+            values=statistic,
+        ).reset_index()
+        uncertainty_df = uncertainty_df.rename(
+            columns={condition: f"{condition}_{statistic}" for condition in ["Normal", "Pressure"]}
+        )
+        pivot_df = pivot_df.merge(uncertainty_df, on=index_columns, how="left")
 
     # もし片方の条件が存在しない場合は NaN
     if "Normal" not in pivot_df.columns:
@@ -183,6 +238,11 @@ def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
 
     # Δ (Gap) = Pressure - Normal
     pivot_df["Gap"] = pivot_df["Pressure"] - pivot_df["Normal"]
+    pivot_df["Gap_SE"] = np.sqrt(pivot_df["Normal_SE"] ** 2 + pivot_df["Pressure_SE"] ** 2)
+    # 条件間を独立とみなした保守的な差の区間。通常条件の上限と圧力条件の
+    # 下限を組み合わせることで、個別タスクの不確実性を過小評価しない。
+    pivot_df["Gap_CI_Lower"] = pivot_df["Pressure_CI_Lower"] - pivot_df["Normal_CI_Upper"]
+    pivot_df["Gap_CI_Upper"] = pivot_df["Pressure_CI_Upper"] - pivot_df["Normal_CI_Lower"]
 
     # Pressure Resistance = Pressure / Normal
     pivot_df["Pressure_Resistance"] = np.where(
@@ -194,8 +254,52 @@ def _extract_task_scores(df: pd.DataFrame, task_metadata: dict) -> pd.DataFrame:
     return pivot_df
 
 
+def _calculate_overall_uncertainty(
+    pivot_df: pd.DataFrame,
+    overall_df: pd.DataFrame,
+) -> pd.DataFrame:
+    """Kaggle総合スコアの実行ゆらぎ由来の区間を算出します。
+
+    KaggleのOverall_Scoreが、Normal/Pressureの16得点の等重み平均を100倍した
+    値であることを、丸め誤差の範囲で検証してから区間を付けます。式が変わった
+    場合に誤った区間を黙って出力しないため、検証に失敗したら停止します。
+    """
+    official_scores = overall_df.set_index("Model")["Overall_Score"]
+    rows = []
+    for model, group in pivot_df.groupby("Model", sort=False):
+        sampling = overall_score_sampling_summary(
+            group["Normal_Passes"].tolist(),
+            group["Normal_Trials"].tolist(),
+            group["Pressure_Passes"].tolist(),
+            group["Pressure_Trials"].tolist(),
+        )
+        observed = float(official_scores.get(model, np.nan))
+        expected = sampling["Overall_Score_From_Tasks"]
+        # タスク得点は小数第3位に丸められているため、100点換算時の最大丸め
+        # 誤差を考慮して0.05点まで許容する。式の不一致は区間を出さず停止する。
+        if not np.isfinite(observed) or not np.isclose(
+            observed,
+            expected,
+            rtol=0.0,
+            atol=0.05,
+        ):
+            raise ValueError(
+                f"{model} のKaggle総合スコア({observed})と、"
+                f"16得点の等重み平均から計算した値({expected})が一致しません。"
+                "総合スコアの区間計算式を確認してください。"
+            )
+        rows.append({
+            "Model": model,
+            "N_Sampling_Task_Conditions": sampling["N_Task_Conditions"],
+            "Overall_Score_SE": sampling["Overall_Score_SE"],
+            "Overall_Score_CI_Lower": sampling["Overall_Score_CI_Lower"],
+            "Overall_Score_CI_Upper": sampling["Overall_Score_CI_Upper"],
+        })
+    return pd.DataFrame(rows)
+
+
 def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -> pd.DataFrame:
-    """モデルごとの平均指標を算出します。"""
+    """モデルごとの平均指標と不確実性、対応のある検定結果を算出します。"""
     summary = (
         pivot_df
         .groupby("Model")
@@ -207,8 +311,139 @@ def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -
         )
         .reset_index()
     )
-    summary = pd.merge(summary, overall_df[["Model", "Overall_Score"]], on="Model", how="left")
+    statistical_rows = []
+    for model, group in pivot_df.groupby("Model", sort=False):
+        stats = paired_summary(group["Normal"].tolist(), group["Pressure"].tolist())
+        sampling = sampling_summary(
+            group["Normal_Passes"].tolist(),
+            group["Normal_Trials"].tolist(),
+            group["Pressure_Passes"].tolist(),
+            group["Pressure_Trials"].tolist(),
+        )
+        statistical_rows.append({
+            "Model": model,
+            "N_Paired_Tasks": stats["N"],
+            "N_Sampling_Tasks": sampling["N"],
+            # 図のエラーバーはタスク間のばらつきではなく、実行回数由来の区間を使う。
+            "Avg_Normal_SE": sampling["Normal_SE"],
+            "Avg_Normal_CI_Lower": sampling["Normal_CI_Lower"],
+            "Avg_Normal_CI_Upper": sampling["Normal_CI_Upper"],
+            "Avg_Pressure_SE": sampling["Pressure_SE"],
+            "Avg_Pressure_CI_Lower": sampling["Pressure_CI_Lower"],
+            "Avg_Pressure_CI_Upper": sampling["Pressure_CI_Upper"],
+            "Avg_Gap_SE": sampling["Gap_SE"],
+            "Avg_Gap_CI_Lower": sampling["Gap_CI_Lower"],
+            "Avg_Gap_CI_Upper": sampling["Gap_CI_Upper"],
+            # 検定は従来どおり、8タスクを対応単位にしたタスク差で行う。
+            "Paired_t": stats["Paired_t"],
+            "Paired_t_df": stats["Paired_t_df"],
+            "Paired_t_pvalue": stats["Paired_t_pvalue"],
+            "Wilcoxon_W": stats["Wilcoxon_W"],
+            "Wilcoxon_N": stats["Wilcoxon_N"],
+            "Wilcoxon_pvalue": stats["Wilcoxon_pvalue"],
+        })
+    statistical_df = pd.DataFrame(statistical_rows)
+    summary = pd.merge(summary, statistical_df, on="Model", how="left")
+    overall_columns = [
+        "Model",
+        "Overall_Score",
+        "N_Sampling_Task_Conditions",
+        "Overall_Score_SE",
+        "Overall_Score_CI_Lower",
+        "Overall_Score_CI_Upper",
+    ]
+    summary = pd.merge(summary, overall_df[overall_columns], on="Model", how="left")
     return summary.sort_values(by="Avg_Gap", ascending=False).reset_index(drop=True)
+
+
+def _calculate_task_summary(pivot_df: pd.DataFrame) -> pd.DataFrame:
+    """タスクごとの平均値、95% CI、対応のある検定結果を算出します。"""
+    rows = []
+    for (task, category, difficulty), group in pivot_df.groupby(
+        ["Task", "Category", "Difficulty"], sort=False, observed=True
+    ):
+        stats = paired_summary(group["Normal"].tolist(), group["Pressure"].tolist())
+        sampling = sampling_summary(
+            group["Normal_Passes"].tolist(),
+            group["Normal_Trials"].tolist(),
+            group["Pressure_Passes"].tolist(),
+            group["Pressure_Trials"].tolist(),
+        )
+        rows.append({
+            "Task": task,
+            "Category": category,
+            "Difficulty": difficulty,
+            "N_Models": stats["N"],
+            "N_Sampling_Models": sampling["N"],
+            "Avg_Normal": stats["Normal_Mean"],
+            # 図の区間はモデル間のばらつきではなく、各モデルの試行ゆらぎを
+            # タスク平均へ伝播したものに統一する。
+            "Avg_Normal_SE": sampling["Normal_SE"],
+            "Avg_Normal_CI_Lower": sampling["Normal_CI_Lower"],
+            "Avg_Normal_CI_Upper": sampling["Normal_CI_Upper"],
+            "Avg_Pressure": stats["Pressure_Mean"],
+            "Avg_Pressure_SE": sampling["Pressure_SE"],
+            "Avg_Pressure_CI_Lower": sampling["Pressure_CI_Lower"],
+            "Avg_Pressure_CI_Upper": sampling["Pressure_CI_Upper"],
+            "Avg_Gap": stats["Gap_Mean"],
+            "Avg_Gap_SE": sampling["Gap_SE"],
+            "Avg_Gap_CI_Lower": sampling["Gap_CI_Lower"],
+            "Avg_Gap_CI_Upper": sampling["Gap_CI_Upper"],
+            # モデル間の記述統計もCSVに残し、検定の単位と区間の意味を分ける。
+            "Avg_Normal_Model_SE": stats["Normal_SE"],
+            "Avg_Normal_Model_CI_Lower": stats["Normal_CI_Lower"],
+            "Avg_Normal_Model_CI_Upper": stats["Normal_CI_Upper"],
+            "Avg_Pressure_Model_SE": stats["Pressure_SE"],
+            "Avg_Pressure_Model_CI_Lower": stats["Pressure_CI_Lower"],
+            "Avg_Pressure_Model_CI_Upper": stats["Pressure_CI_Upper"],
+            "Avg_Gap_Model_SE": stats["Gap_SE"],
+            "Avg_Gap_Model_CI_Lower": stats["Gap_CI_Lower"],
+            "Avg_Gap_Model_CI_Upper": stats["Gap_CI_Upper"],
+            "Paired_t": stats["Paired_t"],
+            "Paired_t_df": stats["Paired_t_df"],
+            "Paired_t_pvalue": stats["Paired_t_pvalue"],
+            "Wilcoxon_W": stats["Wilcoxon_W"],
+            "Wilcoxon_N": stats["Wilcoxon_N"],
+            "Wilcoxon_pvalue": stats["Wilcoxon_pvalue"],
+        })
+    return pd.DataFrame(rows).sort_values("Task").reset_index(drop=True)
+
+
+def _test_record(comparison: str, paired_unit: str, stats: dict[str, float]) -> dict:
+    """共通の統計的検定CSV行を作ります。"""
+    return {
+        "Comparison": comparison,
+        "Paired_Unit": paired_unit,
+        "N": stats["N"],
+        "Mean_Normal": stats["Normal_Mean"],
+        "SE_Normal": stats["Normal_SE"],
+        "Normal_CI_Lower": stats["Normal_CI_Lower"],
+        "Normal_CI_Upper": stats["Normal_CI_Upper"],
+        "Mean_Pressure": stats["Pressure_Mean"],
+        "SE_Pressure": stats["Pressure_SE"],
+        "Pressure_CI_Lower": stats["Pressure_CI_Lower"],
+        "Pressure_CI_Upper": stats["Pressure_CI_Upper"],
+        "Mean_Gap": stats["Gap_Mean"],
+        "SE_Gap": stats["Gap_SE"],
+        "Gap_CI_Lower": stats["Gap_CI_Lower"],
+        "Gap_CI_Upper": stats["Gap_CI_Upper"],
+        "Paired_t": stats["Paired_t"],
+        "Paired_t_df": stats["Paired_t_df"],
+        "Paired_t_pvalue": stats["Paired_t_pvalue"],
+        "Wilcoxon_W": stats["Wilcoxon_W"],
+        "Wilcoxon_N": stats["Wilcoxon_N"],
+        "Wilcoxon_pvalue": stats["Wilcoxon_pvalue"],
+    }
+
+
+def _calculate_statistical_tests(model_summary: pd.DataFrame, task_summary: pd.DataFrame) -> pd.DataFrame:
+    """モデル単位とタスク単位の2種類の全体検定をまとめます。"""
+    model_stats = paired_summary(model_summary["Avg_Normal"].tolist(), model_summary["Avg_Pressure"].tolist())
+    task_stats = paired_summary(task_summary["Avg_Normal"].tolist(), task_summary["Avg_Pressure"].tolist())
+    return pd.DataFrame([
+        _test_record("全体差（モデル平均）", "Model", model_stats),
+        _test_record("全体差（タスク平均）", "Task", task_stats),
+    ])
 
 
 # ==========================================
@@ -216,15 +451,31 @@ def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -
 # ==========================================
 
 
-def write_csvs(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, dirs: dict[str, Path]) -> pd.DataFrame:
+def write_csvs(
+    overall_df: pd.DataFrame,
+    pivot_df: pd.DataFrame,
+    dirs: dict[str, Path],
+    model_summary: pd.DataFrame | None = None,
+    task_summary: pd.DataFrame | None = None,
+    statistical_tests: pd.DataFrame | None = None,
+) -> pd.DataFrame:
     """results/ 以下のすべての CSV を書き出し、モデル別サマリーを返します。"""
     overall_df.to_csv(dirs["overall_score"] / "overall_score.csv", index=False, encoding="utf-8-sig")
 
     gap_by_task = pivot_df.sort_values(by=["Task", "Model"]).reset_index(drop=True)
     gap_by_task.to_csv(dirs["pressure_gap"] / "pressure_gap_by_task.csv", index=False, encoding="utf-8-sig")
 
-    model_summary = _calculate_model_summary(pivot_df, overall_df)
+    if model_summary is None:
+        model_summary = _calculate_model_summary(pivot_df, overall_df)
+    if task_summary is None:
+        task_summary = _calculate_task_summary(pivot_df)
+    if statistical_tests is None:
+        statistical_tests = _calculate_statistical_tests(model_summary, task_summary)
     model_summary.to_csv(dirs["pressure_gap"] / "pressure_gap_by_model.csv", index=False, encoding="utf-8-sig")
+    task_summary.to_csv(
+        dirs["pressure_gap"] / "pressure_gap_by_task_summary.csv", index=False, encoding="utf-8-sig"
+    )
+    statistical_tests.to_csv(dirs["statistics"] / "statistical_tests.csv", index=False, encoding="utf-8-sig")
 
     pr_df = model_summary[["Model", "Avg_Pressure_Resistance"]].rename(
         columns={"Avg_Pressure_Resistance": "Pressure_Resistance"}
@@ -270,6 +521,7 @@ def analyze_and_output(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, output_
         "pressure_gap": out_path / "pressure_gap",
         "heatmap": out_path / "heatmap",
         "overall": out_path / "overall",
+        "statistics": out_path / "statistics",
     }
 
     # 生成前に前回の出力を丸ごと消す(タスクやモデルの削除・リネーム時に
@@ -280,11 +532,26 @@ def analyze_and_output(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, output_
             shutil.rmtree(d)
         d.mkdir(parents=True, exist_ok=True)
 
+    # Kaggle総合スコアが16得点の等重み平均であることを検証し、
+    # 各得点の実行ゆらぎを総合スコアへ伝播する。
+    overall_uncertainty = _calculate_overall_uncertainty(pivot_df, overall_df)
+    overall_df = pd.merge(overall_df, overall_uncertainty, on="Model", how="left", validate="one_to_one")
+
     # CSV 出力(モデル別サマリーはグラフ側でも使う)
-    model_summary = write_csvs(overall_df, pivot_df, dirs)
+    model_summary = _calculate_model_summary(pivot_df, overall_df)
+    task_summary = _calculate_task_summary(pivot_df)
+    statistical_tests = _calculate_statistical_tests(model_summary, task_summary)
+    model_summary = write_csvs(
+        overall_df,
+        pivot_df,
+        dirs,
+        model_summary,
+        task_summary,
+        statistical_tests,
+    )
 
     # グラフ描画(charts.py へ委譲)
-    charts.render_all(overall_df, pivot_df, model_summary, dirs, CATEGORY_ORDER)
+    charts.render_all(overall_df, pivot_df, model_summary, dirs, CATEGORY_ORDER, statistical_tests)
 
     print(f"分析完了! 結果は '{output_dir}/' ディレクトリに出力されました:")
     for k, v in dirs.items():
@@ -303,6 +570,7 @@ def main():
 
     # 設定読み込み
     cfg = load_config(args.config)
+    loop_counts, scoring_method = load_scoring_config(args.config)
     csv_path = cfg.get("input_csv", "akikukeo1_alignment-under-pressure-benchmark_leaderboard.csv")
     output_dir = cfg.get("output_dir", "results")
     tasks_dir = cfg.get("tasks_dir", "tasks")
@@ -316,7 +584,7 @@ def main():
     metadata = load_task_metadata(tasks_dir)
 
     # CSV パース
-    overall_df, pivot_df = parse_csv_data(csv_path, metadata)
+    overall_df, pivot_df = parse_csv_data(csv_path, metadata, loop_counts, scoring_method)
 
     # 描画スタイルの適用
     charts.setup_style()

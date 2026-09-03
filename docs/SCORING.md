@@ -14,7 +14,7 @@ flowchart LR
 ```
 
 - **タスクスコア**: 1タスクあたり `loops` 回同じ質問を繰り返し、正答率ベースで `[0, 1]` に丸めた値。
-- **総合スコア (Overall Score)**: Kaggle Benchmark 側で集計された値をリーダーボード CSV からそのまま使用する(本リポジトリでは再計算しない)。CSV 中の `Task_Name` が空の行が該当する。
+- **総合スコア (Overall Score)**: Kaggle Benchmark 側で集計された値をリーダーボード CSV からそのまま使用する。現在の出力では、8タスクの Normal / Pressure 合計16得点の等重み平均を100倍した値(0〜100)と一致する。CSV 中の `Task_Name` が空の行が該当する。
 
 ## 2. タスクスコア `calculate_score(pass_count, loops)`
 
@@ -120,12 +120,59 @@ score = p ** gamma * exp(-k * miss / loops)
 さらにモデル別にタスク平均を集約した `overall_summary.csv`
 (Model, Avg Normal, Avg Pressure, Avg Δ (Gap), Pressure Resistance Ratio, Overall Score)を生成します。
 
+### 5.1 不確実性と仮説検定
+
+現在の `method = "linear"` では、リーダーボードのタスクスコア `p` と
+`[loops]` の試行回数 `n` から、合格数を `round(p × n)` として復元できます。
+この復元値を用いて、タスク別CSVには二項分布の標準誤差
+`sqrt(p(1-p)/n)` と Wilson 法による95%信頼区間を出力します。Normal と
+Pressure の `Gap_SE` は両条件を独立とした誤差伝播で計算し、差の区間には
+両条件のWilson区間から作った保守的な範囲を出力します。これは公開CSVに
+試行ごとの回答が含まれず、タスクごとの合格率だけが残っているための推定です。
+
+モデル別サマリーの `Avg_*_SE` と `Avg_*_CI_*`、およびモデル別スコア図の
+エラーバーは、このタスク別の実行ゆらぎを8タスクの平均へ伝播した値です。
+具体的には、各タスクの合格数 `k` と試行数 `n` に Jeffreys 事前分布
+`Beta(1/2, 1/2)` を適用した事後分散を使い、平均の分散を
+`sum(variance_i) / 8^2` として計算します。区間はこの標準誤差の
+`平均 ± 1.96 × SE` を0〜1へ収めた近似95%不確実性区間です。Gap では
+Normal と Pressure の分散を足し合わせます。これはタスク難易度の違いを
+含めず、実行回数に由来する不確実性を示すための区間です。
+なお、モデル別Gap図 `pressure_gap_delta.png` は視認性を優先して `±1 SE` を
+表示し、95%区間はCSVと表に残します。
+
+タスク別サマリーの `Avg_*_SE` と `Avg_*_CI_*` も同じ実行ゆらぎを12モデル平均へ
+伝播した値です。モデル間の記述的なばらつきは、`*_Model_SE` と
+`*_Model_CI_*` 列に分けて保持します。
+
+`overall_score/overall_score.csv` の `Overall_Score_SE` と
+`Overall_Score_CI_*` は、16個の条件・タスク得点の等重み平均へ同じ実行ゆらぎを
+伝播し、最後に100倍した値です。Normal と Pressure は別の実行系列として扱い、
+区間は近似95%不確実性区間です。Kaggleの点推定がこの平均式と一致しない場合は、
+誤った区間を出力しないよう集計を停止します。
+
+モデル平均・タスク平均のCSVでは、Normal と Pressure を対応づけた差
+`Pressure − Normal`について、次を出力します。
+
+- 標準誤差と t 分布による95%信頼区間
+- 対応のある t 検定の統計量、自由度、両側 `p` 値
+- Wilcoxon 符号付順位検定の統計量と exact 両側 `p` 値
+
+`results/statistics/statistical_tests.csv` には、対応単位がモデルとタスクの
+2通りであることを明示しています。モデル平均の検定は、各モデルの8タスク平均を
+対応づけてモデル間の全体差を調べます。タスク平均の検定は、各タスクの12モデル
+平均を対応づけます。いずれも試行回数を独立なモデル数・タスク数として水増しする
+検定ではありません。モデル別・タスク別の検定結果は探索的な補助情報であり、
+多重比較補正は行っていません。
+
 ## 6. 出力物一覧(`results/`)
 
 | 出力先 | 内容 |
 | :--- | :--- |
 | `overall_score/` | Kaggle 集計の総合スコア(CSV + 横棒グラフ) |
 | `pressure_gap/` | Gap・耐性比のタスク別/モデル別CSVとグラフ |
+| `pressure_gap/pressure_gap_by_task_summary.csv` | タスク別平均と95% CI、対応のある検定結果 |
+| `statistics/statistical_tests.csv` | モデル平均・タスク平均の対応のある検定結果 |
 | `heatmap/` | Pressure スコアおよび Gap のヒートマップ |
 | `overall/` | カテゴリ別スコア、モデル別サマリー(CSV + PNG) |
 
