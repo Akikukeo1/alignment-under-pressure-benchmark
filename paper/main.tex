@@ -358,23 +358,23 @@ AUPBの着想と、AIへ圧力を加える質問文や指示文（プロンプ�
   ]
   \node[compactbox] at (0,0) (question)
   {\textbf{1\quad 同一課題}\\正答と基準を共通化};
-  \node[compactbox] at (-4,-2.5) (normal)
+  \node[compactbox] at (-4,-2.7) (normal)
   {\textbf{2A\quad 通常条件}\\圧力なし};
-  \node[compactbox] at (4,-2.5) (pressure)
+  \node[compactbox] at (4,-2.7) (pressure)
   {\textbf{2B\quad 圧力条件}\\圧力操作あり};
-  \node[compactbox] at (-4,-4.5) (normalruns)
+  \node[compactbox] at (-4,-5.0) (normalruns)
   {\textbf{3A\quad 回答生成}\\新しい対話};
-  \node[compactbox] at (4,-4.5) (pressureruns)
+  \node[compactbox] at (4,-5.0) (pressureruns)
   {\textbf{3B\quad 回答生成}\\新しい対話};
-  \node[compactbox] at (-4,-6.7) (normalaggregate)
+  \node[compactbox] at (-4,-7.3) (normalaggregate)
   {\textbf{4A\quad 自動採点}\\基準で得点化};
-  \node[compactbox] at (4,-6.7) (pressureaggregate)
+  \node[compactbox] at (4,-7.3) (pressureaggregate)
   {\textbf{4B\quad 自動採点}\\基準で得点化};
-  \node[compactbox,text width=0.34\textwidth] at (0,-9.6) (compare)
+  \node[compactbox,text width=0.34\textwidth] at (0,-10.0) (compare)
   {\textbf{5\quad 指標集計}\\条件間の低下幅を比較};
 
-  \coordinate (split) at ([yshift=-5mm]question.south);
-  \coordinate (merge) at ([yshift=5mm]compare.north);
+  \coordinate (split) at ([yshift=-7mm]question.south);
+  \coordinate (merge) at ([yshift=7mm]compare.north);
 
   \draw[thick,draw=accent] (question.south) -- (split);
   \draw[flowarrow] (split) -| (normal.north);
