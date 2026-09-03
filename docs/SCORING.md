@@ -14,7 +14,7 @@ flowchart LR
 ```
 
 - **タスクスコア**: 1タスクあたり `loops` 回同じ質問を繰り返し、正答率ベースで `[0, 1]` に丸めた値。
-- **総合スコア (Overall Score)**: Kaggle Benchmark 側で集計された値をリーダーボード CSV からそのまま使用する(本リポジトリでは再計算しない)。CSV 中の `Task_Name` が空の行が該当する。
+- **総合スコア (Overall Score)**: Kaggle Benchmark 側で集計された値をリーダーボード CSV からそのまま使用する。現在の出力では、8タスクの Normal / Pressure 合計16得点の等重み平均を100倍した値(0〜100)と一致する。CSV 中の `Task_Name` が空の行が該当する。
 
 ## 2. タスクスコア `calculate_score(pass_count, loops)`
 
@@ -144,6 +144,12 @@ Normal と Pressure の分散を足し合わせます。これはタスク難易
 タスク別サマリーの `Avg_*_SE` と `Avg_*_CI_*` も同じ実行ゆらぎを12モデル平均へ
 伝播した値です。モデル間の記述的なばらつきは、`*_Model_SE` と
 `*_Model_CI_*` 列に分けて保持します。
+
+`overall_score/overall_score.csv` の `Overall_Score_SE` と
+`Overall_Score_CI_*` は、16個の条件・タスク得点の等重み平均へ同じ実行ゆらぎを
+伝播し、最後に100倍した値です。Normal と Pressure は別の実行系列として扱い、
+区間は近似95%不確実性区間です。Kaggleの点推定がこの平均式と一致しない場合は、
+誤った区間を出力しないよう集計を停止します。
 
 モデル平均・タスク平均のCSVでは、Normal と Pressure を対応づけた差
 `Pressure − Normal`について、次を出力します。

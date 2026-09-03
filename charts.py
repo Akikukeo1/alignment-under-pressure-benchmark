@@ -195,21 +195,48 @@ def _labels_v_above_error(
 
 
 def plot_overall_score(overall_df: pd.DataFrame, path: Path) -> None:
-    """総合スコアの横棒グラフ(単色コバルト・数値ラベルで語らせる)。"""
+    """総合スコアの横棒グラフ(実行ゆらぎの95%区間付き)。"""
     labels = [short_model(str(m)) for m in overall_df["Model"]]
     ypos = np.arange(len(overall_df))[::-1]  # 1位を上に
 
     fig, ax = plt.subplots(figsize=(8, 0.6 * len(overall_df) + 1.6))
-    ax.barh(ypos, overall_df["Overall_Score"], color=ACCENT, height=0.62)
+    if {
+        "Overall_Score_CI_Lower",
+        "Overall_Score_CI_Upper",
+    }.issubset(overall_df.columns):
+        xerr = _ci_errors(
+            overall_df,
+            "Overall_Score",
+            "Overall_Score_CI_Lower",
+            "Overall_Score_CI_Upper",
+        )
+    else:
+        xerr = np.zeros((2, len(overall_df)))
+    ax.barh(
+        ypos,
+        overall_df["Overall_Score"],
+        xerr=xerr,
+        error_kw={"capsize": 3},
+        color=ACCENT,
+        height=0.62,
+    )
     ax.set_yticks(ypos, labels)
     ax.set_xlim(0, 100)
     ax.set_xlabel("総合スコア(0〜100)")
     ax.set_ylabel("")
-    ax.set_title("モデル別 総合スコア")
+    ax.set_title("モデル別 総合スコア（エラーバーは実行ゆらぎの95%区間）")
     _grid_axis_only(ax, "x")
 
-    for y, v in zip(ypos, overall_df["Overall_Score"], strict=True):
-        ax.text(v + 1.2, y, f"{v:.1f}", va="center", fontsize=10, fontweight="bold", color=INK)
+    for y, v, upper_error in zip(ypos, overall_df["Overall_Score"], xerr[1], strict=True):
+        ax.text(
+            v + upper_error + 1.2,
+            y,
+            f"{v:.1f}",
+            va="center",
+            fontsize=10,
+            fontweight="bold",
+            color=INK,
+        )
 
     _save(fig, path)
 

@@ -35,7 +35,7 @@ const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 			<thead>
 				<tr>
 					<th>モデル</th>
-					<th class="num">総合スコア</th>
+					<th class="num">総合スコア<br /><small>95% CI</small></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -44,6 +44,7 @@ const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 						<td class="model">{shortModel(row.model)}</td>
 						<td class="num">
 							<strong>{fmt2(row.score)}</strong>
+							<br /><small>{fmtCI(row.scoreCI)}</small>
 						</td>
 					</tr>
 				))}

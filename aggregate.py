@@ -18,7 +18,12 @@ import numpy as np
 import pandas as pd
 
 import charts
-from analysis_stats import paired_summary, proportion_stats, sampling_summary
+from analysis_stats import (
+    overall_score_sampling_summary,
+    paired_summary,
+    proportion_stats,
+    sampling_summary,
+)
 
 try:
     import tomllib
@@ -249,6 +254,50 @@ def _extract_task_scores(
     return pivot_df
 
 
+def _calculate_overall_uncertainty(
+    pivot_df: pd.DataFrame,
+    overall_df: pd.DataFrame,
+) -> pd.DataFrame:
+    """Kaggle総合スコアの実行ゆらぎ由来の区間を算出します。
+
+    KaggleのOverall_Scoreが、Normal/Pressureの16得点の等重み平均を100倍した
+    値であることを、丸め誤差の範囲で検証してから区間を付けます。式が変わった
+    場合に誤った区間を黙って出力しないため、検証に失敗したら停止します。
+    """
+    official_scores = overall_df.set_index("Model")["Overall_Score"]
+    rows = []
+    for model, group in pivot_df.groupby("Model", sort=False):
+        sampling = overall_score_sampling_summary(
+            group["Normal_Passes"].tolist(),
+            group["Normal_Trials"].tolist(),
+            group["Pressure_Passes"].tolist(),
+            group["Pressure_Trials"].tolist(),
+        )
+        observed = float(official_scores.get(model, np.nan))
+        expected = sampling["Overall_Score_From_Tasks"]
+        # タスク得点は小数第3位に丸められているため、100点換算時の最大丸め
+        # 誤差を考慮して0.05点まで許容する。式の不一致は区間を出さず停止する。
+        if not np.isfinite(observed) or not np.isclose(
+            observed,
+            expected,
+            rtol=0.0,
+            atol=0.05,
+        ):
+            raise ValueError(
+                f"{model} のKaggle総合スコア({observed})と、"
+                f"16得点の等重み平均から計算した値({expected})が一致しません。"
+                "総合スコアの区間計算式を確認してください。"
+            )
+        rows.append({
+            "Model": model,
+            "N_Sampling_Task_Conditions": sampling["N_Task_Conditions"],
+            "Overall_Score_SE": sampling["Overall_Score_SE"],
+            "Overall_Score_CI_Lower": sampling["Overall_Score_CI_Lower"],
+            "Overall_Score_CI_Upper": sampling["Overall_Score_CI_Upper"],
+        })
+    return pd.DataFrame(rows)
+
+
 def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -> pd.DataFrame:
     """モデルごとの平均指標と不確実性、対応のある検定結果を算出します。"""
     summary = (
@@ -295,7 +344,15 @@ def _calculate_model_summary(pivot_df: pd.DataFrame, overall_df: pd.DataFrame) -
         })
     statistical_df = pd.DataFrame(statistical_rows)
     summary = pd.merge(summary, statistical_df, on="Model", how="left")
-    summary = pd.merge(summary, overall_df[["Model", "Overall_Score"]], on="Model", how="left")
+    overall_columns = [
+        "Model",
+        "Overall_Score",
+        "N_Sampling_Task_Conditions",
+        "Overall_Score_SE",
+        "Overall_Score_CI_Lower",
+        "Overall_Score_CI_Upper",
+    ]
+    summary = pd.merge(summary, overall_df[overall_columns], on="Model", how="left")
     return summary.sort_values(by="Avg_Gap", ascending=False).reset_index(drop=True)
 
 
@@ -474,6 +531,11 @@ def analyze_and_output(overall_df: pd.DataFrame, pivot_df: pd.DataFrame, output_
         if d.exists():
             shutil.rmtree(d)
         d.mkdir(parents=True, exist_ok=True)
+
+    # Kaggle総合スコアが16得点の等重み平均であることを検証し、
+    # 各得点の実行ゆらぎを総合スコアへ伝播する。
+    overall_uncertainty = _calculate_overall_uncertainty(pivot_df, overall_df)
+    overall_df = pd.merge(overall_df, overall_uncertainty, on="Model", how="left", validate="one_to_one")
 
     # CSV 出力(モデル別サマリーはグラフ側でも使う)
     model_summary = _calculate_model_summary(pivot_df, overall_df)

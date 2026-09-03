@@ -326,6 +326,50 @@ def sampling_summary(
     }
 
 
+def overall_score_sampling_summary(
+    normal_passes: Sequence[float],
+    normal_trials: Sequence[float],
+    pressure_passes: Sequence[float],
+    pressure_trials: Sequence[float],
+) -> dict[str, float]:
+    """16個の条件・タスク得点からKaggle総合スコアの区間を伝播する。
+
+    現在のKaggle総合スコアは、8タスクのNormal/Pressure得点を等重みで平均し、
+    100倍した値である。したがって、各得点を独立な二項比率の推定値とみなし、
+    ``Overall = 100 * (Normal_mean + Pressure_mean) / 2`` として分散を伝播する。
+    Normal と Pressure は別の実行系列なので、両条件の分散は加算する。
+    区間はJeffreys事後分散の正規近似による近似95%不確実性区間である。
+    """
+    sampling = sampling_summary(
+        normal_passes,
+        normal_trials,
+        pressure_passes,
+        pressure_trials,
+    )
+    n = sampling["N"]
+    if n == 0.0:
+        return {
+            "N_Task_Conditions": 0.0,
+            "Overall_Score_From_Tasks": math.nan,
+            "Overall_Score_SE": math.nan,
+            "Overall_Score_CI_Lower": math.nan,
+            "Overall_Score_CI_Upper": math.nan,
+        }
+
+    mean = (sampling["Normal_Mean"] + sampling["Pressure_Mean"]) / 2.0
+    standard_error = math.hypot(sampling["Normal_SE"], sampling["Pressure_SE"]) / 2.0
+    score = 100.0 * mean
+    score_se = 100.0 * standard_error
+    z = 1.959963984540054
+    return {
+        "N_Task_Conditions": 2.0 * n,
+        "Overall_Score_From_Tasks": score,
+        "Overall_Score_SE": score_se,
+        "Overall_Score_CI_Lower": max(0.0, score - z * score_se),
+        "Overall_Score_CI_Upper": min(100.0, score + z * score_se),
+    }
+
+
 def paired_summary(normal: Sequence[float], pressure: Sequence[float]) -> dict[str, float]:
     """対応するNormal/Pressureの系列から平均、CI、t検定、Wilcoxon検定を計算する。"""
     pairs = [

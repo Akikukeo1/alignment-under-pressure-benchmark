@@ -66,7 +66,15 @@ def main() -> None:
 
     # --- 総合スコア(スコア降順) -------------------------------------------
     scores = [
-        {"model": row["Model"], "score": float(row["Overall_Score"]), "date": row["Evaluation_Date"]}
+        {
+            "model": row["Model"],
+            "score": float(row["Overall_Score"]),
+            "scoreCI": [
+                as_float(row, "Overall_Score_CI_Lower"),
+                as_float(row, "Overall_Score_CI_Upper"),
+            ],
+            "date": row["Evaluation_Date"],
+        }
         for row in read_csv_rows(RESULTS_DIR / "overall_score" / "overall_score.csv")
     ]
     scores.sort(key=lambda item: item["score"], reverse=True)

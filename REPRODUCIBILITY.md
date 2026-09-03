@@ -184,7 +184,7 @@ uv run aggregate.py -c config.toml   # 明示指定も可能
 
 | 出力先 | 内容 |
 | :--- | :--- |
-| `overall_score/overall_score.{csv,png}` | Kaggle 集計による総合スコア |
+| `overall_score/overall_score.{csv,png}` | Kaggle 集計による総合スコアと、16条件・タスク得点の実行ゆらぎに由来する近似95%不確実性区間 |
 | `pressure_gap/pressure_gap_by_task.csv` | タスク × モデル別の Normal / Pressure / Gap / 耐性比、試行数・標準誤差・Wilson 95% CI |
 | `pressure_gap/pressure_gap_by_model.csv` | モデル別の平均値、実行ゆらぎに由来する近似95%不確実性区間、対応のある検定結果 |
 | `pressure_gap/pressure_gap_by_task_summary.csv` | タスク別平均、実行ゆらぎに由来する近似95%不確実性区間、モデル間の記述統計、対応のある検定結果 |
