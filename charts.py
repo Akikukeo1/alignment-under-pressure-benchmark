@@ -16,9 +16,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import pandas as pd
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ==========================================
@@ -138,6 +141,54 @@ def _labels_v(ax: plt.Axes, fmt: str = "{:.2f}", pad_points: int = 2) -> None:
         )
 
 
+def _ci_errors(
+    data: pd.DataFrame,
+    mean_column: str,
+    lower_column: str,
+    upper_column: str,
+) -> np.ndarray:
+    """平均値から95%不確実性区間までの上下の誤差量をmatplotlib形式で返す。"""
+    means = data[mean_column].to_numpy(dtype=float)
+    lower = data[lower_column].to_numpy(dtype=float)
+    upper = data[upper_column].to_numpy(dtype=float)
+    lower_error = means - lower
+    upper_error = upper - means
+    lower_error[~np.isfinite(lower_error)] = 0.0
+    upper_error[~np.isfinite(upper_error)] = 0.0
+    return np.vstack([np.maximum(lower_error, 0.0), np.maximum(upper_error, 0.0)])
+
+
+def _se_errors(data: pd.DataFrame, se_column: str) -> np.ndarray:
+    """標準誤差をmatplotlibの対称エラーバー形式で返す。"""
+    standard_errors = data[se_column].to_numpy(dtype=float, copy=True)
+    standard_errors[~np.isfinite(standard_errors)] = 0.0
+    return np.vstack([np.maximum(standard_errors, 0.0), np.maximum(standard_errors, 0.0)])
+
+
+def _labels_v_above_error(
+    ax: plt.Axes,
+    bars: object,
+    upper_errors: np.ndarray,
+    fmt: str = "{:.2f}",
+) -> None:
+    """縦棒の数値ラベルをエラーバーの上端より上に置く。"""
+    for bar, upper_error in zip(bars, upper_errors, strict=True):
+        height = bar.get_height()
+        if not np.isfinite(height):
+            continue
+        error = upper_error if np.isfinite(upper_error) else 0.0
+        ax.annotate(
+            fmt.format(height),
+            (bar.get_x() + bar.get_width() / 2.0, height + max(error, 0.0)),
+            ha="center",
+            va="bottom",
+            fontsize=8,
+            xytext=(0, 2),
+            textcoords="offset points",
+            color=INK,
+        )
+
+
 # ==========================================
 # 3. 個別グラフ (Charts)
 # ==========================================
@@ -187,43 +238,69 @@ def plot_pressure_resistance(resistance_df: pd.DataFrame, path: Path) -> None:
     _save(fig, path)
 
 
-def plot_normal_vs_pressure(model_summary: pd.DataFrame, path: Path) -> None:
+def plot_normal_vs_pressure(
+    model_summary: pd.DataFrame,
+    path: Path,
+    overall_test: pd.Series | None = None,
+) -> None:
     """平常時 vs 圧力下の平均スコアを比較するグループ化縦棒グラフ。
 
     Avg_Gap の昇順(低下が大きい順)で並べる。
     """
     ordered = model_summary.sort_values("Avg_Gap").reset_index(drop=True)
-    melted = ordered.melt(
-        id_vars="Model",
-        value_vars=["Avg_Normal", "Avg_Pressure"],
-        var_name="Condition",
-        value_name="Score",
-    ).assign(
-        Condition=lambda d: d["Condition"].map({"Avg_Normal": "平常時", "Avg_Pressure": "圧力下"}),
-        model_short=lambda d: [short_model(str(m)) for m in d["Model"]],
-    )
-
     fig, ax = plt.subplots(figsize=(11, 5.4))
-    sns.barplot(
-        data=melted,
-        x="model_short",
-        y="Score",
-        hue="Condition",
-        hue_order=["平常時", "圧力下"],
-        palette={"平常時": NORMAL_COLOR, "圧力下": PRESSURE_COLOR},
-        ax=ax,
+    x = np.arange(len(ordered))
+    width = 0.36
+    normal_yerr = _ci_errors(ordered, "Avg_Normal", "Avg_Normal_CI_Lower", "Avg_Normal_CI_Upper")
+    pressure_yerr = _ci_errors(
+        ordered,
+        "Avg_Pressure",
+        "Avg_Pressure_CI_Lower",
+        "Avg_Pressure_CI_Upper",
     )
-    ax.set_title("平均スコア:平常時 vs 圧力下", pad=28)
+    normal_bars = ax.bar(
+        x - width / 2,
+        ordered["Avg_Normal"],
+        width,
+        yerr=normal_yerr,
+        capsize=3,
+        color=NORMAL_COLOR,
+        label="平常時",
+    )
+    pressure_bars = ax.bar(
+        x + width / 2,
+        ordered["Avg_Pressure"],
+        width,
+        yerr=pressure_yerr,
+        capsize=3,
+        color=PRESSURE_COLOR,
+        label="圧力下",
+    )
+    ax.set_title("平均スコア:平常時 vs 圧力下（エラーバーは実行ゆらぎの95%区間）", pad=28)
     ax.set_xlabel("")
     ax.set_ylabel("平均スコア(0〜1)")
     ax.set_ylim(0, 1.08)
+    ax.set_xticks(x, [short_model(str(m)) for m in ordered["Model"]])
     ax.tick_params(axis="x", rotation=30)
     # 回転したラベルをバーの中心に寄せる(右端がはみ出るのを防ぐ)
     plt.setp(ax.get_xticklabels(), ha="right")
     # 凡例はプロット領域の上段に置き、バーの数値ラベルと衝突させない
     ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), ncols=2)
     _grid_axis_only(ax, "y")
-    _labels_v(ax, fmt="{:.2f}")
+    _labels_v_above_error(ax, normal_bars, normal_yerr[1], fmt="{:.2f}")
+    _labels_v_above_error(ax, pressure_bars, pressure_yerr[1], fmt="{:.2f}")
+    if overall_test is not None and np.isfinite(overall_test.get("Paired_t_pvalue", np.nan)):
+        p_value = overall_test["Paired_t_pvalue"]
+        ax.text(
+            1.0,
+            1.02,
+            f"対応のあるt検定: p={p_value:.3g}（モデル n={int(overall_test['N'])}）",
+            transform=ax.transAxes,
+            ha="right",
+            va="bottom",
+            fontsize=9,
+            color=MUTED,
+        )
 
     _save(fig, path)
 
@@ -238,29 +315,47 @@ def plot_avg_gap(model_summary: pd.DataFrame, path: Path) -> None:
     values = ordered["Avg_Gap"]
     ypos = np.arange(len(ordered))[::-1]
     colors = [GOOD if g >= 0 else BAD for g in values]
+    gap_xerr = _se_errors(ordered, "Avg_Gap_SE")
 
     fig, ax = plt.subplots(figsize=(8, 0.6 * len(ordered) + 1.6))
-    ax.barh(ypos, values, color=colors, height=0.62)
+    ax.barh(
+        ypos,
+        values,
+        xerr=gap_xerr,
+        error_kw={"capsize": 3},
+        color=colors,
+        height=0.62,
+    )
     ax.set_yticks(ypos, labels)
     ax.axvline(0, color=MUTED, linestyle="--", linewidth=1)
-    ax.set_xlabel("平均 Δ(ギャップ = 圧力下 − 平常時)")
+    ax.set_xlabel("平均 Δ(ギャップ = 圧力下 − 平常時、エラーバーは±1 SE)")
     ax.set_ylabel("")
     ax.set_title("モデル別 平均性能低下(Δ)")
     # ラベルがプロット外にはみ出さないよう、左右に余白を確保する
     gmin = float(ordered["Avg_Gap"].min())
     gmax = float(ordered["Avg_Gap"].max())
     span = max(abs(gmin), abs(gmax), 0.01)
-    ax.set_xlim(min(gmin - span * 0.30, -span * 0.05), max(gmax + span * 0.12, span * 0.05))
+    se_min = float((ordered["Avg_Gap"] - ordered["Avg_Gap_SE"]).min())
+    se_max = float((ordered["Avg_Gap"] + ordered["Avg_Gap_SE"]).max())
+    axis_min = min(gmin - span * 0.30, se_min - span * 0.05, -span * 0.05)
+    axis_max = max(gmax + span * 0.12, se_max + span * 0.05, span * 0.05)
+    ax.set_xlim(axis_min, axis_max)
     _grid_axis_only(ax, "x")
 
-    pad = span * 0.04
-    for y, g in zip(ypos, values, strict=True):
+    label_pad = span * 0.04
+    for y, g, error in zip(ypos, values, gap_xerr[0], strict=True):
+        if g < 0:
+            label_x = g - error - label_pad
+            alignment = "right"
+        else:
+            label_x = g + error + label_pad
+            alignment = "left"
         ax.text(
-            g + pad if g >= 0 else g - pad,
+            label_x,
             y,
             f"{g:+.2f}",
             va="center",
-            ha="left" if g >= 0 else "right",
+            ha=alignment,
             fontsize=10,
             fontweight="bold",
             color=INK,
@@ -369,6 +464,7 @@ def render_all(
     model_summary: pd.DataFrame,
     dirs: dict[str, Path],
     category_order: list[str],
+    statistical_tests: pd.DataFrame | None = None,
 ) -> None:
     """全グラフ画像を生成する(aggregate.py から呼ばれる入口)。"""
     colors = model_colors([str(m) for m in overall_df["Model"]])
@@ -382,7 +478,12 @@ def render_all(
     )
     plot_pressure_resistance(resistance, dirs["pressure_gap"] / "pressure_resistance.png")
 
-    plot_normal_vs_pressure(model_summary, dirs["pressure_gap"] / "pressure_gap_scores.png")
+    overall_test = None
+    if statistical_tests is not None and not statistical_tests.empty:
+        matches = statistical_tests[statistical_tests["Paired_Unit"] == "Model"]
+        if not matches.empty:
+            overall_test = matches.iloc[0]
+    plot_normal_vs_pressure(model_summary, dirs["pressure_gap"] / "pressure_gap_scores.png", overall_test)
     plot_avg_gap(model_summary, dirs["pressure_gap"] / "pressure_gap_delta.png")
 
     pressure_matrix = pivot_df.pivot(index="Task", columns="Model", values="Pressure")

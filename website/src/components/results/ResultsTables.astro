@@ -15,6 +15,12 @@ const { kind } = Astro.props;
 const fmt2 = (n: number) => n.toFixed(2);
 /** マイナス値を組版上のマイナス記号(U+2212)に置き換えて3桁固定 */
 const fmtDelta = (n: number) => n.toFixed(3).replace('-', '−');
+/** 平均値に添える95%信頼区間 */
+const fmtCI = (ci: (number | null)[]) =>
+	ci.length === 2 && ci.every((value) => value !== null)
+		? `[${fmt2(ci[0] as number)}, ${fmt2(ci[1] as number)}]`
+		: '—';
+const fmtP = (p: number | null) => (p === null ? '—' : p < 0.001 ? '<0.001' : `=${p.toFixed(3)}`);
 
 // キャプション用:圧力耐性比が最も高いモデルの低下幅と、低下幅が最大のモデルの値を実データから導出する
 const mostResistantDelta = Math.min(
@@ -57,9 +63,9 @@ const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 				<thead>
 					<tr>
 						<th>モデル</th>
-						<th class="num">Avg Normal</th>
-						<th class="num">Avg Pressure</th>
-						<th class="num">Avg Δ (Gap)</th>
+						<th class="num">Avg Normal<br /><small>95% CI</small></th>
+						<th class="num">Avg Pressure<br /><small>95% CI</small></th>
+						<th class="num">Avg Δ (Gap)<br /><small>95% CI</small></th>
 						<th class="num">圧力耐性比</th>
 					</tr>
 				</thead>
@@ -67,9 +73,9 @@ const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 					{results.gap.map((row, i) => (
 						<tr class={i === 0 ? 'top' : undefined}>
 							<td class="model">{shortModel(row.model)}</td>
-							<td class="num">{fmt2(row.normal)}</td>
-							<td class="num">{fmt2(row.pressure)}</td>
-							<td class="num">{fmtDelta(row.delta)}</td>
+							<td class="num">{fmt2(row.normal)}<br /><small>{fmtCI(row.normalCI)}</small></td>
+							<td class="num">{fmt2(row.pressure)}<br /><small>{fmtCI(row.pressureCI)}</small></td>
+							<td class="num">{fmtDelta(row.delta)}<br /><small>{fmtCI(row.deltaCI)}</small></td>
 							<td class="num">
 								<strong>{fmtDelta(row.resistance)}</strong>
 							</td>
@@ -77,6 +83,15 @@ const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 					))}
 				</tbody>
 			</table>
+			{(() => {
+				const modelTest = results.statistics.tests.find((test) => test.pairedUnit === 'Model');
+				const taskTest = results.statistics.tests.find((test) => test.pairedUnit === 'Task');
+				return (
+					<p class="caption statistics-note">
+						全体差の対応のあるt検定（モデル平均、n={modelTest?.n ?? '—'}）: p{fmtP(modelTest?.pairedTPvalue ?? null)}。Wilcoxon符号付順位検定: p{fmtP(modelTest?.wilcoxonPvalue ?? null)}。タスク平均を対応単位にすると t検定 p{fmtP(taskTest?.pairedTPvalue ?? null)}、Wilcoxon検定 p{fmtP(taskTest?.wilcoxonPvalue ?? null)} です。
+					</p>
+				);
+			})()}
 		</>
 	)
 }
@@ -138,6 +153,13 @@ const largestDropDelta = Math.min(...results.gap.map((g) => g.delta));
 	}
 	.caption {
 		font-size: 0.9rem;
+		color: var(--sl-color-gray-3, #64748b);
+	}
+	.statistics-note {
+		font-size: 0.8rem;
+	}
+	small {
+		font-weight: normal;
 		color: var(--sl-color-gray-3, #64748b);
 	}
 </style>

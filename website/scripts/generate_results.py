@@ -54,6 +54,12 @@ def read_csv_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(f))
 
 
+def as_float(row: dict[str, str], key: str) -> float | None:
+    """空欄をNoneとしてCSVの数値を読み込む。"""
+    value = row.get(key, "")
+    return float(value) if value not in (None, "") else None
+
+
 def main() -> None:
     if not RESULTS_DIR.is_dir():
         sys.exit(f"results ディレクトリが見つかりません: {RESULTS_DIR}")
@@ -78,8 +84,41 @@ def main() -> None:
             "pressure": float(summary_rows[model]["Avg Pressure"]),
             "delta": float(summary_rows[model]["Avg Δ (Gap)"]),
             "resistance": float(summary_rows[model]["Pressure Resistance Ratio"]),
+            "normalCI": [
+                as_float(summary_rows[model], "Avg_Normal_CI_Lower"),
+                as_float(summary_rows[model], "Avg_Normal_CI_Upper"),
+            ],
+            "pressureCI": [
+                as_float(summary_rows[model], "Avg_Pressure_CI_Lower"),
+                as_float(summary_rows[model], "Avg_Pressure_CI_Upper"),
+            ],
+            "deltaCI": [
+                as_float(summary_rows[model], "Avg_Gap_CI_Lower"),
+                as_float(summary_rows[model], "Avg_Gap_CI_Upper"),
+            ],
         }
         for model in model_order
+    ]
+
+    # 対応のある検定結果(モデル平均・タスク平均)もサイトへ渡す。
+    tests_path = RESULTS_DIR / "statistics" / "statistical_tests.csv"
+    if not tests_path.is_file():
+        sys.exit(f"統計検定結果が見つかりません: {tests_path}\n先に `uv run aggregate.py` を実行してください。")
+    statistical_tests = [
+        {
+            "comparison": row["Comparison"],
+            "pairedUnit": row["Paired_Unit"],
+            "n": as_float(row, "N"),
+            "meanNormal": as_float(row, "Mean_Normal"),
+            "meanPressure": as_float(row, "Mean_Pressure"),
+            "meanGap": as_float(row, "Mean_Gap"),
+            "gapCI": [as_float(row, "Gap_CI_Lower"), as_float(row, "Gap_CI_Upper")],
+            "pairedT": as_float(row, "Paired_t"),
+            "pairedTDf": as_float(row, "Paired_t_df"),
+            "pairedTPvalue": as_float(row, "Paired_t_pvalue"),
+            "wilcoxonPvalue": as_float(row, "Wilcoxon_pvalue"),
+        }
+        for row in read_csv_rows(tests_path)
     ]
 
     # --- カテゴリ別得点(行=カテゴリ固定順、列=スコア降順モデル) -------------
@@ -107,7 +146,13 @@ def main() -> None:
     }
 
     # --- JSON 書き出し --------------------------------------------------------
-    payload = {"meta": meta, "overall": scores, "gap": gap, "categoryMatrix": category_matrix}
+    payload = {
+        "meta": meta,
+        "overall": scores,
+        "gap": gap,
+        "statistics": {"tests": statistical_tests},
+        "categoryMatrix": category_matrix,
+    }
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
