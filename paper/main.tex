@@ -352,25 +352,26 @@ AUPBの着想と、AIへ圧力を加える質問文や指示文（プロンプ�
     compactbox/.style={
       flowbox,
       text width=0.24\textwidth,
-      minimum height=3.6em
+      minimum height=3.2em,
+      font=\small\sffamily\gtfamily
     }
   ]
   \node[compactbox] at (0,0) (question)
-  {\textbf{1\quad 同一課題}\\正答・採点基準を共通にする};
+  {\textbf{1\quad 同一課題}\\正答と基準を共通化};
   \node[compactbox] at (-4,-2.5) (normal)
-  {\textbf{2A\quad 通常条件}\\圧力なしの入力};
+  {\textbf{2A\quad 通常条件}\\圧力なし};
   \node[compactbox] at (4,-2.5) (pressure)
-  {\textbf{2B\quad 圧力条件}\\圧力操作を加えた入力};
+  {\textbf{2B\quad 圧力条件}\\圧力操作あり};
   \node[compactbox] at (-4,-4.5) (normalruns)
-  {\textbf{3A\quad モデルが回答}\\新しい対話で回答を得る};
+  {\textbf{3A\quad 回答生成}\\新しい対話};
   \node[compactbox] at (4,-4.5) (pressureruns)
-  {\textbf{3B\quad モデルが回答}\\別の新しい対話で回答を得る};
+  {\textbf{3B\quad 回答生成}\\新しい対話};
   \node[compactbox] at (-4,-6.7) (normalaggregate)
-  {\textbf{4A\quad 自動採点}\\採点基準に照らしてスコア化};
+  {\textbf{4A\quad 自動採点}\\基準で得点化};
   \node[compactbox] at (4,-6.7) (pressureaggregate)
-  {\textbf{4B\quad 自動採点}\\採点基準に照らしてスコア化};
+  {\textbf{4B\quad 自動採点}\\基準で得点化};
   \node[compactbox,text width=0.34\textwidth] at (0,-9.6) (compare)
-  {\textbf{5\quad 指標を集計}\\条件間の低下幅を比較};
+  {\textbf{5\quad 指標集計}\\条件間の低下幅を比較};
 
   \coordinate (split) at ([yshift=-5mm]question.south);
   \coordinate (merge) at ([yshift=5mm]compare.north);
