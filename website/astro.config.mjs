@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://alignment-under-pressure-benchmark.pages.dev',
 	// スマホなどの LAN 内デバイスから開発サーバーへアクセスできるよう全インターフェースで待受
 	server: {
 		host: true,
