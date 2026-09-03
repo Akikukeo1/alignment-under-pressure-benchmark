@@ -1,0 +1,39 @@
+---
+import { getCollection, render } from 'astro:content';
+import NoteArticle from '@/components/notes/NoteArticle.astro';
+import Nav from '@/components/landing/Nav.astro';
+import CmdK from '@/components/landing/CmdK.astro';
+import FooterInline from '@/components/landing/FooterInline.astro';
+import LandingLayout from '@/layouts/LandingLayout.astro';
+
+export async function getStaticPaths() {
+	const notes = await getCollection('notes');
+
+	return Promise.all(
+		notes.map(async (note) => {
+			const { Content } = await render(note);
+			return { params: { slug: note.id }, props: { note, Content } };
+		}),
+	);
+}
+
+const { note, Content } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url).toString();
+---
+
+<LandingLayout
+	title={`${note.data.title} | AUPB`}
+	description={note.data.description}
+	canonicalUrl={canonicalUrl}
+	ogType="article"
+>
+	<a
+		href="#main"
+		class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-[6px] focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:text-accent-ink"
+		>本文へスキップ</a
+	>
+	<Nav />
+	<NoteArticle note={note} Content={Content} />
+	<FooterInline />
+	<CmdK />
+</LandingLayout>

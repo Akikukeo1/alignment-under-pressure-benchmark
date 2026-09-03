@@ -6,9 +6,11 @@ import '../styles/landing.css';
 interface Props {
 	title: string;
 	description: string;
+	canonicalUrl?: string;
+	ogType?: 'article' | 'website';
 }
 
-const { title, description } = Astro.props;
+const { title, description, canonicalUrl, ogType = 'website' } = Astro.props;
 ---
 
 <!doctype html>
@@ -19,7 +21,9 @@ const { title, description } = Astro.props;
 		<meta name="description" content={description} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		<meta property="og:type" content="website" />
+		<meta property="og:type" content={ogType} />
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<title>{title}</title>
 		<!-- JS有効時のみリビールの初期非表示を有効化するため、最初に html へ js クラスを付与 -->
