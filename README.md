@@ -67,9 +67,11 @@ flowchart LR
 
 ## ドキュメント
 
+- [docs/README.md](docs/README.md) — ドキュメント全体の案内と正本・生成物の対応
 - [REPRODUCIBILITY.md](REPRODUCIBILITY.md) — 環境構築から結果再現までの手順
 - [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md) — タスク定義(TOML)のスキーマ仕様・難易度定義
 - [docs/SCORING.md](docs/SCORING.md) — スコアリング数式と集計指標の定義
+- [website/README.md](website/README.md) — Webサイトの開発・データ同期・文書同期
 
 ## AI エージェントによる開発支援
 

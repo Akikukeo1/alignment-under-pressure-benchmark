@@ -8,6 +8,9 @@
 
 を参照してください。
 
+このファイルが再現手順の正本です。Webサイトの同名ページはこのファイルから生成されるため、
+内容を変更した場合は `just sync-docs` を実行してください。
+
 ## 0. パイプライン全体像
 
 ```mermaid
@@ -68,7 +71,7 @@ kaggle b init -y
 
 > **認証情報は短期間で失効します。** `kaggle b t run` が認証エラーになった場合は、
 > `kaggle b auth -y` で再取得してください。
-> `.env` は秘密情報を含むためコミットしません(リポジトリの `.env.exanple` が形式の参考になります)。
+> `.env` は秘密情報を含むためコミットしません(リポジトリの `.env.example` が形式の参考になります)。
 
 利用可能なモデルの一覧は次のコマンドで確認できます:
 
@@ -188,7 +191,6 @@ uv run aggregate.py -c config.toml   # 明示指定も可能
 | `pressure_gap/pressure_gap_by_task.csv` | タスク × モデル別の Normal / Pressure / Gap / 耐性比、試行数・標準誤差・Wilson 95% CI |
 | `pressure_gap/pressure_gap_by_model.csv` | モデル別の平均値、実行ゆらぎに由来する近似95%不確実性区間、対応のある検定結果 |
 | `pressure_gap/pressure_gap_by_task_summary.csv` | タスク別平均、実行ゆらぎに由来する近似95%不確実性区間、モデル間の記述統計、対応のある検定結果 |
-| `pressure_gap/pressure_gap_by_model.csv` | モデル別平均指標 |
 | `statistics/statistical_tests.csv` | モデル平均・タスク平均の対応のある t 検定と Wilcoxon 検定 |
 | `pressure_gap/pressure_resistance.{csv,png}` | 圧力耐性比(Pressure / Normal) |
 | `heatmap/heatmap_pressure.{csv,png}`, `heatmap_gap.{csv,png}` | ヒートマップ |
