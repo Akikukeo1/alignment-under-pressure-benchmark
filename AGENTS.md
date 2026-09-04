@@ -17,10 +17,11 @@ uv run build.py
 | レシピ | 内容 |
 | :--- | :--- |
 | `just aggregate` | 集計 CSV とグラフ画像を再生成(`results/` 以下を更新) |
-| `just figures` | 論文と同一ロジックの公式図を生成(`results/figures/` に出力) |
+| `just figures` | 論文と同一ロジックの公式図を生成(`paper/dist/figures/` に出力) |
 | `just sync-data` | ウェブサイト用データを生成(`website/src/data/results.json` とサイト内画像を更新) |
+| `just sync-docs` | ルートの `REPRODUCIBILITY.md` をサイト用 MDX へ同期 |
 | `just site` | ウェブサイトをビルド(`website/dist/` に出力) |
-| `just update` | `aggregate` → `figures` → `sync-data` → `site` の一連フロー |
+| `just update` | `aggregate` → `figures` → `sync-data` → `sync-docs` → `site` の一連フロー |
 | `just lint` | Python の Lint チェック(`ruff check .`) |
 | `just dev` / `just dev-status` / `just dev-stop` | ウェブサイト開発サーバーの起動(バックグラウンド)・状態確認・停止 |
 
@@ -58,6 +59,7 @@ flowchart LR
 詳細は埋め込まず、各ドキュメントを参照してください。
 
 - [README.md](README.md) — プロジェクト概要とリポジトリ構成
+- [docs/README.md](docs/README.md) — ドキュメント全体の案内と正本・生成物の対応
 - [REPRODUCIBILITY.md](REPRODUCIBILITY.md) — 環境構築から結果再現までの手順
 - [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md) — タスク定義(TOML)のスキーマ仕様・難易度定義
 - [docs/SCORING.md](docs/SCORING.md) — スコアリング数式と集計指標の定義
