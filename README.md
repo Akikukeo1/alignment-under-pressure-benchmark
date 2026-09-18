@@ -20,7 +20,40 @@ website: https://alignment-under-pressure-benchmark.pages.dev/
 
 各タスクは「圧力条件下(Pressure)」と「圧力なしの対照条件(Normal)」の 2 バリアントで実行され、その差分(Gap / 圧力耐性比)をモデル間で比較します。
 
-## セットアップ
+## 目的別クイックスタート
+
+### 1. 公開済みの結果を再現する
+
+これがこのリポジトリの主な利用目的です。
+
+- **公開版を固定して再現する**: [Releases](https://github.com/Akikukeo1/alignment-under-pressure-benchmark/releases) から対象版の `aupb-*-all.zip` またはタグを選び、[REPRODUCIBILITY.md](REPRODUCIBILITY.md) の手順を実行してください。
+- **最新版を追試する**: `main` を取得して、[REPRODUCIBILITY.md](REPRODUCIBILITY.md) の環境構築から集計までを実行してください。
+- **自分のモデルを評価する**: 同じ再現手順の「タスクのビルド」「Kaggleへの登録」「ベンチマークの実行」を使います。
+
+公開版の再現は使用するタグやReleaseを固定し、最新版の追試は現在の `main` と最新のリーダーボードCSVを使う点が異なります。
+
+### 2. 結果・タスク・指標を確認する
+
+| やりたいこと | 入口 |
+| :--- | :--- |
+| 公開結果を表・グラフで見る | [AUPB Webサイト](https://alignment-under-pressure-benchmark.pages.dev/) または [結果データ](https://alignment-under-pressure-benchmark.pages.dev/results) |
+| スコア、Gap、圧力耐性比の意味を読む | [docs/SCORING.md](docs/SCORING.md) |
+| タスクとプロンプト全文を見る | Webサイトの[タスク一覧](https://alignment-under-pressure-benchmark.pages.dev/tasks) または `tasks/` |
+| 論文・データ・図をまとめて取得する | [Releases](https://github.com/Akikukeo1/alignment-under-pressure-benchmark/releases) |
+
+### 3. 技術者として変更する
+
+| 目的 | 最初に読むもの | 主な変更対象 |
+| :--- | :--- | :--- |
+| タスクを追加・修正する | [docs/TASK_SCHEMA.md](docs/TASK_SCHEMA.md) | `tasks/*.toml` → `uv run build.py` |
+| スコアリングや集計を変更する | [docs/SCORING.md](docs/SCORING.md) | `config.toml`、`build.py`、`aggregate.py` |
+| 結果・論文図・Webサイトを更新する | [website/README.md](website/README.md) | `just aggregate` → `just figures` → `just sync-data` → `just site` |
+| 再現手順やドキュメントを更新する | [docs/README.md](docs/README.md) | 正本を編集して必要な生成物を同期 |
+| CI・公開版・論文PDFの仕組みを変更する | `.github/workflows/` と [website/README.md](website/README.md) | GitHub Actions、Release、サイト公開設定 |
+
+各目的の詳細な手順と前提条件は、[docs/README.md](docs/README.md) にまとめています。
+
+## 再現手順の前提
 
 ```bash
 # Python 3.14+ の環境と依存関係をインストール(uv が必要)
