@@ -38,3 +38,5 @@ node_modules/
 paper.zip
 paper/main.fls
 paper/main.fdb_latexmk
+
+/brag-output*
