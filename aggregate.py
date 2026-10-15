@@ -108,6 +108,18 @@ def parse_csv_data(
     df["Task_Name"] = df["Task_Name"].fillna("").astype(str).str.strip()
     df["Model"] = df["Model"].astype(str).str.strip()
 
+    # 真偽値の結果は数値得点を持たず、0点補完するとKaggle総合スコアと整合しない。
+    boolean_results = df.get("Boolean_Result", pd.Series(index=df.index, dtype=str))
+    incomplete = df.loc[
+        df["Task_Name"].ne("")
+        & df["Numerical_Result"].isna()
+        & boolean_results.astype(str).str.strip().str.lower().isin(["true", "false"]),
+        "Model",
+    ].unique()
+    if len(incomplete):
+        print(f"Warning: 数値得点が揃わないため集計から除外するモデル: {', '.join(incomplete)}")
+        df = df.loc[~df["Model"].isin(incomplete)].copy()
+
     overall_df = _extract_overall_scores(df)
     pivot_df = _extract_task_scores(df, task_metadata, loop_counts, scoring_method)
 
