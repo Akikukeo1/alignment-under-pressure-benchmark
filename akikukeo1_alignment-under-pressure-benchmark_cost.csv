@@ -1,0 +1,20 @@
+Benchmark,Model,Model_Name,Overall_Score,TotalCost_USD,Cost_Per_Task_USD,Input_Tokens,Output_Tokens,Latency_Sec,Evaluation_Date,Retrieved_At_UTC
+akikukeo1/alignment-under-pressure-benchmark,gemini-4-argon,Gemini 4 Argon,91.3,0.257184,0.016074,114872,2744,22.6294375,2026-10-14T22:41:16.938711Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gemini-3.5-flash-lite,Gemini 3.5 Flash-Lite,87.6125,0.0317187,0.00198241875,104279,174,6.1250625,2026-08-22T15:25:08.174173Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,grok-4.20-0309-reasoning,Grok 4.20 Reasoning,87.5,0.56401625,0.035251015625,434083,87189,22.91975,2026-08-22T15:26:37.017546Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,claude-opus-5-default,Claude Opus 5,87.5,0.982755,0.0614221875,143816,10553,19.2374375,2026-08-22T15:28:56.207619Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gemini-3.8-flash,Gemini 3.8 Flash,87.5,0.1973055,0.01233159375,106144,31386,27.081,2026-10-14T22:39:51.918302Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gemini-3.6-flash,Gemini 3.6 Flash,86.60625,0.496353,0.0310220625,104262,45328,22.1430625,2026-08-22T15:25:13.747025Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,claude-opus-4-8-default,Claude Opus 4.8,86.25,0.7664,0.0479,146975,1261,11.36175,2026-08-22T15:25:11.664803Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,claude-sonnet-5-5-default,Claude Sonnet 5.5,85.56875,0.3080134,0.0192508375,144096,12137,12.643,2026-10-14T22:51:29.984544Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,claude-sonnet-4-6-default,Claude Sonnet 4.6,78.06875,0.350712,0.0219195,113829,615,11.462875,2026-08-22T15:25:11.156848Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,grok-4.20-0309-non-reasoning,Grok 4.20 (Non-Reasoning),77.5,0.0657365,0.00410853125,150302,334,2.6151875,2026-08-22T15:25:01.447045Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,claude-haiku-4-5-20251001,Claude Haiku 4.5,74.9,0.117681,0.0073550625,114131,710,3.9873125,2026-08-22T15:24:56.289539Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gpt-6.1-sol,GPT-6.1 Sol,73.75,0.1640072,0.01025045,106519,4546,17.358,2026-10-16T07:29:16.638145Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,claude-haiku-5-5,Claude Haiku 5.5,72.3875,0.01629482,0.00101842625,146305,18185,10.2170625,2026-10-14T22:27:06.023551Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gemini-3-flash-preview,Gemini 3 Flash Preview,71.43125,0.495653,0.0309783125,109294,147002,72.548375,2026-08-22T15:20:25.494077Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gpt-5.4-2026-03-05,GPT-5.4,70,0.241288,0.0150805,106288,560,6.28425,2026-08-22T15:25:03.934850Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gemini-2.5-flash,Gemini 2.5 Flash,66.25,0.241745,0.0151090625,104925,84107,34.1169375,2026-08-22T15:27:21.307825Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gpt-6-luna,GPT-6 Luna,64.81875,0.03050912,0.00190682,106435,48683,35.1485,2026-10-14T22:22:40.479401Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,gpt-5.6-terra,GPT-5.6 Terra,64.10625,0.379518,0.023719875,154359,12007,19.1018125,2026-08-22T15:25:41.268741Z,2026-10-16T12:38:45.380Z
+akikukeo1/alignment-under-pressure-benchmark,deepseek-r1-0528,DeepSeek-R1,13.75625,1.209627,0.0756016875,103148,198218,81.90675,2026-10-16T07:32:25.335772Z,2026-10-16T12:38:45.380Z
